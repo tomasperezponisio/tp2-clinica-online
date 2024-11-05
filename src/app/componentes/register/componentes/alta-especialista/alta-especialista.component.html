@@ -1,0 +1,168 @@
+<h2>Alta Especialista</h2>
+<form [formGroup]="form" (ngSubmit)="altaEspecialista()" class="needs-validation">
+  <div class="row g-3">
+
+    <div class="col-sm-6">
+      <label for="nombre" class="form-label">Nombre</label>
+      <input type="text" class="form-control" id="nombre" placeholder="" formControlName="nombre">
+
+      <ng-container *ngIf="nombre?.hasError('pattern')">
+        <small class="text-danger">Sólo debe contener solo letras</small>
+      </ng-container>
+
+      <ng-container *ngIf="nombre?.hasError('required') && nombre?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+
+    </div>
+
+    <div class="col-sm-6">
+      <label for="apellido" class="form-label">Apellido</label>
+      <input type="text" class="form-control" id="apellido" placeholder="" formControlName="apellido">
+
+      <ng-container *ngIf="apellido?.hasError('pattern')">
+        <small class="text-danger">Sólo debe contener solo letras</small>
+      </ng-container>
+
+      <ng-container *ngIf="apellido?.hasError('required') && apellido?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+
+    </div>
+
+    <div class="col-sm-6">
+      <label for="edad" class="form-label">Edad</label>
+      <input type="number" class="form-control" id="edad" placeholder="" formControlName="edad">
+
+      <ng-container *ngIf="edad?.hasError('min')">
+        <small class="text-danger">Debe ser mayor de 18 años</small>
+      </ng-container>
+
+      <ng-container *ngIf="edad?.hasError('max')">
+        <small class="text-danger">Debe tener menos de 65 años</small>
+      </ng-container>
+
+      <ng-container *ngIf="edad?.hasError('required') && edad?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+
+    </div>
+
+    <div class="col-sm-6">
+      <label for="dni" class="form-label">DNI</label>
+      <input type="text" class="form-control" id="dni" placeholder="" formControlName="dni">
+
+      <ng-container *ngIf="dni?.hasError('pattern')">
+        <small class="text-danger">Debe contener solo 8 números</small>
+      </ng-container>
+
+      <ng-container *ngIf="dni?.hasError('required') && dni?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+
+    </div>
+
+    <!--    <div class="col-sm-6">-->
+    <!--      <label for="especialidad" class="form-label">Especialidad</label>-->
+    <!--      <input type="text" class="form-control" id="especialidad" placeholder="" formControlName="especialidad">-->
+
+    <!--      <ng-container *ngIf="especialidad?.hasError('pattern')">-->
+    <!--        <small class="text-danger">Sólo debe contener solo letras</small>-->
+    <!--      </ng-container>-->
+
+    <!--      <ng-container *ngIf="especialidad?.hasError('required') && especialidad?.touched">-->
+    <!--        <small class="text-danger">Este campo es obligatorio</small>-->
+    <!--      </ng-container>-->
+
+    <!--    </div>-->
+
+    <div class="col-sm-6">
+      <label for="especialidad" class="form-label">Especialidad</label>
+
+      <!-- Dropdown for predefined specialties -->
+      <select id="especialidad" class="form-select" formControlName="especialidad"
+              (change)="alCambiarEspecialidad($event)">
+        <option *ngFor="let esp of especialidades$ | async" [value]="esp">{{ esp }}</option>
+        <option value="otra">Otra</option>
+      </select>
+
+      <!-- Custom input for additional specialty -->
+      <div *ngIf="form.get('especialidad')?.value === 'otra'" class="mt-2">
+        <div class="col-sm-9 d-inline-block m-2">
+          <input id="customEspecialidad" type="text" class="form-control" formControlName="customEspecialidad"
+                 placeholder="Ingrese Especialidad">
+
+          <ng-container *ngIf="customEspecialidad?.hasError('pattern')">
+            <small class="text-danger">Sólo debe contener letras</small>
+          </ng-container>
+        </div>
+        <div class="col-sm-2 d-inline-block m-2">
+          <button class="btn btn-primary" (click)="agregarEspecialidad()">Agregar</button>
+        </div>
+
+      </div>
+
+      <ng-container *ngIf="especialidad?.hasError('required') && especialidad?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+    </div>
+
+
+    <div class="col-sm-6">
+      <label for="email" class="form-label">Email</label>
+      <input type="text" class="form-control" id="email" placeholder="" formControlName="email">
+
+      <ng-container *ngIf="email?.hasError('pattern')">
+        <small class="text-danger">Debe ingresar un email válido</small>
+      </ng-container>
+
+      <ng-container *ngIf="email?.hasError('required') && email?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+
+    </div>
+
+    <div class="col-sm-6">
+      <label for="password" class="form-label">Contraseña</label>
+      <input type="password" class="form-control" id="password" placeholder="" formControlName="password">
+
+      <ng-container *ngIf="password?.hasError('pattern')">
+        <small class="text-danger">Debe contener: min 8 caracteres, 1 letra, 1 numero</small>
+      </ng-container>
+
+      <ng-container *ngIf="password?.hasError('required') && password?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+
+    </div>
+
+    <div class="col-sm-6">
+      <label for="passwordCheck" class="form-label">Confirme la contraseña</label>
+      <input type="password" class="form-control" id="passwordCheck" placeholder="" formControlName="passwordCheck">
+
+      <small class="text-danger">
+        {{ passwordCheck?.getError('noCoincide') }}
+      </small>
+
+      <ng-container *ngIf="passwordCheck?.hasError('required') && passwordCheck?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+
+    </div>
+
+    <div class="col-sm-6">
+      <label for="imagenUno" class="form-label">Imagen 1</label>
+      <input type="file" class="form-control" id="imagenUno" formControlName="imagenUno">
+
+      <ng-container *ngIf="imagenUno?.hasError('required') && imagenUno?.touched">
+        <small class="text-danger">Este campo es obligatorio</small>
+      </ng-container>
+    </div>
+
+
+  </div>
+
+  <hr class="my-4">
+
+  <button type="submit" class="w-100 btn btn-primary btn-lg" [disabled]="form.invalid">Alta Especialista</button>
+</form>

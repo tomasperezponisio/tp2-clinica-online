@@ -1,0 +1,34 @@
+<div class="container bg-light rounded mt-3 p-3">
+  <div class="mb-2">
+    <h2>Registro de usuarios</h2>
+    <form [formGroup]="formUsuario">
+      <div class="form-control-group col-12">
+        <label class="form-label">Que usuario quiere dar de alta:</label>
+        <div>
+          <div class="form-check d-inline-block m-2">
+            <input id="paciente" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="paciente"
+                   required>
+            <label class="form-check-label" for="paciente">Paciente</label>
+          </div>
+          <div class="form-check d-inline-block m-2">
+            <input id="especialista" formControlName="tipoDeUsuario" type="radio" class="form-check-input"
+                   value="especialista" required>
+            <label class="form-check-label" for="especialista">Especialista</label>
+          </div>
+          <div class="form-check d-inline-block m-2">
+            <input id="admin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="admin"
+                   required>
+            <label class="form-check-label" for="admin">Admin</label>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+
+  <app-alta-paciente *ngIf="tipoDeUsuario == 'paciente'"></app-alta-paciente>
+  <app-alta-especialista *ngIf="tipoDeUsuario == 'especialista'"></app-alta-especialista>
+  <app-alta-admin *ngIf="tipoDeUsuario == 'admin'"></app-alta-admin>
+
+</div>

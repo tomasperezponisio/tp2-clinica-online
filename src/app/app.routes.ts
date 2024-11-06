@@ -22,6 +22,10 @@ export const routes: Routes = [
       .then(c => c.ErrorPageComponent)
   },
   {
+    path: 'usuarios', loadComponent: () => import('./componentes/usuarios/usuarios.component')
+      .then(c => c.UsuariosComponent)
+  },
+  {
     path: '**', loadComponent: () => import('./componentes/error-page/error-page.component')
       .then(c => c.ErrorPageComponent)
   },

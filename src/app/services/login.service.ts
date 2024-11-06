@@ -62,7 +62,27 @@ export class LoginService {
   async login(email: string, password: string): Promise<{ success: boolean; message: string }> {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-      if (!userCredential.user.emailVerified) {
+      const userId = userCredential.user.uid;
+
+      const usuariosCollection = collection(this.firestore, 'usuarios');
+      const q = query(usuariosCollection, where('uid', '==', userId));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        await signOut(this.auth); // Sign out if user not found in Firestore
+        return { success: false, message: 'Usuario no encontrado en la base de datos.' };
+      }
+
+      const userData = querySnapshot.docs[0].data();
+      const userTipo = userData['tipo'];
+      const userVerificado = userData['verificado'];
+
+      if (userTipo === 'especialista' && !userVerificado) {
+        await signOut(this.auth);
+        return { success: false, message: 'Su usuario no ha sido verificado. Por favor contacte con el administrador.' };
+      }
+
+      if (userTipo !== 'admin' && !userCredential.user.emailVerified) {
         await signOut(this.auth);
         return {success: false, message: 'Por favor verifica tu correo eléctronico para finalizar el registro.'};
       }

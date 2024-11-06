@@ -1,0 +1,29 @@
+<div class="container mt-3">
+  <table class="table table-striped" *ngIf="usuarios$ | async as usuarios">
+    <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Apellido</th>
+      <th>DNI</th>
+      <th>Tipo</th>
+      <th>Imagen</th>
+      <th>Verificado</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let usuario of usuarios">
+      <td>{{ usuario.nombre }}</td>
+      <td>{{ usuario.apellido }}</td>
+      <td>{{ usuario.dni }}</td>
+      <td>{{ usuario.tipo }}</td>
+      <td>
+        <img *ngIf="usuario.imagenUno" [src]="usuario.imagenUno" class="img-thumbnail" width="50">
+        <img *ngIf="usuario.imagenDos" [src]="usuario.imagenDos" class="img-thumbnail" width="50">
+      </td>
+      <td *ngIf="usuario.tipo === 'especialista'">
+        <input type="checkbox" [checked]="usuario.verificado" (change)="toggleVerificado(usuario)">
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

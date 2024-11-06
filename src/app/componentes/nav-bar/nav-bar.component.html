@@ -30,6 +30,10 @@
                 Especialista</a>
             </li>
 
+            <li class="nav-item" *ngIf="userData.isLoggedIn && userData.tipo === 'admin'">
+              <a class="nav-link" aria-current="page" routerLink="usuarios" routerLinkActive="active-route">Usuarios</a>
+            </li>
+
             <li class="nav-item" *ngIf="!userData.isLoggedIn">
               <a class="nav-link" aria-current="page" routerLink="login" routerLinkActive="active-route">Login</a>
             </li>

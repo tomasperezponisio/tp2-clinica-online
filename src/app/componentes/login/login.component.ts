@@ -67,7 +67,7 @@ export class LoginComponent {
   }
 
   autoCompletarAdmin() {
-    this.email = 'pobajo1860@inikale.com';
+    this.email = 'admin@gmail.com';
     this.password = 'a1234567';
   }
 

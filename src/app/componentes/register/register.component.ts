@@ -4,6 +4,7 @@ import {NgIf} from "@angular/common";
 import {AltaPacienteComponent} from "./componentes/alta-paciente/alta-paciente.component";
 import {AltaEspecialistaComponent} from "./componentes/alta-especialista/alta-especialista.component";
 import {AltaAdminComponent} from "./componentes/alta-admin/alta-admin.component";
+import {Auth} from "@angular/fire/auth";
 
 @Component({
   selector: 'app-register',
@@ -21,7 +22,10 @@ import {AltaAdminComponent} from "./componentes/alta-admin/alta-admin.component"
 export class RegisterComponent {
   formUsuario: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    public auth: Auth
+  ) {
     this.formUsuario = this.fb.group({
       tipoDeUsuario: ['paciente']
     });

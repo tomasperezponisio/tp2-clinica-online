@@ -15,7 +15,7 @@
                    value="especialista" required>
             <label class="form-check-label" for="especialista">Especialista</label>
           </div>
-          <div class="form-check d-inline-block m-2">
+          <div class="form-check d-inline-block m-2" *ngIf="auth.currentUser?.email">
             <input id="admin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="admin"
                    required>
             <label class="form-check-label" for="admin">Admin</label>

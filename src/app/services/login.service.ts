@@ -10,6 +10,7 @@ import {addDoc, collection, doc, Firestore, getDoc, DocumentData,  query, where,
 import {Paciente} from "../models/paciente";
 import {from, map, Observable, of, switchMap} from "rxjs";
 import {Especialista} from "../models/especialista";
+import {Admin} from "../models/admin";
 
 @Injectable({
   providedIn: 'root'
@@ -198,6 +199,66 @@ export class LoginService {
         await signOut(this.auth);
 
         console.log('Especialista registrado y gurdado en la db.');
+
+        return {success: true, message: 'Termina tu registro en el correo que te hemos enviado.'};
+      } else {
+        return {success: false, message: 'Error en Google Auth: UID es undefined.'};
+      }
+
+    } catch (error) {
+      // @ts-ignore
+      console.log(error.code);
+      // @ts-ignore
+      switch (error.code) {
+        case "auth/invalid-email":
+          this.msjError = "Email inválido";
+          break;
+        case "auth/email-already-exists":
+          this.msjError = "Email ya registrado";
+          break;
+        case "auth/email-already-in-use":
+          this.msjError = "Email ya registrado";
+          break;
+        case "auth/missing-password":
+          this.msjError = "Ingrese una contraseña";
+          break;
+        case "auth/weak-password":
+          this.msjError = "La contraseña es muy débil";
+          break;
+        default:
+          this.msjError = "Error al registrarse";
+          break;
+      }
+      // @ts-ignore
+      return {success: false, message: this.msjError};
+    }
+  }
+
+  async altaAdmin(email: string, password: string, admin: Admin): Promise<{
+    success: boolean;
+    message: string
+  }> {
+    try {
+      // registro el admin con el mail y contraseña
+      const adminCreado = await createUserWithEmailAndPassword(this.auth, email, password);
+
+      // me traigo el UID de Auth en la respuesta
+      const uid = adminCreado.user?.uid;
+
+      // guardo en la db el admin con el UID asociado a su Auth, el tipo de usuario
+      if (uid) {
+        const tipo = 'admin';
+        const adminConUid = {...admin, uid, tipo};
+        let col = collection(this.firestore, 'usuarios');
+        await addDoc(col, adminConUid);
+
+        // envío correo de verificación
+        await sendEmailVerification(adminCreado.user);
+
+        // cierro sesión para evitar que quede logueado sin haber verificado el correo
+        await signOut(this.auth);
+
+        console.log('Admin registrado y gurdado en la db.');
 
         return {success: true, message: 'Termina tu registro en el correo que te hemos enviado.'};
       } else {

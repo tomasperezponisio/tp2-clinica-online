@@ -52,8 +52,7 @@ export class AltaEspecialistaComponent  implements OnInit {
         Validators.pattern('^[0-9]{8}$'),
         Validators.required
       ]),
-      especialidad: new FormControl("", [
-        Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚ\\s]+$'),
+      especialidad: new FormControl([], [
         Validators.required
       ]),
       customEspecialidad: new FormControl("", [
@@ -119,6 +118,14 @@ export class AltaEspecialistaComponent  implements OnInit {
     return this.form.get('imagenUno');
   }
 
+  /**
+   * Registra un nuevo especialista si el formulario es válido y se proporciona la imagen requerida.
+   * El metodo sube la imagen, crea un nuevo objeto `Especialista`, y llama al
+   * servicio de login para registrar al especialista. Se muestran diversas alertas de éxito
+   * y error basadas en el resultado de la subida de imágenes o del proceso de registro.
+   *
+   * @return {Promise<void>} Una promesa que se resuelve cuando el proceso de registro del especialista se completa.
+   */
   async altaEspecialista(): Promise<void> {
     if (this.form.invalid) {
       return;
@@ -131,12 +138,10 @@ export class AltaEspecialistaComponent  implements OnInit {
       try {
         const downloadURL1 = await this.uploadImage(file1, 'imagenUno');
 
-        // Get the value for "especialidad" based on selection
-        const especialidad: string[] = [];
-        if (this.form.value.especialidad === 'other') {
-          especialidad.push(this.form.value.customEspecialidad);
-        } else {
-          especialidad.push(this.form.value.especialidad);
+        // Si hay especialidades seleccionadas las agrego al array
+        let especialidadesSeleccionadas = this.form.value.especialidad || [];
+        if (this.form.value.customEspecialidad) {
+          especialidadesSeleccionadas = [...especialidadesSeleccionadas, this.form.value.customEspecialidad];
         }
 
         const especialista = new Especialista(
@@ -144,7 +149,7 @@ export class AltaEspecialistaComponent  implements OnInit {
           this.form.value.apellido,
           this.form.value.edad,
           this.form.value.dni,
-          especialidad,
+          especialidadesSeleccionadas,
           this.form.value.email,
           downloadURL1
         );
@@ -155,7 +160,7 @@ export class AltaEspecialistaComponent  implements OnInit {
         this.loginService.altaEspecialista(email, password, especialista)
           .then(response => {
             if (response.success) {
-              this.showSuccessAlert('Especialista dado de alta exitosamente!', response.message).then(() => {
+              this.showSuccessAlert('¡Especialista dado de alta exitosamente!', response.message).then(() => {
                 this.form.reset();
               });
             } else {
@@ -170,12 +175,12 @@ export class AltaEspecialistaComponent  implements OnInit {
             });
           });
       } catch (e) {
-        this.showErrorAlert('Error al subir las imagenes, intente nuevamente.').then(() => {
+        this.showErrorAlert('Error al subir las imágenes, intente nuevamente.').then(() => {
           this.form.reset();
         });
       }
     } else {
-      this.showErrorAlert('Es necesario subir dos imagenes para el especialista, intente nuevamente.').then(() => {
+      this.showErrorAlert('Es necesario subir una imagen para el especialista, intente nuevamente.').then(() => {
         this.form.reset();
       });
     }
@@ -185,18 +190,6 @@ export class AltaEspecialistaComponent  implements OnInit {
     const imageRef = ref(this.storage, `images/${imageName}-${file.name}`);
     const response = await uploadBytes(imageRef, file);
     return await getDownloadURL(response.ref);
-  }
-
-  alCambiarEspecialidad(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    console.log(select.value);
-    if (select.value === 'otra') {
-      this.form.get('customEspecialidad')?.setValidators([Validators.required, Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚ\\s]+$')]);
-    } else {
-      this.form.get('customEspecialidad')?.clearValidators();
-      this.form.get('customEspecialidad')?.reset();
-    }
-    this.form.get('customEspecialidad')?.updateValueAndValidity();
   }
 
   async agregarEspecialidad(): Promise<void> {

@@ -7,7 +7,7 @@
   --azure-web: #E2ECED;
 }
 
-h1 {
+h1, h2 {
   color: var(--midnight-green);
 }
 

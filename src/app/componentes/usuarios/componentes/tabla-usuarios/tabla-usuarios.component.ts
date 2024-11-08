@@ -1,7 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
-import {Observable} from "rxjs";
+import {map, Observable} from "rxjs";
 import {UsuariosService} from "../../../../services/usuarios.service";
+import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive.directive";
 
 @Component({
   selector: 'app-tabla-usuarios',
@@ -9,21 +11,47 @@ import {UsuariosService} from "../../../../services/usuarios.service";
   imports: [
     NgIf,
     NgForOf,
-    AsyncPipe
+    AsyncPipe,
+    ReactiveFormsModule,
+    HoverZoomDirective
   ],
   templateUrl: './tabla-usuarios.component.html',
   styleUrl: './tabla-usuarios.component.css'
 })
 export class TablaUsuariosComponent implements OnInit {
-  usuarios$!: Observable<any[]>
+  formUsuario!: FormGroup;
+  selectedTipo: string = 'paciente';
+
+  usuarios$!: Observable<any[]>;
+  filteredUsuarios$!: Observable<any[]>;
 
   constructor(
+    private fb: FormBuilder,
     private usuariosService: UsuariosService
   ) {
   }
 
   ngOnInit(): void {
-    this.usuarios$ = this.usuariosService.getUsuarios();
+    this.formUsuario = this.fb.group({
+      tipoDeUsuario: ['paciente']
+    });
+
+    this.usuarios$ = this.usuariosService.getUsuarios(); // Fetch all users
+
+    // Update `selectedTipo` whenever the radio button selection changes
+    this.formUsuario.get('tipoDeUsuario')?.valueChanges.subscribe(tipo => {
+      this.selectedTipo = tipo;
+      this.filterUsuarios();
+    });
+
+    // Set up filtered list based on the selected type
+    this.filterUsuarios();
+  }
+
+  filterUsuarios(): void {
+    this.filteredUsuarios$ = this.usuarios$.pipe(
+      map(usuarios => usuarios.filter(usuario => usuario.tipo === this.selectedTipo))
+    );
   }
 
   toggleVerificado(user: any) {

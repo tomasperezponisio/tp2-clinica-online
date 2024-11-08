@@ -62,32 +62,16 @@
 
     </div>
 
-    <!--    <div class="col-sm-6">-->
-    <!--      <label for="especialidad" class="form-label">Especialidad</label>-->
-    <!--      <input type="text" class="form-control" id="especialidad" placeholder="" formControlName="especialidad">-->
-
-    <!--      <ng-container *ngIf="especialidad?.hasError('pattern')">-->
-    <!--        <small class="text-danger">Sólo debe contener solo letras</small>-->
-    <!--      </ng-container>-->
-
-    <!--      <ng-container *ngIf="especialidad?.hasError('required') && especialidad?.touched">-->
-    <!--        <small class="text-danger">Este campo es obligatorio</small>-->
-    <!--      </ng-container>-->
-
-    <!--    </div>-->
-
     <div class="col-sm-6">
       <label for="especialidad" class="form-label">Especialidad</label>
 
-      <!-- Dropdown for predefined specialties -->
-      <select id="especialidad" class="form-select" formControlName="especialidad"
-              (change)="alCambiarEspecialidad($event)">
+      <!-- Multi-Select for predefined specialties -->
+      <select id="especialidad" class="form-select" formControlName="especialidad" multiple>
         <option *ngFor="let esp of especialidades$ | async" [value]="esp">{{ esp }}</option>
-        <option value="otra">Otra</option>
       </select>
 
-      <!-- Custom input for additional specialty -->
-      <div *ngIf="form.get('especialidad')?.value === 'otra'" class="mt-2">
+      <!-- Input for custom specialty, always visible -->
+      <div class="mt-2">
         <div class="col-sm-9 d-inline-block m-2">
           <input id="customEspecialidad" type="text" class="form-control" formControlName="customEspecialidad"
                  placeholder="Ingrese Especialidad">
@@ -97,9 +81,8 @@
           </ng-container>
         </div>
         <div class="col-sm-2 d-inline-block m-2">
-          <button class="btn btn-primary" (click)="agregarEspecialidad()">Agregar</button>
+          <button type="button" class="btn btn-primary" (click)="agregarEspecialidad()">Agregar</button>
         </div>
-
       </div>
 
       <ng-container *ngIf="especialidad?.hasError('required') && especialidad?.touched">

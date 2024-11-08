@@ -1,0 +1,28 @@
+/* Set background image for the hero section */
+.hero-section {
+  background: url('https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/clinic_compressed.jpg?alt=media&token=4f146938-fd64-4af4-a8dc-eff71b1d3d32') no-repeat center center;
+  background-size: cover;
+  color: white;
+  border-radius: 8px;
+
+}
+
+.hero-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+  border-radius: 8px;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 40px 20px;
+  }
+}

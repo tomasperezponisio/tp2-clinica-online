@@ -1,0 +1,12 @@
+.login-form {
+  width: 400px;
+  max-width: 100%;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.container-login {
+  height: calc(100vh - 80px);
+}

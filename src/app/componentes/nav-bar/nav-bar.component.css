@@ -1,0 +1,14 @@
+.active-route {
+  font-weight: bold;
+  color: var(--midnight-green);
+}
+
+.navbar-nav .nav-link {
+  cursor: pointer;
+}
+
+.logged-user {
+  font-weight: lighter;
+  font-style: italic;
+  font-size: small;
+}

@@ -1,0 +1,58 @@
+<div class="container mt-3">
+  <form [formGroup]="formUsuario">
+    <div class="form-control-group col-12 d-flex align-items-center">
+      <label class="form-label me-3">Selecciona el tipo de usuario:</label>
+      <div class="d-flex">
+        <div class="form-check d-inline-block me-3">
+          <input id="paciente" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="paciente" required>
+          <label class="form-check-label" for="paciente">Paciente</label>
+        </div>
+        <div class="form-check d-inline-block me-3">
+          <input id="especialista" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="especialista" required>
+          <label class="form-check-label" for="especialista">Especialista</label>
+        </div>
+        <div class="form-check d-inline-block">
+          <input id="admin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="admin" required>
+          <label class="form-check-label" for="admin">Admin</label>
+        </div>
+      </div>
+    </div>
+  </form>
+  <h4 class="text-capitalize">{{selectedTipo}}</h4>
+
+  <table class="table table-striped mt-3" *ngIf="filteredUsuarios$ | async as usuarios">
+    <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Apellido</th>
+      <th>DNI</th>
+      <th *ngIf="selectedTipo === 'paciente'">Obra Social</th>
+      <th *ngIf="selectedTipo === 'especialista'">Especialidad</th>
+      <th>Imagen</th>
+      <th *ngIf="selectedTipo === 'especialista'">Verificado</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let usuario of usuarios">
+      <td>{{ usuario.nombre }}</td>
+      <td>{{ usuario.apellido }}</td>
+      <td>{{ usuario.dni }}</td>
+
+      <!-- Show specific columns based on the selected user type -->
+      <td *ngIf="selectedTipo === 'paciente'">{{ usuario.obraSocial }}</td>
+      <td *ngIf="selectedTipo === 'especialista'">{{ usuario.especialidad?.join(', ') }}</td>
+
+      <!-- Show images -->
+      <td>
+        <img *ngIf="usuario.imagenUno" [src]="usuario.imagenUno" class="img-thumbnail" width="50" appHoverZoom>
+        <img *ngIf="usuario.imagenDos" [src]="usuario.imagenDos" class="img-thumbnail" width="50" appHoverZoom>
+      </td>
+
+      <!-- Verificado toggle for 'especialista' -->
+      <td *ngIf="selectedTipo === 'especialista'">
+        <input type="checkbox" [checked]="usuario.verificado" (change)="toggleVerificado(usuario)">
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

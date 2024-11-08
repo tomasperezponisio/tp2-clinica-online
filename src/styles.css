@@ -1,1 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --midnight-green: #1B5061;
+  --light-blue: #A8BFC5;
+  --columbia-blue: #BDD0D3;
+  --turquoise: #38D3C5;
+  --azure-web: #E2ECED;
+}
+
+h1, h2 {
+  color: var(--midnight-green);
+}
+
+body {
+  background-color: var(--azure-web);
+}

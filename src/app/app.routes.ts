@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import {adminGuard} from "./guards/admin.guard";
+import {UsuariosComponent} from "./componentes/usuarios/usuarios.component";
 
 export const routes: Routes = [
   {
@@ -22,8 +24,10 @@ export const routes: Routes = [
       .then(c => c.ErrorPageComponent)
   },
   {
-    path: 'usuarios', loadComponent: () => import('./componentes/usuarios/usuarios.component')
-      .then(c => c.UsuariosComponent)
+    path: "usuarios",
+    data: {midata: "datos de ruta"},
+    component: UsuariosComponent,
+    canActivate: [adminGuard],
   },
   {
     path: '**', loadComponent: () => import('./componentes/error-page/error-page.component')

@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import {adminGuard} from "./guards/admin.guard";
 import {UsuariosComponent} from "./componentes/usuarios/usuarios.component";
+import {MiPerfilComponent} from "./componentes/mi-perfil/mi-perfil.component";
+import {authGuard} from "./guards/auth.guard";
 
 export const routes: Routes = [
   {
@@ -28,6 +30,12 @@ export const routes: Routes = [
     data: {midata: "datos de ruta"},
     component: UsuariosComponent,
     canActivate: [adminGuard],
+  },
+  {
+    path: "mi-perfil",
+    data: {midata: "datos de ruta"},
+    component: MiPerfilComponent,
+    canActivate: [authGuard],
   },
   {
     path: '**', loadComponent: () => import('./componentes/error-page/error-page.component')

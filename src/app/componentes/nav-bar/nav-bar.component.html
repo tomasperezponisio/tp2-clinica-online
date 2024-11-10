@@ -20,14 +20,8 @@
           </li>
 
           <ng-container *ngIf="(loginService.userData$ | async) as userData">
-            <li class="nav-item" *ngIf="userData.isLoggedIn && userData.tipo === 'paciente'">
-              <a class="nav-link" aria-current="page" routerLink="home" routerLinkActive="active-route">Menu
-                Paciente</a>
-            </li>
-
-            <li class="nav-item" *ngIf="userData.isLoggedIn && userData.tipo === 'especialista'">
-              <a class="nav-link" aria-current="page" routerLink="home" routerLinkActive="active-route">Menu
-                Especialista</a>
+            <li class="nav-item" *ngIf="userData.isLoggedIn">
+              <a class="nav-link" aria-current="page" routerLink="mi-perfil" routerLinkActive="active-route">Mi Perfil</a>
             </li>
 
             <li class="nav-item" *ngIf="userData.isLoggedIn && userData.tipo === 'admin'">
@@ -35,11 +29,11 @@
             </li>
 
             <li class="nav-item" *ngIf="!userData.isLoggedIn">
-              <a class="nav-link" aria-current="page" routerLink="login" routerLinkActive="active-route">Login</a>
+              <a class="nav-link" aria-current="page" routerLink="login" routerLinkActive="active-route">Iniciar Sesión</a>
             </li>
 
             <li class="nav-item" *ngIf="!userData.isLoggedIn">
-              <a class="nav-link" aria-current="page" routerLink="register" routerLinkActive="active-route">Register</a>
+              <a class="nav-link" aria-current="page" routerLink="register" routerLinkActive="active-route">Darse de Alta</a>
             </li>
 
             <li class="nav-item" *ngIf="userData.isLoggedIn">

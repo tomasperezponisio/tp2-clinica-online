@@ -8,6 +8,11 @@ import {Turno} from "../../models/turno";
 import {AuthService} from "../../services/auth.service";
 import {DatePipe, NgForOf, NgIf} from "@angular/common";
 import Swal from "sweetalert2";
+import { NgModule, LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEsAr from '@angular/common/locales/es-AR';
+
+registerLocaleData(localeEsAr, 'es-AR');
 
 @Component({
   selector: 'app-solicitar-turnos',
@@ -15,7 +20,11 @@ import Swal from "sweetalert2";
   imports: [
     NgForOf,
     NgIf,
-    DatePipe
+    DatePipe,
+  ],
+  providers: [
+    // Set the LOCALE_ID to 'es-AR' for the entire application
+    { provide: LOCALE_ID, useValue: 'es-AR' },
   ],
   templateUrl: './solicitar-turnos.component.html',
   styleUrl: './solicitar-turnos.component.css'
@@ -125,13 +134,31 @@ export class SolicitarTurnosComponent implements OnInit {
   }
 
   // Helper methods for displaying slots
-  getDates(): string[] {
-    const dates = Array.from(new Set(this.availableSlots.map(slot => slot.fecha)));
+  getDates(): Date[] {
+    const dateStrings = Array.from(new Set(this.availableSlots.map(slot => slot.fecha)));
+    const dates = dateStrings.map(dateStr => new Date(dateStr + 'T00:00:00')); // Ensure proper parsing
     return dates;
   }
 
-  getSlotsForDate(date: string): Slot[] {
-    return this.availableSlots.filter(slot => slot.fecha === date);
+// solicitar-turnos.component.ts
+  getSlotsForDate(date: Date): Slot[] {
+    const dateStr = this.formatDate(date); // Convert Date object back to 'YYYY-MM-DD' string
+    return this.availableSlots.filter(slot => slot.fecha === dateStr);
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  toTitleCase(str: string | null) {
+    // @ts-ignore
+    return str.replace(
+      /\w\S*/g,
+      text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+    );
   }
 
   private showSuccessAlert(message: string) {

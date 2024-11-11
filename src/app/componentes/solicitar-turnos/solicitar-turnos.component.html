@@ -40,7 +40,7 @@
     <h3 class="mb-4 text-center">Seleccione un Turno</h3>
     <div class="appointments-grid">
       <div *ngFor="let date of getDates()" class="date-group mb-4">
-        <h4 class="mb-3">{{ date | date: 'fullDate' }}</h4>
+        <h4 class="mb-3">{{ toTitleCase( date | date: 'fullDate' ) }}</h4>
         <div class="d-flex flex-wrap">
           <button
             *ngFor="let slot of getSlotsForDate(date)"

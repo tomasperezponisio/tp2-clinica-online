@@ -1,0 +1,84 @@
+<div class="container bg-light rounded">
+  <div *ngIf="step === 1" class="container mt-4 step">
+    <!-- Step 1: Select Especialidad -->
+    <h3 class="mb-4 text-center">Seleccione una Especialidad</h3>
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex flex-wrap justify-content-center">
+          <button
+            *ngFor="let esp of especialidades"
+            class="btn btn-outline-primary m-2"
+            (click)="selectEspecialidad(esp)"
+          >
+            {{ esp }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="step === 2" class="container mt-4">
+    <!-- Step 2: Select Especialista -->
+    <h3 class="mb-4 text-center">Seleccione un Especialista</h3>
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex flex-wrap justify-content-center">
+          <button
+            *ngFor="let especialista of especialistas"
+            class="btn btn-outline-primary m-2"
+            (click)="selectEspecialista(especialista)"
+          >
+            {{ especialista.nombre }} {{ especialista.apellido }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="step === 3" class="container mt-4">
+    <!-- Step 3: Select Appointment Slot -->
+    <h3 class="mb-4 text-center">Seleccione un Turno</h3>
+    <div class="appointments-grid">
+      <div *ngFor="let date of getDates()" class="date-group mb-4">
+        <h4 class="mb-3">{{ date | date: 'fullDate' }}</h4>
+        <div class="d-flex flex-wrap">
+          <button
+            *ngFor="let slot of getSlotsForDate(date)"
+            class="btn btn-outline-success m-2"
+            (click)="selectSlot(slot)"
+          >
+            {{ slot.hora }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="step === 4" class="container mt-4">
+    <!-- Step 4: Confirm Appointment -->
+    <h3 class="mb-4 text-center">Confirmar Turno</h3>
+    <div class="card">
+      <div class="card-body">
+        <p><strong>Especialidad:</strong> {{ selectedEspecialidad }}</p>
+        <p>
+          <strong>Especialista:</strong>
+          {{ selectedEspecialista?.nombre }} {{ selectedEspecialista?.apellido }}
+        </p>
+        <p>
+          <strong>Fecha:</strong> {{ selectedSlot?.fecha | date: 'fullDate' }}
+        </p>
+        <p><strong>Hora:</strong> {{ selectedSlot?.hora }}</p>
+        <div class="text-center mt-4">
+          <button class="btn btn-primary m-2" (click)="confirmAppointment()">
+            Confirmar
+          </button>
+          <button class="btn btn-secondary m-2" (click)="resetSelections()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

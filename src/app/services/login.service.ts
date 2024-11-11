@@ -4,11 +4,11 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
-  signOut, authState, User
+  signOut,
+  UserCredential,
 } from '@angular/fire/auth';
-import {addDoc, collection, doc, Firestore, getDoc, DocumentData,  query, where, getDocs } from "@angular/fire/firestore";
+import {Firestore, DocumentData, doc, setDoc, getDoc} from "@angular/fire/firestore";
 import {Paciente} from "../models/paciente";
-import {from, map, Observable, of, switchMap} from "rxjs";
 import {Especialista} from "../models/especialista";
 import {Admin} from "../models/admin";
 
@@ -17,70 +17,34 @@ import {Admin} from "../models/admin";
 })
 export class LoginService {
   msjError: string = '';
-  userData$: Observable<{ isLoggedIn: boolean, tipo?: string, nombre?: string }>;
 
   constructor(
     public auth: Auth,
     private firestore: Firestore
   ) {
-    this.userData$ = authState(this.auth).pipe(
-      switchMap((user: User | null) => {
-        if (user && user.uid) {
-          return this.fetchUserData(user.uid).pipe(
-            map((data) => {
-              return {
-                isLoggedIn: true,
-                tipo: data?.['tipo'],
-                nombre: data?.['nombre']
-              };
-            })
-          );
-        } else {
-          return of({isLoggedIn: false});
-        }
-      })
-    );
-  }
-  private fetchUserData(uid: string): Observable<any> {
-    const usuariosCollection = collection(this.firestore, 'usuarios');
-    const q = query(usuariosCollection, where('uid', '==', uid));
-
-    return new Observable(observer => {
-      getDocs(q)
-        .then((querySnapshot) => {
-          if (!querySnapshot.empty) {
-            const data = querySnapshot.docs[0].data(); // Get the first matching document
-            observer.next(data);
-          } else {
-            observer.next(null);
-          }
-          observer.complete();
-        })
-        .catch((error) => observer.error(error));
-    });
   }
 
   async login(email: string, password: string): Promise<{ success: boolean; message: string }> {
     try {
-      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-      const userId = userCredential.user.uid;
+      const userCredential: UserCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      const userId: string = userCredential.user.uid;
 
-      const usuariosCollection = collection(this.firestore, 'usuarios');
-      const q = query(usuariosCollection, where('uid', '==', userId));
-      const querySnapshot = await getDocs(q);
+      // Directly access the user's document using UID
+      const userDocRef = doc(this.firestore, 'usuarios', userId);
+      const userDocSnap = await getDoc(userDocRef);
 
-      if (querySnapshot.empty) {
+      if (!userDocSnap.exists()) {
         await signOut(this.auth); // Sign out if user not found in Firestore
-        return { success: false, message: 'Usuario no encontrado en la base de datos.' };
+        return {success: false, message: 'Usuario no encontrado en la base de datos.'};
       }
 
-      const userData = querySnapshot.docs[0].data();
-      const userTipo = userData['tipo'];
-      const userVerificado = userData['verificado'];
+      const userData: DocumentData = userDocSnap.data()!;
+      const userTipo: string = userData['tipo'];
+      const userVerificado: boolean = userData['verificado'];
 
       if (userTipo === 'especialista' && !userVerificado) {
         await signOut(this.auth);
-        return { success: false, message: 'Su usuario no ha sido verificado. Por favor contacte con el administrador.' };
+        return {success: false, message: 'Su usuario no ha sido verificado. Por favor contacte con el administrador.'};
       }
 
       if (userTipo !== 'admin' && !userCredential.user.emailVerified) {
@@ -108,7 +72,6 @@ export class LoginService {
           this.msjError = "Error al loguearse";
           break;
       }
-      // @ts-ignore
       return {success: false, message: this.msjError};
     }
   }
@@ -119,17 +82,19 @@ export class LoginService {
   }> {
     try {
       // registro el paciente con el mail y contraseña
-      const pacienteCreado = await createUserWithEmailAndPassword(this.auth, email, password);
+      const pacienteCreado: UserCredential = await createUserWithEmailAndPassword(this.auth, email, password);
 
       // me traigo el UID de Auth en la respuesta
-      const uid = pacienteCreado.user?.uid;
+      const uid: string | undefined = pacienteCreado.user?.uid;
 
       // guardo en la db el paciente con el UID asociado a su Auth, el tipo de usuario
       if (uid) {
-        const tipo = 'paciente';
-        const pacienteConUid = {...paciente, uid, tipo};
-        let col = collection(this.firestore, 'usuarios');
-        await addDoc(col, pacienteConUid);
+        const pacienteConUid = {...paciente, uid};
+        // let col: CollectionReference<DocumentData, DocumentData> = collection(this.firestore, 'usuarios');
+        // await addDoc(col, pacienteConUid);
+        // TODO: change registering method to set user id as the auth uid
+        const userDocRef = doc(this.firestore, 'usuarios', uid);
+        await setDoc(userDocRef, pacienteConUid);
 
         // envío correo de verificación
         await sendEmailVerification(pacienteCreado.user);
@@ -186,11 +151,12 @@ export class LoginService {
 
       // guardo en la db el paciente con el UID asociado a su Auth, el tipo de usuario y el atributo verificado en false
       if (uid) {
-        const tipo = 'especialista';
-        const verificado = false;
-        const especialistaConUid = {...especialista, uid, tipo, verificado};
-        let col = collection(this.firestore, 'usuarios');
-        await addDoc(col, especialistaConUid);
+        especialista.uid = uid;
+        // const especialistaConUid = {...especialista, uid};
+        // let col = collection(this.firestore, 'usuarios');
+        // await addDoc(col, especialistaConUid);
+        const userDocRef = doc(this.firestore, 'usuarios', uid);
+        await setDoc(userDocRef, especialista);
 
         // envío correo de verificación
         await sendEmailVerification(especialistaCreado.user);
@@ -247,10 +213,12 @@ export class LoginService {
 
       // guardo en la db el admin con el UID asociado a su Auth, el tipo de usuario
       if (uid) {
-        const tipo = 'admin';
-        const adminConUid = {...admin, uid, tipo};
-        let col = collection(this.firestore, 'usuarios');
-        await addDoc(col, adminConUid);
+        const adminConUid = {...admin, uid};
+        // let col = collection(this.firestore, 'usuarios');
+        // await addDoc(col, adminConUid);
+        const userDocRef = doc(this.firestore, 'usuarios', uid);
+        await setDoc(userDocRef, adminConUid);
+
 
         // envío correo de verificación
         await sendEmailVerification(adminCreado.user);
@@ -293,7 +261,6 @@ export class LoginService {
       return {success: false, message: this.msjError};
     }
   }
-
 
 
   async register(email: string, password: string): Promise<{ success: boolean; message: string }> {

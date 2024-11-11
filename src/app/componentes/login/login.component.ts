@@ -62,12 +62,12 @@ export class LoginComponent {
   }
 
   autoCompletarEspecialista() {
-    this.email = 'vecahe5227@anypng.com';
+    this.email = 'corkipikni@gufum.com';
     this.password = 'a1234567';
   }
 
   autoCompletarAdmin() {
-    this.email = 'admin@gmail.com';
+    this.email = 'daseniba@polkaroad.net';
     this.password = 'a1234567';
   }
 

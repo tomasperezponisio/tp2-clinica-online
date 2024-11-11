@@ -151,7 +151,7 @@ export class AltaEspecialistaComponent  implements OnInit {
           this.form.value.dni,
           especialidadesSeleccionadas,
           this.form.value.email,
-          downloadURL1
+          downloadURL1,
         );
 
         const email: string = this.form.value.email;

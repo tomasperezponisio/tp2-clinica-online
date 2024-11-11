@@ -1,1 +1,49 @@
-<p>mi-perfil works!</p>
+<div class="container mt-3" *ngIf="userData$ | async as user; else loading">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="text-center">Mi Perfil</h2>
+    </div>
+    <div class="card-body">
+      <!-- User Info -->
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <!-- Display images -->
+          <img *ngIf="user.imagenUno" [src]="user.imagenUno" alt="Imagen 1" class="img-fluid rounded-circle mb-3"
+               style="width: 150px; height: 150px;">
+          <img *ngIf="user.imagenDos && user.tipo === 'paciente'" [src]="user.imagenDos" alt="Imagen 2"
+               class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px;">
+        </div>
+        <div class="col-md-8">
+          <h4>{{ user.nombre }} {{ user.apellido }}</h4>
+          <p><strong>Edad:</strong> {{ user.edad }}</p>
+          <p><strong>DNI:</strong> {{ user.dni }}</p>
+          <p><strong>Email:</strong> {{ user.email }}</p>
+
+          <!-- Additional fields for Paciente -->
+          <div *ngIf="user.tipo === 'paciente'">
+            <p><strong>Obra Social:</strong> {{ user.obraSocial }}</p>
+          </div>
+
+          <!-- Additional fields for Especialista -->
+          <div *ngIf="user.tipo === 'especialista'">
+            <p><strong>Especialidades:</strong> {{ user.especialidad.join(', ') }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mis Horarios Section for Especialista -->
+      <div *ngIf="user.tipo === 'especialista'" class="mt-4">
+        <app-mis-horarios [especialista]="user"></app-mis-horarios>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loading>
+  <div class="d-flex justify-content-center align-items-center" style="height: 80vh;">
+    <div class="spinner-grow text-info" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+</ng-template>

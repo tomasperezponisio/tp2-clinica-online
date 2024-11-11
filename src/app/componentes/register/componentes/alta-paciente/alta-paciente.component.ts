@@ -133,7 +133,7 @@ export class AltaPacienteComponent implements OnInit {
           this.form.value.obraSocial,
           this.form.value.email,
           downloadURL1,
-          downloadURL2
+          downloadURL2,
         );
 
         const email: string = this.form.value.email;

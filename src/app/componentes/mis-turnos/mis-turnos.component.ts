@@ -1,9 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, LOCALE_ID, OnInit} from '@angular/core';
 import {Turno} from "../../models/turno";
 import {TurnosService} from "../../services/turnos.service";
 import {AuthService} from "../../services/auth.service";
 import {FormsModule} from "@angular/forms";
 import {DatePipe, NgClass, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
+import {AlertService} from "../../services/alert.service";
+import {registerLocaleData} from '@angular/common';
+import localeEsAr from '@angular/common/locales/es-AR';
+
+registerLocaleData(localeEsAr, 'es-AR');
 
 @Component({
   selector: 'app-mis-turnos',
@@ -15,6 +20,10 @@ import {DatePipe, NgClass, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
     TitleCasePipe,
     NgIf,
     NgClass
+  ],
+  providers: [
+    // Set the LOCALE_ID to 'es-AR' for the entire application
+    {provide: LOCALE_ID, useValue: 'es-AR'},
   ],
   templateUrl: './mis-turnos.component.html',
   styleUrl: './mis-turnos.component.css'
@@ -30,7 +39,8 @@ export class MisTurnosComponent implements OnInit {
 
   constructor(
     private turnosService: TurnosService,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertService: AlertService
   ) {
   }
 
@@ -80,6 +90,7 @@ export class MisTurnosComponent implements OnInit {
   }
 
   onFilterChange() {
+    console.log('Filter changed:' + this.filterText);
     this.applyFilter();
   }
 
@@ -105,16 +116,31 @@ export class MisTurnosComponent implements OnInit {
   }
 
   cancelarTurno(turno: Turno) {
-    const motivo = prompt('Ingrese el motivo de la cancelación:');
-    if (motivo) {
-      turno.estado = 'cancelado';
-      turno.comentarioPaciente = motivo;
-      this.turnosService.updateTurno(turno).then(() => {
-        alert('Turno cancelado con éxito.');
-      }).catch(error => {
-        console.error('Error al cancelar el turno:', error);
+    this.alertService.customPrompt('Cancelar Turno', 'Ingrese el motivo de la cancelación:')
+      .then(result => {
+        if (result.isConfirmed && result.value) {
+          const motivo = result.value;
+          turno.estado = 'cancelado';
+          turno.comentarioPaciente = motivo;
+          this.turnosService.updateTurno(turno).then(() => {
+            this.alertService.customAlert(
+              'Turno cancelado con éxito',
+              `El turno fue cancelado por el paciente con el motivo: ${motivo}`,
+              'success'
+            );
+          }).catch(error => {
+            console.error('Error al cancelar el turno:', error);
+            this.alertService.customAlert(
+              'Error',
+              'Hubo un error al cancelar el turno. Por favor, inténtelo de nuevo.',
+              'error'
+            );
+          });
+        } else if (result.isDismissed) {
+          // The user cancelled the prompt
+          console.log('Prompt cancelado');
+        }
       });
-    }
   }
 
   verResena(turno: Turno) {

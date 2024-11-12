@@ -1,0 +1,32 @@
+/* Center align the card titles */
+.card-title {
+  text-align: center;
+}
+
+/* Adjust font sizes for better readability */
+.card-text {
+  font-size: 0.9rem;
+}
+
+/* Style the status text */
+.status-text {
+  font-weight: bold;
+}
+
+/* Example of status colors */
+.text-pending {
+  color: orange;
+}
+
+.text-accepted {
+  color: blue;
+}
+
+.text-completed {
+  color: green;
+}
+
+.text-canceled,
+.text-rejected {
+  color: red;
+}

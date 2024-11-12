@@ -2,14 +2,14 @@ import {Component, OnInit} from '@angular/core';
 import {Especialista} from "../../models/especialista";
 import {Router} from "@angular/router";
 import {UsuariosService} from "../../services/usuarios.service";
-import {Slot} from "../../models/slot";
+import {Bloque} from "../../models/bloque";
 import {TurnosService} from "../../services/turnos.service";
 import {Turno} from "../../models/turno";
 import {AuthService} from "../../services/auth.service";
 import {DatePipe, NgForOf, NgIf} from "@angular/common";
 import Swal from "sweetalert2";
-import { NgModule, LOCALE_ID } from '@angular/core';
-import { registerLocaleData } from '@angular/common';
+import {NgModule, LOCALE_ID} from '@angular/core';
+import {registerLocaleData} from '@angular/common';
 import localeEsAr from '@angular/common/locales/es-AR';
 
 registerLocaleData(localeEsAr, 'es-AR');
@@ -24,7 +24,7 @@ registerLocaleData(localeEsAr, 'es-AR');
   ],
   providers: [
     // Set the LOCALE_ID to 'es-AR' for the entire application
-    { provide: LOCALE_ID, useValue: 'es-AR' },
+    {provide: LOCALE_ID, useValue: 'es-AR'},
   ],
   templateUrl: './solicitar-turnos.component.html',
   styleUrl: './solicitar-turnos.component.css'
@@ -36,86 +36,87 @@ export class SolicitarTurnosComponent implements OnInit {
   // Data holders
   especialidades: string[] = [];
   especialistas: Especialista[] = [];
-  availableSlots: Slot[] = [];
+  availableSlots: Bloque[] = [];
 
   // Selections
-  selectedEspecialidad: string = '';
-  selectedEspecialista: Especialista | null = null;
-  selectedSlot: Slot | null = null;
+  especialidadSeleccionada: string = '';
+  especialistaSeleccionado: Especialista | null = null;
+  bloqueSeleccionado: Bloque | null = null;
 
   // Current User
-  currentUser: any;
+  usuarioActual: any;
 
   constructor(
     private usuariosService: UsuariosService,
     private turnosService: TurnosService,
     private authService: AuthService,
     private router: Router
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
     // Get the current user
-    this.authService.getCurrentUser().subscribe(user => {
-      this.currentUser = user;
+    this.authService.traerUsuarioActual().subscribe(user => {
+      this.usuarioActual = user;
     });
 
     // Fetch the list of specialties
-    this.fetchEspecialidades();
+    this.traerEspecialidades();
   }
 
-  fetchEspecialidades() {
-    this.usuariosService.getEspecialidades().subscribe(especialidades => {
+  traerEspecialidades() {
+    this.usuariosService.traerEspecialidades().subscribe(especialidades => {
       this.especialidades = especialidades;
     });
   }
 
-  selectEspecialidad(especialidad: string) {
-    this.selectedEspecialidad = especialidad;
+  elegirEspecialidad(especialidad: string) {
+    this.especialidadSeleccionada = especialidad;
     this.step = 2;
-    this.fetchEspecialistas();
+    this.traerEspecialistas();
   }
 
-  fetchEspecialistas() {
-    this.usuariosService.getEspecialistasByEspecialidad(this.selectedEspecialidad).subscribe(especialistas => {
+  traerEspecialistas() {
+    this.usuariosService.traerEspecialistasPorEspecialidad(this.especialidadSeleccionada).subscribe(especialistas => {
       this.especialistas = especialistas;
     });
   }
 
-  selectEspecialista(especialista: Especialista) {
-    this.selectedEspecialista = especialista;
+  elegirEspecialista(especialista: Especialista) {
+    this.especialistaSeleccionado = especialista;
     this.step = 3;
-    this.fetchAvailableSlots();
+    this.traerBloquesDisponibles();
   }
 
-  fetchAvailableSlots() {
-    if (this.selectedEspecialista && this.selectedEspecialidad) {
-      this.turnosService.generateAvailableSlots(this.selectedEspecialista, this.selectedEspecialidad).then(slots => {
+  traerBloquesDisponibles() {
+    if (this.especialistaSeleccionado && this.especialidadSeleccionada) {
+      this.turnosService.generarBloquesDisponibles(this.especialistaSeleccionado, this.especialidadSeleccionada).then(slots => {
         this.availableSlots = slots;
       });
     }
   }
 
-  selectSlot(slot: Slot) {
-    this.selectedSlot = slot;
+  seleccionarBloque(slot: Bloque) {
+    this.bloqueSeleccionado = slot;
     this.step = 4;
   }
 
-  confirmAppointment() {
-    if (this.currentUser && this.selectedEspecialista && this.selectedEspecialidad && this.selectedSlot) {
+  confirmarTurno() {
+    if (this.usuarioActual && this.especialistaSeleccionado && this.especialidadSeleccionada && this.bloqueSeleccionado) {
       const turno: Turno = {
-        pacienteUid: this.currentUser.uid,
-        pacienteNombre: `${this.currentUser.nombre} ${this.currentUser.apellido}`,
-        especialistaUid: this.selectedEspecialista.uid,
-        especialistaNombre: `${this.selectedEspecialista.nombre} ${this.selectedEspecialista.apellido}`,
-        especialidad: this.selectedEspecialidad,
-        fecha: this.selectedSlot.fecha,
-        hora: this.selectedSlot.hora,
+        pacienteUid: this.usuarioActual.uid,
+        pacienteNombre: `${this.usuarioActual.nombre} ${this.usuarioActual.apellido}`,
+        especialistaUid: this.especialistaSeleccionado.uid,
+        especialistaNombre: `${this.especialistaSeleccionado.nombre} ${this.especialistaSeleccionado.apellido}`,
+        especialidad: this.especialidadSeleccionada,
+        fecha: this.bloqueSeleccionado.fecha,
+        hora: this.bloqueSeleccionado.hora,
         estado: 'pendiente',
       };
 
       this.turnosService.solicitarTurno(turno).then(() => {
         // @ts-ignore
-        this.showSuccessAlert(`Turno reservado para el ${this.selectedSlot.fecha} a las ${this.selectedSlot.hora}`).then(() => {
+        this.showSuccessAlert(`Turno reservado para el ${this.bloqueSeleccionado.fecha} a las ${this.bloqueSeleccionado.hora}`).then(() => {
           // Reset selections or navigate away
           this.resetSelections();
         });
@@ -128,25 +129,25 @@ export class SolicitarTurnosComponent implements OnInit {
 
   resetSelections() {
     this.step = 1;
-    this.selectedEspecialidad = '';
-    this.selectedEspecialista = null;
-    this.selectedSlot = null;
+    this.especialidadSeleccionada = '';
+    this.especialistaSeleccionado = null;
+    this.bloqueSeleccionado = null;
   }
 
   // Helper methods for displaying slots
-  getDates(): Date[] {
+  traerFechas(): Date[] {
     const dateStrings = Array.from(new Set(this.availableSlots.map(slot => slot.fecha)));
     const dates = dateStrings.map(dateStr => new Date(dateStr + 'T00:00:00')); // Ensure proper parsing
     return dates;
   }
 
 // solicitar-turnos.component.ts
-  getSlotsForDate(date: Date): Slot[] {
-    const dateStr = this.formatDate(date); // Convert Date object back to 'YYYY-MM-DD' string
+  traerBloquesPorFecha(date: Date): Bloque[] {
+    const dateStr = this.formatearFecha(date); // Convert Date object back to 'YYYY-MM-DD' string
     return this.availableSlots.filter(slot => slot.fecha === dateStr);
   }
 
-  formatDate(date: Date): string {
+  formatearFecha(date: Date): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
     const day = date.getDate().toString().padStart(2, '0');

@@ -29,12 +29,11 @@ export class LoginService {
       const userCredential: UserCredential = await signInWithEmailAndPassword(this.auth, email, password);
       const userId: string = userCredential.user.uid;
 
-      // Directly access the user's document using UID
       const userDocRef = doc(this.firestore, 'usuarios', userId);
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        await signOut(this.auth); // Sign out if user not found in Firestore
+        await signOut(this.auth);
         return {success: false, message: 'Usuario no encontrado en la base de datos.'};
       }
 
@@ -90,9 +89,6 @@ export class LoginService {
       // guardo en la db el paciente con el UID asociado a su Auth, el tipo de usuario
       if (uid) {
         const pacienteConUid = {...paciente, uid};
-        // let col: CollectionReference<DocumentData, DocumentData> = collection(this.firestore, 'usuarios');
-        // await addDoc(col, pacienteConUid);
-        // TODO: change registering method to set user id as the auth uid
         const userDocRef = doc(this.firestore, 'usuarios', uid);
         await setDoc(userDocRef, pacienteConUid);
 

@@ -1,8 +1,19 @@
 import { Injectable } from '@angular/core';
 import {Turno} from "../models/turno";
-import {addDoc, collection, Firestore, getDocs, query, where} from "@angular/fire/firestore";
+import {
+  addDoc,
+  collection,
+  collectionData,
+  doc,
+  Firestore,
+  getDocs,
+  query,
+  updateDoc,
+  where
+} from "@angular/fire/firestore";
 import {Especialista} from "../models/especialista";
-import {Slot} from "../models/slot";
+import {Bloque} from "../models/bloque";
+import {Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +29,15 @@ export class TurnosService {
     await addDoc(turnosCollection, turno);
   }
 
-  async generateAvailableSlots(especialista: Especialista, especialidad: string): Promise<Slot[]> {
-    const slots: Slot[] = [];
+  /**
+   * Generates available time slots for a given specialist and specialty within the next 15 days.
+   *
+   * @param {Especialista} especialista - The specialist whose availability is being checked.
+   * @param {string} especialidad - The specialty for which availability is required.
+   * @return {Promise<Bloque[]>} - A promise that resolves to an array of available time slots.
+   */
+  async generarBloquesDisponibles(especialista: Especialista, especialidad: string): Promise<Bloque[]> {
+    const bloques: Bloque[] = [];
     const today = new Date();
     const endDate = new Date();
     endDate.setDate(today.getDate() + 15);
@@ -27,13 +45,13 @@ export class TurnosService {
     const disponibilidad = especialista.disponibilidad.find(disp => disp.especialidad === especialidad);
 
     if (!disponibilidad) {
-      return slots; // No availability for this specialty
+      return bloques; // No hay bloques disponibles para esta especialidad
     }
 
-    // Fetch existing bookings for this specialist
-    const bookedSlots = await this.getBookedSlots(especialista.uid);
+    // Traigo los bloques reservados para este especialista
+    const bloquesReservados = await this.traerBloquesReservados(especialista.uid);
 
-    // Loop through each day within the next 15 days
+    // Itero de aca a 15 días por los días del especialista en la especialidad
     for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
       const dayName = this.getDayName(d);
 
@@ -43,14 +61,14 @@ export class TurnosService {
         let horaInicio = this.parseTime(disponibilidad.horarioInicio);
         const horaFin = this.parseTime(disponibilidad.horarioFin);
 
-        // Generate time slots
+        // Genero bloques de tiempo en base a la hora de inicio y la duración
         while (horaInicio + duracion <= horaFin) {
           const hora = this.formatTime(horaInicio);
 
-          // Check if this slot is already booked
+          // Verifico si en este bloque ya hay un turno reservado
           const slotKey = `${fecha}_${hora}`;
-          if (!bookedSlots.has(slotKey)) {
-            slots.push({
+          if (!bloquesReservados.has(slotKey)) {
+            bloques.push({
               fecha,
               hora,
             });
@@ -61,20 +79,38 @@ export class TurnosService {
       }
     }
 
-    return slots;
+    return bloques;
   }
 
-  private async getBookedSlots(especialistaUid: string): Promise<Set<string>> {
+  /**
+   * Retrieves a set of booked slots for a given specialist from the Firestore database.
+   *
+   * @param {string} especialistaUid - The unique identifier of the specialist.
+   * @return {Promise<Set<string>>} A promise that resolves to a set of strings representing booked slots, where each slot is a combination of date and time formatted as 'fecha_hora'.
+   */
+  private async traerBloquesReservados(especialistaUid: string): Promise<Set<string>> {
+    const bloquesReservados = new Set<string>();
+
+    // Define the statuses that indicate the appointment occupies a time slot
+    const occupiedStatuses = ['pendiente', 'aceptado'];
+
     const turnosRef = collection(this.firestore, 'turnos');
-    const q = query(turnosRef, where('especialistaUid', '==', especialistaUid));
-    const querySnapshot = await getDocs(q);
-    const bookedSlots = new Set<string>();
-    querySnapshot.forEach(doc => {
+    const q = query(
+      turnosRef,
+      where('especialistaUid', '==', especialistaUid),
+      where('estado', 'in', occupiedStatuses)
+    );
+
+    const snapshot = await getDocs(q);
+    snapshot.forEach(doc => {
       const data = doc.data();
-      const key = `${data['fecha']}_${data['hora']}`;
-      bookedSlots.add(key);
+      const fecha = data['fecha'];
+      const hora = data['hora'];
+      const slotKey = `${fecha}_${hora}`;
+      bloquesReservados.add(slotKey);
     });
-    return bookedSlots;
+
+    return bloquesReservados;
   }
 
   private parseTime(timeStr: string): number {
@@ -96,4 +132,25 @@ export class TurnosService {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     return days[date.getDay()];
   }
+
+  traerTurnosPorUidDePaciente(pacienteUid: string): Observable<Turno[]> {
+    const turnosRef = collection(this.firestore, 'turnos');
+    const q = query(turnosRef, where('pacienteUid', '==', pacienteUid));
+    return collectionData(q, { idField: 'id' }) as Observable<Turno[]>;
+  }
+
+  getTurnosByEspecialistaUid(especialistaUid: string): Observable<Turno[]> {
+    const turnosRef = collection(this.firestore, 'turnos');
+    const q = query(turnosRef, where('especialistaUid', '==', especialistaUid));
+    return collectionData(q, { idField: 'id' }) as Observable<Turno[]>;
+  }
+
+  updateTurno(turno: Turno): Promise<void> {
+    if (!turno.id) {
+      return Promise.reject('Turno ID is missing');
+    }
+    const turnoDocRef = doc(this.firestore, 'turnos', turno.id);
+    return updateDoc(turnoDocRef, { ...turno });
+  }
+
 }

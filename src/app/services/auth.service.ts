@@ -10,7 +10,7 @@ import { switchMap } from 'rxjs/operators';
 export class AuthService {
   constructor(private auth: Auth, private usuariosService: UsuariosService) { }
 
-  getCurrentUser(): Observable<any> {
+  traerUsuarioActual(): Observable<any> {
     return authState(this.auth).pipe(
       switchMap((user: User | null) => {
         if (user) {

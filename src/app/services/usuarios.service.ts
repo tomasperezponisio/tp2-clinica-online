@@ -78,7 +78,7 @@ export class UsuariosService {
     }
   }
 
-  getEspecialidades(): Observable<string[]> {
+  traerEspecialidades(): Observable<string[]> {
     const usuariosRef = collection(this.firestore, 'usuarios');
     const q = query(usuariosRef, where('tipo', '==', 'especialista'));
     return from(getDocs(q)).pipe(
@@ -95,7 +95,7 @@ export class UsuariosService {
     );
   }
 
-  getEspecialistasByEspecialidad(especialidad: string): Observable<Especialista[]> {
+  traerEspecialistasPorEspecialidad(especialidad: string): Observable<Especialista[]> {
     const usuariosRef = collection(this.firestore, 'usuarios');
     const q = query(
       usuariosRef,

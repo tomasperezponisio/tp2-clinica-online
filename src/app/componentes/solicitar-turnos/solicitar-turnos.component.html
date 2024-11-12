@@ -8,7 +8,7 @@
           <button
             *ngFor="let esp of especialidades"
             class="btn btn-outline-primary m-2"
-            (click)="selectEspecialidad(esp)"
+            (click)="elegirEspecialidad(esp)"
           >
             {{ esp }}
           </button>
@@ -26,7 +26,7 @@
           <button
             *ngFor="let especialista of especialistas"
             class="btn btn-outline-primary m-2"
-            (click)="selectEspecialista(especialista)"
+            (click)="elegirEspecialista(especialista)"
           >
             {{ especialista.nombre }} {{ especialista.apellido }}
           </button>
@@ -39,13 +39,13 @@
     <!-- Step 3: Select Appointment Slot -->
     <h3 class="mb-4 text-center">Seleccione un Turno</h3>
     <div class="appointments-grid">
-      <div *ngFor="let date of getDates()" class="date-group mb-4">
+      <div *ngFor="let date of traerFechas()" class="date-group mb-4">
         <h4 class="mb-3">{{ toTitleCase( date | date: 'fullDate' ) }}</h4>
         <div class="d-flex flex-wrap">
           <button
-            *ngFor="let slot of getSlotsForDate(date)"
+            *ngFor="let slot of traerBloquesPorFecha(date)"
             class="btn btn-outline-success m-2"
-            (click)="selectSlot(slot)"
+            (click)="seleccionarBloque(slot)"
           >
             {{ slot.hora }}
           </button>
@@ -59,17 +59,17 @@
     <h3 class="mb-4 text-center">Confirmar Turno</h3>
     <div class="card">
       <div class="card-body">
-        <p><strong>Especialidad:</strong> {{ selectedEspecialidad }}</p>
+        <p><strong>Especialidad:</strong> {{ especialidadSeleccionada }}</p>
         <p>
           <strong>Especialista:</strong>
-          {{ selectedEspecialista?.nombre }} {{ selectedEspecialista?.apellido }}
+          {{ especialistaSeleccionado?.nombre }} {{ especialistaSeleccionado?.apellido }}
         </p>
         <p>
-          <strong>Fecha:</strong> {{ selectedSlot?.fecha | date: 'fullDate' }}
+          <strong>Fecha:</strong> {{ bloqueSeleccionado?.fecha | date: 'fullDate' }}
         </p>
-        <p><strong>Hora:</strong> {{ selectedSlot?.hora }}</p>
+        <p><strong>Hora:</strong> {{ bloqueSeleccionado?.hora }}</p>
         <div class="text-center mt-4">
-          <button class="btn btn-primary m-2" (click)="confirmAppointment()">
+          <button class="btn btn-primary m-2" (click)="confirmarTurno()">
             Confirmar
           </button>
           <button class="btn btn-secondary m-2" (click)="resetSelections()">

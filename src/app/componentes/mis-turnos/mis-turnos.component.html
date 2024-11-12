@@ -1,1 +1,126 @@
-<p>mis-turnos works!</p>
+<!-- mis-turnos.component.html -->
+<div class="container mt-4">
+  <h3 class="mb-4 text-center">Mis Turnos</h3>
+
+  <!-- Filter Input -->
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      [placeholder]="userRole === 'paciente' ? 'Filtrar por especialidad o especialista' : 'Filtrar por especialidad o paciente'"
+      [(ngModel)]="filterText"
+      (input)="onFilterChange()"
+    />
+  </div>
+
+  <!-- Appointments List -->
+  <div *ngFor="let turno of filteredTurnos" class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ turno.especialidad }}</h5>
+      <p class="card-text">
+        <ng-container *ngIf="userRole === 'paciente'">
+          <strong>Especialista:</strong> {{ turno.especialistaNombre }}<br />
+        </ng-container>
+        <ng-container *ngIf="userRole === 'especialista'">
+          <strong>Paciente:</strong> {{ turno.pacienteNombre }}<br />
+        </ng-container>
+        <strong>Fecha:</strong> {{ turno.fecha | date: 'fullDate' }}<br />
+        <strong>Hora:</strong> {{ turno.hora }}<br />
+        <strong>Estado:</strong>
+        <span [ngClass]="getEstadoClass(turno.estado)">
+          {{ turno.estado | titlecase }}
+        </span>
+      </p>
+
+      <!-- Actions -->
+      <div class="mt-3">
+        <!-- Actions for Paciente -->
+        <ng-container *ngIf="userRole === 'paciente'">
+          <!-- Cancelar turno -->
+          <button
+            *ngIf="canCancelTurno(turno)"
+            class="btn btn-danger m-1"
+            (click)="cancelarTurno(turno)"
+          >
+            Cancelar Turno
+          </button>
+
+          <!-- Ver reseña -->
+          <button
+            *ngIf="canVerResena(turno)"
+            class="btn btn-info m-1"
+            (click)="verResena(turno)"
+          >
+            Ver Reseña
+          </button>
+
+          <!-- Completar encuesta -->
+          <button
+            *ngIf="canCompletarEncuesta(turno)"
+            class="btn btn-success m-1"
+            (click)="completarEncuesta(turno)"
+          >
+            Completar Encuesta
+          </button>
+
+          <!-- Calificar Atención -->
+          <button
+            *ngIf="canCalificarAtencion(turno)"
+            class="btn btn-primary m-1"
+            (click)="calificarAtencion(turno)"
+          >
+            Calificar Atención
+          </button>
+        </ng-container>
+
+        <!-- Actions for Especialista -->
+        <ng-container *ngIf="userRole === 'especialista'">
+          <!-- Cancelar turno -->
+          <button
+            *ngIf="canCancelarTurnoEsp(turno)"
+            class="btn btn-danger m-1"
+            (click)="cancelarTurnoEsp(turno)"
+          >
+            Cancelar Turno
+          </button>
+
+          <!-- Rechazar turno -->
+          <button
+            *ngIf="canRechazarTurno(turno)"
+            class="btn btn-warning m-1"
+            (click)="rechazarTurno(turno)"
+          >
+            Rechazar Turno
+          </button>
+
+          <!-- Aceptar turno -->
+          <button
+            *ngIf="canAceptarTurno(turno)"
+            class="btn btn-success m-1"
+            (click)="aceptarTurno(turno)"
+          >
+            Aceptar Turno
+          </button>
+
+          <!-- Finalizar turno -->
+          <button
+            *ngIf="canFinalizarTurno(turno)"
+            class="btn btn-primary m-1"
+            (click)="finalizarTurno(turno)"
+          >
+            Finalizar Turno
+          </button>
+
+          <!-- Ver reseña -->
+          <button
+            *ngIf="canVerResena(turno)"
+            class="btn btn-info m-1"
+            (click)="verResena(turno)"
+          >
+            Ver Reseña
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

@@ -22,7 +22,6 @@ registerLocaleData(localeEsAr, 'es-AR');
     NgClass
   ],
   providers: [
-    // Set the LOCALE_ID to 'es-AR' for the entire application
     {provide: LOCALE_ID, useValue: 'es-AR'},
   ],
   templateUrl: './mis-turnos.component.html',
@@ -34,7 +33,6 @@ export class MisTurnosComponent implements OnInit {
   currentUser: any;
   userRole: string = ''; // 'paciente' or 'especialista'
 
-  // Filter text
   filterText: string = '';
 
   constructor(
@@ -45,7 +43,6 @@ export class MisTurnosComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get the current user
     this.authService.traerUsuarioActual().subscribe(user => {
       this.currentUser = user;
       this.userRole = user.tipo; // 'paciente' or 'especialista'
@@ -55,19 +52,16 @@ export class MisTurnosComponent implements OnInit {
 
   loadTurnos() {
     if (this.userRole === 'paciente') {
-      // Fetch appointments for the current patient
       this.turnosService.traerTurnosPorUidDePaciente(this.currentUser.uid).subscribe(turnos => {
         this.turnos = turnos;
         this.applyFilter();
       });
     } else if (this.userRole === 'especialista') {
-      // Fetch appointments for the current specialist
       this.turnosService.getTurnosByEspecialistaUid(this.currentUser.uid).subscribe(turnos => {
         this.turnos = turnos;
         this.applyFilter();
       });
     } else {
-      // Handle other user roles if necessary
       this.turnos = [];
     }
   }
@@ -94,23 +88,17 @@ export class MisTurnosComponent implements OnInit {
     this.applyFilter();
   }
 
-
-// Methods for Paciente
   canCancelTurno(turno: Turno): boolean {
     return this.userRole === 'paciente' && turno.estado !== 'realizado' && turno.estado !== 'cancelado';
   }
-
-// Determine if the review can be viewed
   canVerResena(turno: Turno): boolean {
     return !!turno.reseña;
   }
 
-// Determine if the survey can be completed
   canCompletarEncuesta(turno: Turno): boolean {
     return turno.estado === 'realizado' && !!turno.reseña && !turno.encuesta;
   }
 
-// Determine if the service can be rated
   canCalificarAtencion(turno: Turno): boolean {
     return turno.estado === 'realizado' && !turno.calificacion;
   }
@@ -137,7 +125,6 @@ export class MisTurnosComponent implements OnInit {
             );
           });
         } else if (result.isDismissed) {
-          // The user cancelled the prompt
           console.log('Prompt cancelado');
         }
       });
@@ -149,17 +136,14 @@ export class MisTurnosComponent implements OnInit {
 
 
   completarEncuesta(turno: Turno) {
-    // Implement your survey logic here.
-    // For simplicity, we'll prompt the user for survey responses.
+    // TODO: implementar encuesta
 
     const respuesta1 = prompt('Pregunta 1: ¿Cómo calificaría la puntualidad del especialista?');
     const respuesta2 = prompt('Pregunta 2: ¿Está satisfecho con la atención recibida?');
-    // ... add more questions as needed
 
     turno.encuesta = {
       respuesta1,
       respuesta2,
-      // ... other responses
     };
 
     this.turnosService.updateTurno(turno).then(() => {
@@ -191,7 +175,7 @@ export class MisTurnosComponent implements OnInit {
 
   // Methods for Especialista
   canCancelarTurnoEsp(turno: Turno): boolean {
-    const estadosNoPermitidos = ['aceptado', 'realizado', 'rechazado'];
+    const estadosNoPermitidos = ['aceptado', 'realizado', 'rechazado', 'cancelado'];
     return this.userRole === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
@@ -201,7 +185,7 @@ export class MisTurnosComponent implements OnInit {
   }
 
   canAceptarTurno(turno: Turno): boolean {
-    const estadosNoPermitidos = ['realizado', 'cancelado', 'rechazado'];
+    const estadosNoPermitidos = ['aceptado', 'realizado', 'cancelado', 'rechazado'];
     return this.userRole === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
@@ -223,16 +207,79 @@ export class MisTurnosComponent implements OnInit {
   }
 
   rechazarTurno(turno: Turno) {
-    // TODO: rechazar desde especialista
-  }
+    this.alertService.customPrompt('Rechazar Turno', 'Ingrese el motivo del rechazo:')
+      .then(result => {
+        if (result.isConfirmed && result.value) {
+          const motivo = result.value;
+          turno.estado = 'rechazado';
+          turno.comentarioEspecialista = motivo;
+          this.turnosService.updateTurno(turno).then(() => {
+            this.alertService.customAlert(
+              'Turno rechazado con éxito',
+              `El turno ha sido rechazado con el motivo: ${motivo}`,
+              'success'
+            );
+          }).catch(error => {
+            console.error('Error al rechazar el turno:', error);
+            this.alertService.customAlert(
+              'Error',
+              'Hubo un error al rechazar el turno. Por favor, inténtelo de nuevo.',
+              'error'
+            );
+          });
+        } else if (result.isDismissed) {
+          console.log('Operación cancelada por el usuario.');
+        }
+      });  }
 
   aceptarTurno(turno: Turno) {
-    // TODO: aceptar desde especialista
+    this.alertService.customConfirm('Aceptar Turno', '¿Está seguro de aceptar este turno?')
+      .then(result => {
+        if (result.isConfirmed) {
+          turno.estado = 'aceptado';
+          this.turnosService.updateTurno(turno).then(() => {
+            this.alertService.customAlert(
+              'Turno aceptado con éxito',
+              `El turno ha sido aceptado.`,
+              'success'
+            );
+          }).catch(error => {
+            console.error('Error al aceptar el turno:', error);
+            this.alertService.customAlert(
+              'Error',
+              'Hubo un error al aceptar el turno. Por favor, inténtelo de nuevo.',
+              'error'
+            );
+          });
+        }
+      });
   }
 
   finalizarTurno(turno: Turno) {
-    // TODO: finalizar desde especialista
-  }
+    this.alertService.customPrompt('Finalizar Turno', 'Ingrese la reseña y diagnóstico de la consulta:')
+      .then(result => {
+        if (result.isConfirmed && result.value) {
+          const reseña = result.value;
+          turno.estado = 'realizado';
+          turno.reseña = reseña;
+          this.turnosService.updateTurno(turno).then(() => {
+            this.alertService.customAlert(
+              'Turno finalizado con éxito',
+              `El turno ha sido finalizado.`,
+              'success'
+            );
+          }).catch(error => {
+            console.error('Error al finalizar el turno:', error);
+            this.alertService.customAlert(
+              'Error',
+              'Hubo un error al finalizar el turno. Por favor, inténtelo de nuevo.',
+              'error'
+            );
+          });
+        } else if (result.isDismissed) {
+          console.log('Operación cancelada por el usuario.');
+        }
+      });  }
 
   getEstadoClass(estado: string): string {
     switch (estado.toLowerCase()) {

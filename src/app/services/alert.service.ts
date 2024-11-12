@@ -39,4 +39,22 @@ export class AlertService {
       }
     });
   }
+
+  /**
+   * Custom Confirm using SweetAlert2
+   *
+   * @param titulo Title text
+   * @param mensaje Message text
+   * @returns Promise that resolves with the user's action
+   */
+  public customConfirm(titulo: string, mensaje: string) {
+    return Swal.fire({
+      title: titulo,
+      text: mensaje,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No'
+    });
+  }
 }

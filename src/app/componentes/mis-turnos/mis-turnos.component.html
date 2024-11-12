@@ -1,8 +1,7 @@
-<!-- mis-turnos.component.html -->
 <div class="container mt-4">
   <h3 class="mb-4 text-center">Mis Turnos</h3>
 
-  <!-- Filter Input -->
+  <!-- Input del filtro -->
   <div class="mb-3">
     <input
       type="text"
@@ -13,7 +12,7 @@
     />
   </div>
 
-  <!-- Appointments Grid -->
+  <!-- Grilla de turnos -->
   <div class="row">
     <div *ngFor="let turno of filteredTurnos" class="col-sm-6 col-md-4 col-lg-3 mb-3">
       <div class="card h-100">
@@ -21,13 +20,13 @@
           <h5 class="card-title">{{ turno.especialidad }}</h5>
           <p class="card-text">
             <ng-container *ngIf="userRole === 'paciente'">
-              <strong>Especialista:</strong> {{ turno.especialistaNombre }}<br />
+              <strong>Especialista:</strong> {{ turno.especialistaNombre }}<br/>
             </ng-container>
             <ng-container *ngIf="userRole === 'especialista'">
-              <strong>Paciente:</strong> {{ turno.pacienteNombre }}<br />
+              <strong>Paciente:</strong> {{ turno.pacienteNombre }}<br/>
             </ng-container>
-            <strong>Fecha:</strong> {{ turno.fecha | date: 'fullDate' | titlecase }}<br />
-            <strong>Hora:</strong> {{ turno.hora }}<br />
+            <strong>Fecha:</strong> {{ turno.fecha | date: 'fullDate' | titlecase }}<br/>
+            <strong>Hora:</strong> {{ turno.hora }}<br/>
             <strong>Estado:</strong>
             <span [ngClass]="getEstadoClass(turno.estado)">
               {{ turno.estado | titlecase }}

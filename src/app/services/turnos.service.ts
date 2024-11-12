@@ -30,11 +30,11 @@ export class TurnosService {
   }
 
   /**
-   * Generates available time slots for a given specialist and specialty within the next 15 days.
+   * Genera franjas horarias disponibles para un especialista y especialidad dados dentro de los próximos 15 días.
    *
-   * @param {Especialista} especialista - The specialist whose availability is being checked.
-   * @param {string} especialidad - The specialty for which availability is required.
-   * @return {Promise<Bloque[]>} - A promise that resolves to an array of available time slots.
+   * @param {Especialista} especialista - El especialista cuya disponibilidad se está verificando.
+   * @param {string} especialidad - La especialidad para la cual se requiere disponibilidad.
+   * @return {Promise<Bloque[]>} - Una promesa que se resuelve en un arreglo de franjas horarias disponibles.
    */
   async generarBloquesDisponibles(especialista: Especialista, especialidad: string): Promise<Bloque[]> {
     const bloques: Bloque[] = [];
@@ -83,10 +83,10 @@ export class TurnosService {
   }
 
   /**
-   * Retrieves a set of booked slots for a given specialist from the Firestore database.
+   * Recupera un conjunto de franjas horarias reservadas para un especialista dado desde la base de datos de Firestore.
    *
-   * @param {string} especialistaUid - The unique identifier of the specialist.
-   * @return {Promise<Set<string>>} A promise that resolves to a set of strings representing booked slots, where each slot is a combination of date and time formatted as 'fecha_hora'.
+   * @param {string} especialistaUid - El identificador único del especialista.
+   * @return {Promise<Set<string>>} Una promesa que se resuelve en un conjunto de cadenas que representan las franjas horarias reservadas, donde cada franja es una combinación de fecha y hora formateada como 'fecha_hora'.
    */
   private async traerBloquesReservados(especialistaUid: string): Promise<Set<string>> {
     const bloquesReservados = new Set<string>();

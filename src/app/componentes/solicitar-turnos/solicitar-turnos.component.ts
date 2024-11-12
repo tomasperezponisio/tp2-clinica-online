@@ -30,20 +30,20 @@ registerLocaleData(localeEsAr, 'es-AR');
   styleUrl: './solicitar-turnos.component.css'
 })
 export class SolicitarTurnosComponent implements OnInit {
-  // Step tracker
+  // Pasos
   step: number = 1;
 
-  // Data holders
+  // Data
   especialidades: string[] = [];
   especialistas: Especialista[] = [];
-  availableSlots: Bloque[] = [];
+  bloquesDisponibles: Bloque[] = [];
 
-  // Selections
+  // Selecciones
   especialidadSeleccionada: string = '';
   especialistaSeleccionado: Especialista | null = null;
   bloqueSeleccionado: Bloque | null = null;
 
-  // Current User
+  // Usuario actual
   usuarioActual: any;
 
   constructor(
@@ -55,12 +55,10 @@ export class SolicitarTurnosComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get the current user
     this.authService.traerUsuarioActual().subscribe(user => {
       this.usuarioActual = user;
     });
 
-    // Fetch the list of specialties
     this.traerEspecialidades();
   }
 
@@ -91,7 +89,7 @@ export class SolicitarTurnosComponent implements OnInit {
   traerBloquesDisponibles() {
     if (this.especialistaSeleccionado && this.especialidadSeleccionada) {
       this.turnosService.generarBloquesDisponibles(this.especialistaSeleccionado, this.especialidadSeleccionada).then(slots => {
-        this.availableSlots = slots;
+        this.bloquesDisponibles = slots;
       });
     }
   }
@@ -117,7 +115,6 @@ export class SolicitarTurnosComponent implements OnInit {
       this.turnosService.solicitarTurno(turno).then(() => {
         // @ts-ignore
         this.showSuccessAlert(`Turno reservado para el ${this.bloqueSeleccionado.fecha} a las ${this.bloqueSeleccionado.hora}`).then(() => {
-          // Reset selections or navigate away
           this.resetSelections();
         });
 
@@ -134,17 +131,15 @@ export class SolicitarTurnosComponent implements OnInit {
     this.bloqueSeleccionado = null;
   }
 
-  // Helper methods for displaying slots
   traerFechas(): Date[] {
-    const dateStrings = Array.from(new Set(this.availableSlots.map(slot => slot.fecha)));
+    const dateStrings = Array.from(new Set(this.bloquesDisponibles.map(slot => slot.fecha)));
     const dates = dateStrings.map(dateStr => new Date(dateStr + 'T00:00:00')); // Ensure proper parsing
     return dates;
   }
 
-// solicitar-turnos.component.ts
   traerBloquesPorFecha(date: Date): Bloque[] {
     const dateStr = this.formatearFecha(date); // Convert Date object back to 'YYYY-MM-DD' string
-    return this.availableSlots.filter(slot => slot.fecha === dateStr);
+    return this.bloquesDisponibles.filter(slot => slot.fecha === dateStr);
   }
 
   formatearFecha(date: Date): string {

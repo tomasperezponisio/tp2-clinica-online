@@ -139,20 +139,40 @@ export class LoginService {
     message: string
   }> {
     try {
+      console.log('En el service');
+      console.log('especialista: ', especialista);
+
       // registro el paciente con el mail y contraseña
       const especialistaCreado = await createUserWithEmailAndPassword(this.auth, email, password);
 
       // me traigo el UID de Auth en la respuesta
-      const uid = especialistaCreado.user?.uid;
+      const uid: string | undefined = especialistaCreado.user?.uid;
 
       // guardo en la db el paciente con el UID asociado a su Auth, el tipo de usuario y el atributo verificado en false
       if (uid) {
-        especialista.uid = uid;
         // const especialistaConUid = {...especialista, uid};
-        // let col = collection(this.firestore, 'usuarios');
-        // await addDoc(col, especialistaConUid);
+        // Crear un objeto plano con los datos del especialista
+        const especialistaConUid = {
+          nombre: especialista.nombre,
+          apellido: especialista.apellido,
+          edad: especialista.edad,
+          dni: especialista.dni,
+          especialidad: especialista.especialidad,
+          email: especialista.email,
+          imagenUno: especialista.imagenUno,
+          tipo: especialista.tipo, // 'especialista'
+          verificado: especialista.verificado, // false por defecto
+          disponibilidad: especialista.disponibilidad, // []
+          uid: uid
+        };
+
+        console.log('especialistaConUid: ', especialistaConUid);
+
+        // Referencia al documento en Firestore
         const userDocRef = doc(this.firestore, 'usuarios', uid);
-        await setDoc(userDocRef, especialista);
+        console.log('userDocRef: ', userDocRef);
+
+        await setDoc(userDocRef, especialistaConUid);
 
         // envío correo de verificación
         await sendEmailVerification(especialistaCreado.user);
@@ -169,7 +189,8 @@ export class LoginService {
 
     } catch (error) {
       // @ts-ignore
-      console.log(error.code);
+      console.error('Error en altaEspecialista:', error);
+
       // @ts-ignore
       switch (error.code) {
         case "auth/invalid-email":
@@ -210,11 +231,8 @@ export class LoginService {
       // guardo en la db el admin con el UID asociado a su Auth, el tipo de usuario
       if (uid) {
         const adminConUid = {...admin, uid};
-        // let col = collection(this.firestore, 'usuarios');
-        // await addDoc(col, adminConUid);
         const userDocRef = doc(this.firestore, 'usuarios', uid);
         await setDoc(userDocRef, adminConUid);
-
 
         // envío correo de verificación
         await sendEmailVerification(adminCreado.user);

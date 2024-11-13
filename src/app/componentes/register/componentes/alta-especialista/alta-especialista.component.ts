@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import {Especialista} from "../../../../models/especialista";
 import {Observable} from "rxjs";
 import {EspecialidadesService} from "../../../../services/especialidades.service";
+import {AlertService} from "../../../../services/alert.service";
 
 @Component({
   selector: 'app-alta-especialista',
@@ -21,7 +22,7 @@ import {EspecialidadesService} from "../../../../services/especialidades.service
   templateUrl: './alta-especialista.component.html',
   styleUrl: './alta-especialista.component.css'
 })
-export class AltaEspecialistaComponent  implements OnInit {
+export class AltaEspecialistaComponent implements OnInit {
   form!: FormGroup;
   // especialidades: string[] = ['Cardiología', 'Neurología', 'Dermatología'];
   especialidades$!: Observable<string[]>;
@@ -29,7 +30,8 @@ export class AltaEspecialistaComponent  implements OnInit {
   constructor(
     private loginService: LoginService,
     private storage: Storage,
-    private especialidadesService: EspecialidadesService
+    private especialidadesService: EspecialidadesService,
+    private alertService: AlertService
   ) {
   }
 
@@ -145,44 +147,39 @@ export class AltaEspecialistaComponent  implements OnInit {
         }
 
         const especialista = new Especialista(
-          this.form.value.nombre,
-          this.form.value.apellido,
-          this.form.value.edad,
-          this.form.value.dni,
+          this.form.value.nombre.trim(),
+          this.form.value.apellido.trim(),
+          parseInt(this.form.value.edad, 10),
+          parseInt(this.form.value.dni, 10),
           especialidadesSeleccionadas,
-          this.form.value.email,
-          downloadURL1,
+          this.form.value.email.trim(),
+          downloadURL1
+          // 'tipo', 'verificado', 'disponibilidad', y 'uid' están seteados por default
         );
+
+        console.log('especialista en componente: ' + especialista);
 
         const email: string = this.form.value.email;
         const password: string = this.form.value.password;
 
-        this.loginService.altaEspecialista(email, password, especialista)
-          .then(response => {
-            if (response.success) {
-              this.showSuccessAlert('¡Especialista dado de alta exitosamente!', response.message).then(() => {
-                this.form.reset();
-              });
-            } else {
-              this.showErrorAlert(response.message).then(() => {
-                this.form.reset();
-              });
-            }
-          })
-          .catch(error => {
-            this.showErrorAlert('Error al dar de alta al especialista: ' + error).then(() => {
-              this.form.reset();
-            });
-          });
-      } catch (e) {
-        this.showErrorAlert('Error al subir las imágenes, intente nuevamente.').then(() => {
+
+        const response = await this.loginService.altaEspecialista(email, password, especialista);
+
+        if (response.success) {
+          await this.alertService.customAlert('¡Especialista dado de alta exitosamente!', response.message, 'success');
           this.form.reset();
-        });
+        } else {
+          await this.alertService.customAlert('Error al registrar', response.message, 'error');
+        }
+
+      } catch (e: any) { // Type as any to capture all error properties
+        console.error('Error en altaEspecialista:', e);
+        await this.alertService.customAlert('Error', 'Error al subir las imágenes, intente nuevamente.', 'error');
+        this.form.reset();
       }
     } else {
-      this.showErrorAlert('Es necesario subir una imagen para el especialista, intente nuevamente.').then(() => {
-        this.form.reset();
-      });
+      await this.alertService.customAlert('Error', 'Es necesario subir una imagen para el especialista, intente nuevamente.', 'error');
+      this.form.reset();
     }
   }
 
@@ -200,7 +197,7 @@ export class AltaEspecialistaComponent  implements OnInit {
       await this.especialidadesService.addEspecialidad(nuevaEspecialidad);
       this.showSuccessAlert('Nueva especialidad agregada.', `Especialidad "${nuevaEspecialidad}" agregada con éxito.`);
 
-      this.form.patchValue({ especialidad: nuevaEspecialidad, customEspecialidad: '' });
+      this.form.patchValue({especialidad: nuevaEspecialidad, customEspecialidad: ''});
     } catch (error) {
       console.error('Error adding specialty:', error);
       this.showErrorAlert('Error al agregar la especialidad. Intenta de nuevo.');

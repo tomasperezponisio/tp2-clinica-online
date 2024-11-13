@@ -1,0 +1,35 @@
+/* register.component.css */
+
+/* Style for user selection buttons */
+.select-user-button {
+  width: 200px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ced4da;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  background-color: #ffffff;
+}
+
+.select-user-button:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.05);
+}
+
+.user-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.user-type {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #343a40;
+}

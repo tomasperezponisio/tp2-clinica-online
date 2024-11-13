@@ -56,13 +56,28 @@ export class LoginComponent {
       });
   }
 
-  autoCompletarPaciente() {
-    this.email = 'pobajo1860@inikale.com';
+  autoCompletarPaciente1() {
+    this.email = 'pobajo1860@inikale.com'; // Juan Peperulo
     this.password = 'a1234567';
   }
 
-  autoCompletarEspecialista() {
-    this.email = 'corkipikni@gufum.com';
+  autoCompletarPaciente2() {
+    this.email = 'kexafih386@gianes.com'; // Pepe Sanchez
+    this.password = 'a1234567';
+  }
+
+  autoCompletarPaciente3() {
+    this.email = 'finbal@tempmailto.org'; // Cosme Fulanito
+    this.password = 'a1234567';
+  }
+
+  autoCompletarEspecialista1() {
+    this.email = 'corkipikni@gufum.com'; // Nick Riviera
+    this.password = 'a1234567';
+  }
+
+  autoCompletarEspecialista2() {
+    this.email = 'virkufostu@gufum.com'; // Dr Ahorro
     this.password = 'a1234567';
   }
 

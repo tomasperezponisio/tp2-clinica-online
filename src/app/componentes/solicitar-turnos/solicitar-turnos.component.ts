@@ -32,16 +32,22 @@ registerLocaleData(localeEsAr, 'es-AR');
 export class SolicitarTurnosComponent implements OnInit {
   // Pasos
   step: number = 1;
+  maxStep: number = 4; // Total steps for regular users
+
+  // Add a property to store the user's role
+  userRole: string = ''; // 'paciente', 'admin', or other roles
 
   // Data
   especialidades: string[] = [];
   especialistas: Especialista[] = [];
   bloquesDisponibles: Bloque[] = [];
+  pacientes: any[] = [];
 
   // Selecciones
   especialidadSeleccionada: string = '';
   especialistaSeleccionado: Especialista | null = null;
   bloqueSeleccionado: Bloque | null = null;
+  pacienteSeleccionado: any = null;
 
   // Usuario actual
   usuarioActual: any;
@@ -57,9 +63,28 @@ export class SolicitarTurnosComponent implements OnInit {
   ngOnInit(): void {
     this.authService.traerUsuarioActual().subscribe(user => {
       this.usuarioActual = user;
+      this.userRole = user.tipo; // Determine the user's role
+
+      // If the user is an admin, fetch the list of pacientes
+      if (this.userRole === 'admin') {
+        this.traerPacientes();
+        this.maxStep = 5; // Admins have an extra step
+      }
     });
 
     this.traerEspecialidades();
+  }
+
+  traerPacientes() {
+    this.usuariosService.traerPacientes().subscribe(pacientes => {
+      this.pacientes = pacientes;
+    });
+  }
+
+  // Method to handle paciente selection
+  elegirPaciente(paciente: any) {
+    this.pacienteSeleccionado = paciente;
+    this.step += 1; // Move to the next step
   }
 
   traerEspecialidades() {
@@ -70,7 +95,7 @@ export class SolicitarTurnosComponent implements OnInit {
 
   elegirEspecialidad(especialidad: string) {
     this.especialidadSeleccionada = especialidad;
-    this.step = 2;
+    this.step += 1; // Move to the next step
     this.traerEspecialistas();
   }
 
@@ -82,7 +107,7 @@ export class SolicitarTurnosComponent implements OnInit {
 
   elegirEspecialista(especialista: Especialista) {
     this.especialistaSeleccionado = especialista;
-    this.step = 3;
+    this.step += 1; // Move to the next step
     this.traerBloquesDisponibles();
   }
 
@@ -96,11 +121,14 @@ export class SolicitarTurnosComponent implements OnInit {
 
   seleccionarBloque(slot: Bloque) {
     this.bloqueSeleccionado = slot;
-    this.step = 4;
+    this.step += 1; // Move to the next step
   }
 
   confirmarTurno() {
-    if (this.usuarioActual && this.especialistaSeleccionado && this.especialidadSeleccionada && this.bloqueSeleccionado) {
+    // Determine the paciente based on user role
+    const paciente = this.userRole === 'admin' ? this.pacienteSeleccionado : this.usuarioActual;
+
+    if (paciente && this.especialistaSeleccionado && this.especialidadSeleccionada && this.bloqueSeleccionado) {
       const turno: Turno = {
         pacienteUid: this.usuarioActual.uid,
         pacienteNombre: `${this.usuarioActual.nombre} ${this.usuarioActual.apellido}`,
@@ -129,6 +157,7 @@ export class SolicitarTurnosComponent implements OnInit {
     this.especialidadSeleccionada = '';
     this.especialistaSeleccionado = null;
     this.bloqueSeleccionado = null;
+    this.pacienteSeleccionado = null;
   }
 
   traerFechas(): Date[] {

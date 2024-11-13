@@ -156,7 +156,8 @@ export class TurnosService {
   // turnos.service.ts
   traerTodosLosTurnos(): Observable<Turno[]> {
     const turnosRef = collection(this.firestore, 'turnos');
-    return collectionData(turnosRef, { idField: 'id' }) as Observable<Turno[]>;
+    const q = query(turnosRef); // You can apply filters if needed
+    return collectionData(q, { idField: 'id' }) as Observable<Turno[]>;
   }
 
 }

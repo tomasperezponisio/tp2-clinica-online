@@ -21,6 +21,7 @@ import {Auth} from "@angular/fire/auth";
 })
 export class RegisterComponent {
   formUsuario: FormGroup;
+  tipoDeUsuario: string | null = null; // Initialize as null
 
   constructor(
     private fb: FormBuilder,
@@ -31,8 +32,16 @@ export class RegisterComponent {
     });
   }
 
-  get tipoDeUsuario() {
-    const control = this.formUsuario.get('tipoDeUsuario');
-    return control ? control.value : null;
+  // get tipoDeUsuario() {
+  //   const control = this.formUsuario.get('tipoDeUsuario');
+  //   return control ? control.value : null;
+  // }
+
+  /**
+   * Método para seleccionar el tipo de usuario.
+   * @param tipo Tipo de usuario seleccionado ('paciente' o 'especialista').
+   */
+  selectUsuario(tipo: string): void {
+    this.tipoDeUsuario = tipo;
   }
 }

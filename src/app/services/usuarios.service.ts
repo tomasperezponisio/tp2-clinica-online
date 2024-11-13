@@ -129,4 +129,11 @@ export class UsuariosService {
     return docData(userDocRef);
   }
 
+  // Add this method to fetch all pacientes
+  traerPacientes(): Observable<any[]> {
+    const usuariosRef = collection(this.firestore, 'usuarios');
+    const q = query(usuariosRef, where('tipo', '==', 'paciente'));
+    return collectionData(q, { idField: 'uid' }) as Observable<any[]>;
+  }
+
 }

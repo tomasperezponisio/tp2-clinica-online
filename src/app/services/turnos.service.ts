@@ -153,4 +153,10 @@ export class TurnosService {
     return updateDoc(turnoDocRef, { ...turno });
   }
 
+  // turnos.service.ts
+  traerTodosLosTurnos(): Observable<Turno[]> {
+    const turnosRef = collection(this.firestore, 'turnos');
+    return collectionData(turnosRef, { idField: 'id' }) as Observable<Turno[]>;
+  }
+
 }

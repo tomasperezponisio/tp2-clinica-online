@@ -39,7 +39,7 @@ export const routes: Routes = [
   {
     path: "turnos",
     data: {midata: "datos de ruta"},
-    component: TurnosComponent,
+    component: MisTurnosComponent,
     canActivate: [adminGuard],
   },
   {

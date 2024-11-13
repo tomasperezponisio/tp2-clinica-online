@@ -13,4 +13,5 @@ export interface Turno {
   reseña?: string; // Specialist's notes after the appointment
   encuesta?: any; // Patient's survey after the appointment
   calificacion?: number; // Patient's rating
+  comentarioAdmin?: string;
 }

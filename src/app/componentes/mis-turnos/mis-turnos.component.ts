@@ -29,11 +29,11 @@ registerLocaleData(localeEsAr, 'es-AR');
 })
 export class MisTurnosComponent implements OnInit {
   turnos: Turno[] = [];
-  filteredTurnos: Turno[] = [];
-  currentUser: any;
-  userRole: string = ''; // 'paciente' or 'especialista'
+  turnosFiltrados: Turno[] = [];
+  usuarioActual: any;
+  tipoDeUsuario: string = ''; // 'paciente' or 'especialista'
 
-  filterText: string = '';
+  textoParaFiltrar: string = '';
 
   constructor(
     private turnosService: TurnosService,
@@ -44,66 +44,91 @@ export class MisTurnosComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.traerUsuarioActual().subscribe(user => {
-      this.currentUser = user;
-      this.userRole = user.tipo; // 'paciente' or 'especialista'
-      this.loadTurnos();
+      this.usuarioActual = user;
+      this.tipoDeUsuario = user.tipo; // 'paciente', 'especialista', or 'admin'
+      this.cargarTurnos();
     });
   }
 
-  loadTurnos() {
-    if (this.userRole === 'paciente') {
-      this.turnosService.traerTurnosPorUidDePaciente(this.currentUser.uid).subscribe(turnos => {
+  cargarTurnos() {
+    if (this.tipoDeUsuario === 'paciente') {
+      this.turnosService.traerTurnosPorUidDePaciente(this.usuarioActual.uid).subscribe(turnos => {
         this.turnos = turnos;
-        this.applyFilter();
+        this.filtrar();
       });
-    } else if (this.userRole === 'especialista') {
-      this.turnosService.getTurnosByEspecialistaUid(this.currentUser.uid).subscribe(turnos => {
+    } else if (this.tipoDeUsuario === 'especialista') {
+      this.turnosService.getTurnosByEspecialistaUid(this.usuarioActual.uid).subscribe(turnos => {
         this.turnos = turnos;
-        this.applyFilter();
+        this.filtrar();
+      });
+    } else if (this.tipoDeUsuario === 'admin') {
+      this.turnosService.traerTodosLosTurnos().subscribe(turnos => {
+        this.turnos = turnos;
+        this.filtrar();
       });
     } else {
       this.turnos = [];
     }
   }
 
-  applyFilter() {
-    const searchText = this.filterText.toLowerCase();
-    if (this.userRole === 'paciente') {
-      this.filteredTurnos = this.turnos.filter(turno =>
+  filtrar() {
+    const searchText = this.textoParaFiltrar.toLowerCase();
+    if (this.tipoDeUsuario === 'paciente') {
+      this.turnosFiltrados = this.turnos.filter(turno =>
         turno.especialidad.toLowerCase().includes(searchText) ||
         turno.especialistaNombre.toLowerCase().includes(searchText)
       );
-    } else if (this.userRole === 'especialista') {
-      this.filteredTurnos = this.turnos.filter(turno =>
+    } else if (this.tipoDeUsuario === 'especialista') {
+      this.turnosFiltrados = this.turnos.filter(turno =>
         turno.especialidad.toLowerCase().includes(searchText) ||
         turno.pacienteNombre.toLowerCase().includes(searchText)
       );
+    } else if (this.tipoDeUsuario === 'admin') {
+      this.turnosFiltrados = this.turnos.filter(turno =>
+        turno.especialidad.toLowerCase().includes(searchText) ||
+        turno.pacienteNombre.toLowerCase().includes(searchText) ||
+        turno.especialistaNombre.toLowerCase().includes(searchText)
+      );
     } else {
-      this.filteredTurnos = [];
+      this.turnosFiltrados = [];
     }
+
+    this.turnosFiltrados.sort((a, b) => {
+      const dateA = this.parseDateTime(a.fecha, a.hora);
+      const dateB = this.parseDateTime(b.fecha, b.hora);
+      return dateA.getTime() - dateB.getTime(); // Ascendiente
+    });
   }
 
-  onFilterChange() {
-    console.log('Filter changed:' + this.filterText);
-    this.applyFilter();
+  parseDateTime(fecha: string, hora: string): Date {
+    const dateTimeString = `${fecha} ${hora}`;
+    const dateTime = new Date(dateTimeString);
+    return dateTime;
   }
 
-  canCancelTurno(turno: Turno): boolean {
-    return this.userRole === 'paciente' && turno.estado !== 'realizado' && turno.estado !== 'cancelado';
-  }
-  canVerResena(turno: Turno): boolean {
-    return !!turno.reseña;
+  alCambiarElFiltro() {
+    console.log('Filtrando por:' + this.textoParaFiltrar);
+    this.filtrar();
   }
 
-  canCompletarEncuesta(turno: Turno): boolean {
+  puedeCancelTurno(turno: Turno): boolean {
+    const estadosNoPermitidos = ['realizado', 'cancelado', 'rechazado'];
+    return this.tipoDeUsuario === 'paciente' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
+  }
+
+  puedeVerResena(turno: Turno): boolean {
+    return turno.estado === 'realizado' || !!turno.reseña;
+  }
+
+  puedeCompletarEncuesta(turno: Turno): boolean {
     return turno.estado === 'realizado' && !!turno.reseña && !turno.encuesta;
   }
 
-  canCalificarAtencion(turno: Turno): boolean {
+  puedeCalificarAtencion(turno: Turno): boolean {
     return turno.estado === 'realizado' && !turno.calificacion;
   }
 
-  cancelarTurno(turno: Turno) {
+  puedeCelarTurno(turno: Turno) {
     this.alertService.customPrompt('Cancelar Turno', 'Ingrese el motivo de la cancelación:')
       .then(result => {
         if (result.isConfirmed && result.value) {
@@ -131,7 +156,9 @@ export class MisTurnosComponent implements OnInit {
   }
 
   verResena(turno: Turno) {
-    alert(`Reseña:\n${turno.reseña}`);
+    if (turno.reseña != null) {
+      this.alertService.customAlert('Reseña', turno.reseña, 'info');
+    }
   }
 
 
@@ -174,23 +201,23 @@ export class MisTurnosComponent implements OnInit {
   }
 
   // Methods for Especialista
-  canCancelarTurnoEsp(turno: Turno): boolean {
+  puedeCancelarTurnoEsp(turno: Turno): boolean {
     const estadosNoPermitidos = ['aceptado', 'realizado', 'rechazado', 'cancelado'];
-    return this.userRole === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
+    return this.tipoDeUsuario === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
-  canRechazarTurno(turno: Turno): boolean {
-    const estadosNoPermitidos = ['aceptado', 'realizado', 'cancelado'];
-    return this.userRole === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
+  puedeRechazarTurno(turno: Turno): boolean {
+    const estadosNoPermitidos = ['aceptado', 'realizado', 'rechazado', 'cancelado'];
+    return this.tipoDeUsuario === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
-  canAceptarTurno(turno: Turno): boolean {
+  puedeAceptarTurno(turno: Turno): boolean {
     const estadosNoPermitidos = ['aceptado', 'realizado', 'cancelado', 'rechazado'];
-    return this.userRole === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
+    return this.tipoDeUsuario === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
-  canFinalizarTurno(turno: Turno): boolean {
-    return this.userRole === 'especialista' && turno.estado.toLowerCase() === 'aceptado';
+  puedeFinalizarTurno(turno: Turno): boolean {
+    return this.tipoDeUsuario === 'especialista' && turno.estado.toLowerCase() === 'aceptado';
   }
 
   cancelarTurnoEsp(turno: Turno) {
@@ -296,5 +323,49 @@ export class MisTurnosComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  getFilterPlaceholder(): string {
+    if (this.tipoDeUsuario === 'paciente') {
+      return 'Filtrar por especialidad o especialista';
+    } else if (this.tipoDeUsuario === 'especialista') {
+      return 'Filtrar por especialidad o paciente';
+    } else if (this.tipoDeUsuario === 'admin') {
+      return 'Filtrar por especialidad, paciente o especialista';
+    } else {
+      return 'Filtrar';
+    }
+  }
+
+  puedeCancelarTurnoAdmin(turno: Turno): boolean {
+    const estadosNoPermitidos = ['aceptado', 'realizado', 'cancelado', 'rechazado'];
+    return this.tipoDeUsuario === 'admin' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
+  }
+
+  cancelarTurnoAdmin(turno: Turno) {
+    this.alertService.customPrompt('Cancelar Turno', 'Ingrese el motivo de la cancelación:')
+      .then(result => {
+        if (result.isConfirmed && result.value) {
+          const motivo = result.value;
+          turno.estado = 'cancelado';
+          turno.comentarioAdmin = motivo; // Assuming you have this field
+          this.turnosService.updateTurno(turno).then(() => {
+            this.alertService.customAlert(
+              'Turno cancelado con éxito',
+              `El turno fue cancelado por el administrador con el motivo: ${motivo}`,
+              'success'
+            );
+          }).catch(error => {
+            console.error('Error al cancelar el turno:', error);
+            this.alertService.customAlert(
+              'Error',
+              'Hubo un error al cancelar el turno. Por favor, inténtelo de nuevo.',
+              'error'
+            );
+          });
+        } else if (result.isDismissed) {
+          console.log('Operación cancelada por el usuario.');
+        }
+      });
   }
 }

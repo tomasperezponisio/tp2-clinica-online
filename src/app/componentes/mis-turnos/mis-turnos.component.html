@@ -6,23 +6,23 @@
     <input
       type="text"
       class="form-control"
-      [placeholder]="userRole === 'paciente' ? 'Filtrar por especialidad o especialista' : 'Filtrar por especialidad o paciente'"
-      [(ngModel)]="filterText"
-      (input)="onFilterChange()"
+      [placeholder]="getFilterPlaceholder()"
+      [(ngModel)]="textoParaFiltrar"
+      (input)="alCambiarElFiltro()"
     />
   </div>
 
   <!-- Grilla de turnos -->
   <div class="row">
-    <div *ngFor="let turno of filteredTurnos" class="col-sm-6 col-md-4 col-lg-3 mb-3">
+    <div *ngFor="let turno of turnosFiltrados" class="col-sm-6 col-md-4 col-lg-3 mb-3">
       <div class="card h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">{{ turno.especialidad }}</h5>
           <p class="card-text">
-            <ng-container *ngIf="userRole === 'paciente'">
+            <ng-container *ngIf="tipoDeUsuario === 'paciente'">
               <strong>Especialista:</strong> {{ turno.especialistaNombre }}<br/>
             </ng-container>
-            <ng-container *ngIf="userRole === 'especialista'">
+            <ng-container *ngIf="tipoDeUsuario === 'especialista'">
               <strong>Paciente:</strong> {{ turno.pacienteNombre }}<br/>
             </ng-container>
             <strong>Fecha:</strong> {{ turno.fecha | date: 'fullDate' | titlecase }}<br/>
@@ -35,20 +35,32 @@
 
           <!-- Actions -->
           <div class="mt-auto">
-            <!-- Actions for Paciente -->
-            <ng-container *ngIf="userRole === 'paciente'">
+            <!-- Actions for Admin -->
+            <ng-container *ngIf="tipoDeUsuario === 'admin'">
               <!-- Cancelar turno -->
               <button
-                *ngIf="canCancelTurno(turno)"
+                *ngIf="puedeCancelarTurnoAdmin(turno)"
                 class="btn btn-danger btn-sm m-1"
-                (click)="cancelarTurno(turno)"
+                (click)="cancelarTurnoAdmin(turno)"
+              >
+                Cancelar
+              </button>
+            </ng-container>
+
+            <!-- Actions for Paciente -->
+            <ng-container *ngIf="tipoDeUsuario === 'paciente'">
+              <!-- Cancelar turno -->
+              <button
+                *ngIf="puedeCancelTurno(turno)"
+                class="btn btn-danger btn-sm m-1"
+                (click)="puedeCelarTurno(turno)"
               >
                 Cancelar
               </button>
 
               <!-- Ver reseña -->
               <button
-                *ngIf="canVerResena(turno)"
+                *ngIf="puedeVerResena(turno)"
                 class="btn btn-info btn-sm m-1"
                 (click)="verResena(turno)"
               >
@@ -57,7 +69,7 @@
 
               <!-- Completar encuesta -->
               <button
-                *ngIf="canCompletarEncuesta(turno)"
+                *ngIf="puedeCompletarEncuesta(turno)"
                 class="btn btn-success btn-sm m-1"
                 (click)="completarEncuesta(turno)"
               >
@@ -66,7 +78,7 @@
 
               <!-- Calificar Atención -->
               <button
-                *ngIf="canCalificarAtencion(turno)"
+                *ngIf="puedeCalificarAtencion(turno)"
                 class="btn btn-primary btn-sm m-1"
                 (click)="calificarAtencion(turno)"
               >
@@ -75,10 +87,10 @@
             </ng-container>
 
             <!-- Actions for Especialista -->
-            <ng-container *ngIf="userRole === 'especialista'">
+            <ng-container *ngIf="tipoDeUsuario === 'especialista'">
               <!-- Cancelar turno -->
               <button
-                *ngIf="canCancelarTurnoEsp(turno)"
+                *ngIf="puedeCancelarTurnoEsp(turno)"
                 class="btn btn-danger btn-sm m-1"
                 (click)="cancelarTurnoEsp(turno)"
               >
@@ -87,7 +99,7 @@
 
               <!-- Rechazar turno -->
               <button
-                *ngIf="canRechazarTurno(turno)"
+                *ngIf="puedeRechazarTurno(turno)"
                 class="btn btn-warning btn-sm m-1"
                 (click)="rechazarTurno(turno)"
               >
@@ -96,7 +108,7 @@
 
               <!-- Aceptar turno -->
               <button
-                *ngIf="canAceptarTurno(turno)"
+                *ngIf="puedeAceptarTurno(turno)"
                 class="btn btn-success btn-sm m-1"
                 (click)="aceptarTurno(turno)"
               >
@@ -105,7 +117,7 @@
 
               <!-- Finalizar turno -->
               <button
-                *ngIf="canFinalizarTurno(turno)"
+                *ngIf="puedeFinalizarTurno(turno)"
                 class="btn btn-primary btn-sm m-1"
                 (click)="finalizarTurno(turno)"
               >
@@ -114,7 +126,7 @@
 
               <!-- Ver reseña -->
               <button
-                *ngIf="canVerResena(turno)"
+                *ngIf="puedeVerResena(turno)"
                 class="btn btn-info btn-sm m-1"
                 (click)="verResena(turno)"
               >

@@ -138,4 +138,24 @@
       </div>
     </div>
   </div>
+
+  <!-- Fullscreen overlay for Encuesta -->
+  <div *ngIf="showEncuestaForm" class="overlay">
+    <div class="overlay-content">
+      <h4>Completar Encuesta</h4>
+      <form [formGroup]="encuestaForm" (ngSubmit)="submitEncuesta(selectedTurno)">
+        <div class="form-group">
+          <label for="puntualidad">¿Cómo calificaría la puntualidad del especialista?</label>
+          <input id="puntualidad" type="text" formControlName="puntualidad" class="form-control" placeholder="Puntualidad">
+        </div>
+
+        <div class="form-group mt-3">
+          <label for="satisfaccion">¿Está satisfecho con la atención recibida?</label>
+          <input id="satisfaccion" type="text" formControlName="satisfaccion" class="form-control" placeholder="Satisfacción">
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3" [disabled]="encuestaForm.invalid">Enviar Encuesta</button>
+        <button type="button" class="btn btn-secondary mt-3" (click)="cancelEncuesta()">Cancelar</button>
+      </form>
+    </div>
 </div>

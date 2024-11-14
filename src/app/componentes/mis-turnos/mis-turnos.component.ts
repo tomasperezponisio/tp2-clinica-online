@@ -2,7 +2,7 @@ import {Component, LOCALE_ID, OnInit} from '@angular/core';
 import {Turno} from "../../models/turno";
 import {TurnosService} from "../../services/turnos.service";
 import {AuthService} from "../../services/auth.service";
-import {FormsModule} from "@angular/forms";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {DatePipe, NgClass, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
 import {AlertService} from "../../services/alert.service";
 import {registerLocaleData} from '@angular/common';
@@ -19,7 +19,8 @@ registerLocaleData(localeEsAr, 'es-AR');
     DatePipe,
     TitleCasePipe,
     NgIf,
-    NgClass
+    NgClass,
+    ReactiveFormsModule
   ],
   providers: [
     {provide: LOCALE_ID, useValue: 'es-AR'},
@@ -32,13 +33,17 @@ export class MisTurnosComponent implements OnInit {
   turnosFiltrados: Turno[] = [];
   usuarioActual: any;
   tipoDeUsuario: string = ''; // 'paciente' or 'especialista'
+  encuestaForm!: FormGroup;
+  showEncuestaForm: boolean = false;
+  selectedTurno: Turno | null = null;
 
   textoParaFiltrar: string = '';
 
   constructor(
     private turnosService: TurnosService,
     private authService: AuthService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private fb: FormBuilder  // Inject FormBuilder for reactive forms
   ) {
   }
 
@@ -47,6 +52,11 @@ export class MisTurnosComponent implements OnInit {
       this.usuarioActual = user;
       this.tipoDeUsuario = user.tipo; // 'paciente', 'especialista', or 'admin'
       this.cargarTurnos();
+    });
+    // Initialize the survey form
+    this.encuestaForm = this.fb.group({
+      puntualidad: ['', Validators.required],
+      satisfaccion: ['', Validators.required]
     });
   }
 
@@ -125,7 +135,7 @@ export class MisTurnosComponent implements OnInit {
   }
 
   puedeCalificarAtencion(turno: Turno): boolean {
-    return turno.estado === 'realizado' && !turno.calificacion;
+    return turno.estado === 'realizado' && !turno.comentarioPaciente;
   }
 
   puedeCelarTurno(turno: Turno) {
@@ -161,8 +171,7 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
-
-  completarEncuesta(turno: Turno) {
+ /* completarEncuesta(turno: Turno) {
     // TODO: implementar encuesta
 
     const respuesta1 = prompt('Pregunta 1: ¿Cómo calificaría la puntualidad del especialista?');
@@ -178,27 +187,65 @@ export class MisTurnosComponent implements OnInit {
     }).catch(error => {
       console.error('Error al completar la encuesta:', error);
     });
+  }*/
+
+  completarEncuesta(turno: Turno): void {
+    this.showEncuestaForm = true;
+    this.selectedTurno = turno;
+  }
+
+  cancelEncuesta(): void {
+    this.showEncuestaForm = false;
+    this.selectedTurno = null;
+    this.encuestaForm.reset();
+  }
+
+  submitEncuesta(turno: Turno | null): void {
+    if (this.encuestaForm.valid && turno != null) {
+      turno.encuesta = {
+        respuesta1: this.encuestaForm.get('puntualidad')?.value,
+        respuesta2: this.encuestaForm.get('satisfaccion')?.value,
+      };
+
+      this.turnosService.updateTurno(turno).then(() => {
+        this.alertService.customAlert('Encuesta completada', 'Gracias por completar la encuesta.', 'success');
+        this.showEncuestaForm = false;
+        this.selectedTurno = null;
+        this.encuestaForm.reset();
+      }).catch(error => {
+        console.error('Error al completar la encuesta:', error);
+        this.alertService.customAlert('Error', 'Hubo un error al completar la encuesta. Por favor, inténtelo de nuevo.', 'error');
+      });
+    }
   }
 
   calificarAtencion(turno: Turno) {
-    const calificacionStr = prompt('Califique la atención del especialista (1 a 5):');
-    const comentario = prompt('Ingrese un comentario sobre la atención recibida:');
-    const calificacion = parseInt(calificacionStr || '0', 10);
-
-    if (calificacion >= 1 && calificacion <= 5) {
-      turno.calificacion = calificacion;
-      // @ts-ignore
-      turno.comentarioPaciente = comentario;
-
-      this.turnosService.updateTurno(turno).then(() => {
-        alert('Gracias por calificar la atención.');
-      }).catch(error => {
-        console.error('Error al calificar la atención:', error);
-      });
-    } else {
-      alert('Calificación inválida. Debe ser un número entre 1 y 5.');
-    }
+    this.alertService.customPrompt('Califique la atención', 'Ingrese un comentario:').then(result => {
+      if (result.isConfirmed && result.value) {
+        const comentario = result.value;
+        turno.comentarioPaciente = comentario;
+        this.turnosService.updateTurno(turno).then(() => {
+          this.alertService.customAlert(
+            'Gracias por su comentario',
+            'Gracias por calificar la atención.',
+            'success'
+          );
+        }).catch(error => {
+          console.error('Error al dejar comentario:', error);
+          this.alertService.customAlert(
+            'Error',
+            'Hubo un error al dejar un comentario. Por favor, inténtelo de nuevo.',
+            'error'
+          );
+        });
+      } else if (result.isDismissed) {
+        console.log('Operación cancelada por el usuario.');
+      }
+    });
   }
+
+
+
 
   // Methods for Especialista
   puedeCancelarTurnoEsp(turno: Turno): boolean {
@@ -257,7 +304,8 @@ export class MisTurnosComponent implements OnInit {
         } else if (result.isDismissed) {
           console.log('Operación cancelada por el usuario.');
         }
-      });  }
+      });
+  }
 
   aceptarTurno(turno: Turno) {
     this.alertService.customConfirm('Aceptar Turno', '¿Está seguro de aceptar este turno?')

@@ -4,6 +4,7 @@ import {AsyncPipe, NgIf} from "@angular/common";
 import Swal from "sweetalert2";
 import {LoginService} from "../../services/login.service";
 import {Observable} from "rxjs";
+import {UsuariosService} from "../../services/usuarios.service";
 
 @Component({
   selector: 'app-nav-bar',
@@ -23,12 +24,13 @@ export class NavBarComponent implements OnInit {
 
   constructor(
     private router: Router,
-    protected loginService: LoginService
+    protected loginService: LoginService,
+    protected usuariosService: UsuariosService
   ) {
   }
 
   ngOnInit(): void {
-    this.loginService.userData$.subscribe((data) => {
+    this.usuariosService.userData$.subscribe((data) => {
       this.userData = data;
     });
   }

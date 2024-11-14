@@ -1,0 +1,16 @@
+.appointments-grid .date-group h4 {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+.time-slots button {
+  min-width: 80px;
+}
+
+h3 {
+  padding-top: 20px;
+}
+
+.container {
+  padding-bottom: 10px !important;
+}

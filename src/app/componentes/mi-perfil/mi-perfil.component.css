@@ -1,0 +1,14 @@
+/* mi-perfil.component.css */
+.card {
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: none;
+}
+
+.img-fluid {
+  object-fit: cover;
+}

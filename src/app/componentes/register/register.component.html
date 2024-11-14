@@ -1,34 +1,38 @@
 <div class="container bg-light rounded mt-3 p-3">
-  <div class="mb-2">
+  <div class="mb-4 text-center">
     <h2>Registro de usuarios</h2>
-    <form [formGroup]="formUsuario">
-      <div class="form-control-group col-12">
-        <label class="form-label">Que usuario quiere dar de alta:</label>
-        <div>
-          <div class="form-check d-inline-block m-2">
-            <input id="paciente" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="paciente"
-                   required>
-            <label class="form-check-label" for="paciente">Paciente</label>
-          </div>
-          <div class="form-check d-inline-block m-2">
-            <input id="especialista" formControlName="tipoDeUsuario" type="radio" class="form-check-input"
-                   value="especialista" required>
-            <label class="form-check-label" for="especialista">Especialista</label>
-          </div>
-          <div class="form-check d-inline-block m-2" *ngIf="auth.currentUser?.email">
-            <input id="admin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="admin"
-                   required>
-            <label class="form-check-label" for="admin">Admin</label>
-          </div>
-        </div>
-
-      </div>
-    </form>
+    <!-- Botones de selección -->
+    <div class="d-flex justify-content-center">
+      <!-- Paciente Button -->
+      <button
+        (click)="selectUsuario('paciente')"
+        type="button"
+        class="btn btn-outline-primary m-2 select-user-button"
+      >
+        <img
+          src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/paciente.png?alt=media&token=405c0878-feea-488b-80e0-672a77548204"
+          alt="Paciente"
+          class="img-fluid user-image"
+        >
+        <div class="user-type">Paciente</div>
+      </button>
+      <!-- Especialista Button -->
+      <button
+        (click)="selectUsuario('especialista')"
+        type="button"
+        class="btn btn-outline-secondary m-2 select-user-button"
+      >
+        <img
+          src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/doctor.png?alt=media&token=37b1cdbf-3218-4591-b921-7c301bb96efb"
+          alt="Especialista"
+          class="img-fluid user-image"
+        >
+        <div class="user-type">Especialista</div>
+      </button>
+    </div>
   </div>
 
-
-  <app-alta-paciente *ngIf="tipoDeUsuario == 'paciente'"></app-alta-paciente>
-  <app-alta-especialista *ngIf="tipoDeUsuario == 'especialista'"></app-alta-especialista>
-  <app-alta-admin *ngIf="tipoDeUsuario == 'admin'"></app-alta-admin>
-
+  <!-- Mostrar el formulario basado en la selección -->
+  <app-alta-paciente *ngIf="tipoDeUsuario === 'paciente'"></app-alta-paciente>
+  <app-alta-especialista *ngIf="tipoDeUsuario === 'especialista'"></app-alta-especialista>
 </div>

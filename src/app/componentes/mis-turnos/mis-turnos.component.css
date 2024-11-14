@@ -1,0 +1,56 @@
+/* Center align the card titles */
+.card-title {
+  text-align: center;
+}
+
+/* Adjust font sizes for better readability */
+.card-text {
+  font-size: 0.9rem;
+}
+
+/* Style the status text */
+.status-text {
+  font-weight: bold;
+}
+
+/* Example of status colors */
+.text-pending {
+  color: orange;
+}
+
+.text-accepted {
+  color: blue;
+}
+
+.text-completed {
+  color: green;
+}
+
+.text-canceled,
+.text-rejected {
+  color: red;
+}
+
+/* Full-screen overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Ensure it is above other content */
+}
+
+/* Centered form content */
+.overlay-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}

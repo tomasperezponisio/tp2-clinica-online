@@ -7,6 +7,7 @@ export class Paciente {
   email: string;
   imagenUno: string;
   imagenDos: string;
+  tipo: string;
 
   constructor(
     nombre: string,
@@ -16,7 +17,8 @@ export class Paciente {
     obraSocial: string,
     email: string,
     imagenUno: string,
-    imagenDos: string
+    imagenDos: string,
+    tipo: string = 'paciente'
   ) {
     this.nombre = nombre;
     this.apellido = apellido;
@@ -26,5 +28,6 @@ export class Paciente {
     this.email = email;
     this.imagenUno = imagenUno;
     this.imagenDos = imagenDos;
+    this.tipo = tipo;
   }
 }

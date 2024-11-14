@@ -1,22 +1,147 @@
 <div class="d-flex align-items-center justify-content-center container-login">
   <form class="bg-light rounded p-5 shadow-lg login-form">
-    <h3 class="text-center mb-4">Login</h3>
+    <h3 class="text-center mb-4">Iniciar Sesión</h3>
 
     <div class="form-group mb-3">
       <label class="mb-2" for="email">Email</label>
-      <input type="text" class="form-control shadow-sm" id="email" [(ngModel)]="email" name="email" placeholder="Ingresa tu email" required>
+      <input
+        type="text"
+        class="form-control shadow-sm"
+        id="email"
+        [(ngModel)]="email"
+        name="email"
+        placeholder="Ingresa tu email"
+        required
+      >
     </div>
 
     <div class="form-group mb-4">
       <label class="mb-2" for="password">Contraseña</label>
-      <input type="password" class="form-control shadow-sm" id="password" [(ngModel)]="password" name="password" placeholder="Ingresa tu contraseña" required>
+      <input
+        type="password"
+        class="form-control shadow-sm"
+        id="password"
+        [(ngModel)]="password"
+        name="password"
+        placeholder="Ingresa tu contraseña"
+        required
+      >
     </div>
 
-    <div class="d-grid gap-2">
-      <button (click)="login()" class="btn btn-primary btn-lg shadow-sm mb-2">Login</button>
-      <button (click)="autoCompletarPaciente()" class="btn btn-secondary btn-lg shadow-sm">Login paciente</button>
-      <button (click)="autoCompletarEspecialista()" class="btn btn-secondary btn-lg shadow-sm mt-1">Login especialista</button>
-      <button (click)="autoCompletarAdmin()" class="btn btn-secondary btn-lg shadow-sm mt-1">Login admin</button>
+    <div class="d-grid gap-2 mb-4">
+      <button
+        (click)="login()"
+        type="button"
+        class="btn btn-primary shadow-sm"
+      >
+        Iniciar Sesión
+      </button>
+    </div>
+
+    <!-- Botones de Acceso Rápido -->
+    <div class="row justify-content-center quick-access-buttons">
+      <!-- Paciente 1 -->
+      <div class="col-2 text-center">
+        <button
+          (click)="autoCompletarPaciente1()"
+          type="button"
+          class="btn btn-secondary p-0 quick-access-button"
+        >
+          <div class="content">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/images%2FimagenDos-juan_peperulo_01.png?alt=media&token=e9a505c5-b840-4988-8c5e-0117d57e974f"
+              alt="Paciente 1"
+              class="img-fluid user-image"
+            >
+            <div class="user-name">Juan<br>Peperulo</div>
+          </div>
+        </button>
+      </div>
+      <!-- Paciente 2 -->
+      <div class="col-2 text-center">
+        <button
+          (click)="autoCompletarPaciente2()"
+          type="button"
+          class="btn btn-secondary p-0 quick-access-button"
+        >
+          <div class="content">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/images%2FimagenUno-pepe_sanchez_01.png?alt=media&token=0f0121e8-5662-457a-ab38-7064eaa9d7c8"
+              alt="Paciente 2"
+              class="img-fluid user-image"
+            >
+            <div class="user-name">Pepe<br>Sanchez</div>
+          </div>
+        </button>
+      </div>
+      <!-- Paciente 3 -->
+      <div class="col-2 text-center">
+        <button
+          (click)="autoCompletarPaciente3()"
+          type="button"
+          class="btn btn-secondary p-0 quick-access-button"
+        >
+          <div class="content">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/images%2FimagenUno-cosme_fulanito_01.png?alt=media&token=f9a62118-da3d-4ec7-9027-8fa379c0f76f"
+              alt="Paciente 3"
+              class="img-fluid user-image"
+            >
+            <div class="user-name">Cosme<br>Fulanito</div>
+          </div>
+        </button>
+      </div>
+      <!-- Especialista 1 -->
+      <div class="col-2 text-center">
+        <button
+          (click)="autoCompletarEspecialista1()"
+          type="button"
+          class="btn btn-secondary p-0 quick-access-button"
+        >
+          <div class="content">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/images%2FimagenUno-nick_riviera_01.png?alt=media&token=8b7bc9df-0243-4c16-8d7d-20d488678a20"
+              alt="Especialista 1"
+              class="img-fluid user-image"
+            >
+            <div class="user-name">Dr Nick<br>Riviera</div>
+          </div>
+        </button>
+      </div>
+      <!-- Especialista 2 -->
+      <div class="col-2 text-center">
+        <button
+          (click)="autoCompletarEspecialista2()"
+          type="button"
+          class="btn btn-secondary p-0 quick-access-button"
+        >
+          <div class="content">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/images%2FimagenUno-dr_ahorro.png?alt=media&token=7719bea8-38f3-4ac8-a45f-bc9e1114a7f3"
+              alt="Especialista 2"
+              class="img-fluid user-image"
+            >
+            <div class="user-name">Dr<br>Ahorro</div>
+          </div>
+        </button>
+      </div>
+      <!-- Admin -->
+      <div class="col-2 text-center">
+        <button
+          (click)="autoCompletarAdmin()"
+          type="button"
+          class="btn btn-secondary p-0 quick-access-button"
+        >
+          <div class="content">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/images%2Fhacker-carlin.jpg?alt=media&token=611ad8dc-4eee-4998-ac21-3bb74412a267"
+              alt="Admin"
+              class="img-fluid user-image"
+            >
+            <div class="user-name">Sr<br>Admin</div>
+          </div>
+        </button>
+      </div>
     </div>
   </form>
 </div>

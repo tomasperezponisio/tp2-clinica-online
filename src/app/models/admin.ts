@@ -5,6 +5,7 @@ export class Admin {
   dni: number;
   email: string;
   imagenUno: string;
+  tipo: string;
 
   constructor(
     nombre: string,
@@ -13,6 +14,7 @@ export class Admin {
     dni: number,
     email: string,
     imagenUno: string,
+    tipo: string = 'admin'
   ) {
     this.nombre = nombre;
     this.apellido = apellido;
@@ -20,5 +22,6 @@ export class Admin {
     this.dni = dni;
     this.email = email;
     this.imagenUno = imagenUno;
+    this.tipo = tipo;
   }
 }

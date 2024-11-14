@@ -1,0 +1,161 @@
+<div class="container mt-4">
+  <h3 class="mb-4 text-center">Mis Turnos</h3>
+
+  <!-- Input del filtro -->
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      [placeholder]="getFilterPlaceholder()"
+      [(ngModel)]="textoParaFiltrar"
+      (input)="alCambiarElFiltro()"
+    />
+  </div>
+
+  <!-- Grilla de turnos -->
+  <div class="row">
+    <div *ngFor="let turno of turnosFiltrados" class="col-sm-6 col-md-4 col-lg-3 mb-3">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ turno.especialidad }}</h5>
+          <p class="card-text">
+            <ng-container *ngIf="tipoDeUsuario === 'paciente'">
+              <strong>Especialista:</strong> {{ turno.especialistaNombre }}<br/>
+            </ng-container>
+            <ng-container *ngIf="tipoDeUsuario === 'especialista'">
+              <strong>Paciente:</strong> {{ turno.pacienteNombre }}<br/>
+            </ng-container>
+            <strong>Fecha:</strong> {{ turno.fecha | date: 'fullDate' | titlecase }}<br/>
+            <strong>Hora:</strong> {{ turno.hora }}<br/>
+            <strong>Estado:</strong>
+            <span [ngClass]="getEstadoClass(turno.estado)">
+              {{ turno.estado | titlecase }}
+            </span>
+          </p>
+
+          <!-- Actions -->
+          <div class="mt-auto">
+            <!-- Actions for Admin -->
+            <ng-container *ngIf="tipoDeUsuario === 'admin'">
+              <!-- Cancelar turno -->
+              <button
+                *ngIf="puedeCancelarTurnoAdmin(turno)"
+                class="btn btn-danger btn-sm m-1"
+                (click)="cancelarTurnoAdmin(turno)"
+              >
+                Cancelar
+              </button>
+            </ng-container>
+
+            <!-- Actions for Paciente -->
+            <ng-container *ngIf="tipoDeUsuario === 'paciente'">
+              <!-- Cancelar turno -->
+              <button
+                *ngIf="puedeCancelTurno(turno)"
+                class="btn btn-danger btn-sm m-1"
+                (click)="puedeCelarTurno(turno)"
+              >
+                Cancelar
+              </button>
+
+              <!-- Ver reseña -->
+              <button
+                *ngIf="puedeVerResena(turno)"
+                class="btn btn-info btn-sm m-1"
+                (click)="verResena(turno)"
+              >
+                Ver Reseña
+              </button>
+
+              <!-- Completar encuesta -->
+              <button
+                *ngIf="puedeCompletarEncuesta(turno)"
+                class="btn btn-success btn-sm m-1"
+                (click)="completarEncuesta(turno)"
+              >
+                Completar Encuesta
+              </button>
+
+              <!-- Calificar Atención -->
+              <button
+                *ngIf="puedeCalificarAtencion(turno)"
+                class="btn btn-primary btn-sm m-1"
+                (click)="calificarAtencion(turno)"
+              >
+                Calificar Atención
+              </button>
+            </ng-container>
+
+            <!-- Actions for Especialista -->
+            <ng-container *ngIf="tipoDeUsuario === 'especialista'">
+              <!-- Cancelar turno -->
+              <button
+                *ngIf="puedeCancelarTurnoEsp(turno)"
+                class="btn btn-danger btn-sm m-1"
+                (click)="cancelarTurnoEsp(turno)"
+              >
+                Cancelar
+              </button>
+
+              <!-- Rechazar turno -->
+              <button
+                *ngIf="puedeRechazarTurno(turno)"
+                class="btn btn-warning btn-sm m-1"
+                (click)="rechazarTurno(turno)"
+              >
+                Rechazar
+              </button>
+
+              <!-- Aceptar turno -->
+              <button
+                *ngIf="puedeAceptarTurno(turno)"
+                class="btn btn-success btn-sm m-1"
+                (click)="aceptarTurno(turno)"
+              >
+                Aceptar
+              </button>
+
+              <!-- Finalizar turno -->
+              <button
+                *ngIf="puedeFinalizarTurno(turno)"
+                class="btn btn-primary btn-sm m-1"
+                (click)="finalizarTurno(turno)"
+              >
+                Finalizar
+              </button>
+
+              <!-- Ver reseña -->
+              <button
+                *ngIf="puedeVerResena(turno)"
+                class="btn btn-info btn-sm m-1"
+                (click)="verResena(turno)"
+              >
+                Ver Reseña
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen overlay for Encuesta -->
+  <div *ngIf="showEncuestaForm" class="overlay">
+    <div class="overlay-content">
+      <h4>Completar Encuesta</h4>
+      <form [formGroup]="encuestaForm" (ngSubmit)="submitEncuesta(selectedTurno)">
+        <div class="form-group">
+          <label for="puntualidad">¿Cómo calificaría la puntualidad del especialista?</label>
+          <input id="puntualidad" type="text" formControlName="puntualidad" class="form-control" placeholder="Puntualidad">
+        </div>
+
+        <div class="form-group mt-3">
+          <label for="satisfaccion">¿Está satisfecho con la atención recibida?</label>
+          <input id="satisfaccion" type="text" formControlName="satisfaccion" class="form-control" placeholder="Satisfacción">
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3" [disabled]="encuestaForm.invalid">Enviar Encuesta</button>
+        <button type="button" class="btn btn-secondary mt-3" (click)="cancelEncuesta()">Cancelar</button>
+      </form>
+    </div>
+</div>

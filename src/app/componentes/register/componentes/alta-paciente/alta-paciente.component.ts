@@ -6,13 +6,16 @@ import {LoginService} from "../../../../services/login.service";
 import {Paciente} from "../../../../models/paciente";
 import {passwordValidator} from "../../../../validadores/password.validator";
 import {Storage, ref, uploadBytes, getDownloadURL} from '@angular/fire/storage';
+import {CaptchaComponent} from "../../../captcha/captcha.component";
+import {AlertService} from "../../../../services/alert.service";
 
 @Component({
   selector: 'app-alta-paciente',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgIf
+    NgIf,
+    CaptchaComponent
   ],
   templateUrl: './alta-paciente.component.html',
   styleUrl: './alta-paciente.component.css'
@@ -20,9 +23,13 @@ import {Storage, ref, uploadBytes, getDownloadURL} from '@angular/fire/storage';
 export class AltaPacienteComponent implements OnInit {
   form!: FormGroup;
 
+  // Flag to track CAPTCHA validity
+  isCaptchaValid: boolean = false;
+
   constructor(
     private loginService: LoginService,
-    private storage: Storage
+    private storage: Storage,
+    private alertService: AlertService,
   ) {
   }
 
@@ -110,8 +117,20 @@ export class AltaPacienteComponent implements OnInit {
     return this.form.get('imagenDos');
   }
 
+  /**
+   * Handles the CAPTCHA validation result emitted by CaptchaComponent.
+   * @param isValid Boolean indicating whether CAPTCHA is valid.
+   */
+  onCaptchaValid(isValid: boolean): void {
+    this.isCaptchaValid = isValid;
+    console.log('Captcha is valid: ' + isValid);
+    // Optionally, you can trigger form validation
+    // this.form.updateValueAndValidity();
+  }
+
   async altaPaciente(): Promise<void> {
-    if (this.form.invalid) {
+    if (this.form.invalid || !this.isCaptchaValid) {
+      await this.alertService.customAlert('Formulario inválido', 'Por favor, complete correctamente todos los campos y resuelva el CAPTCHA.', 'error');
       return;
     }
 
@@ -133,7 +152,7 @@ export class AltaPacienteComponent implements OnInit {
           this.form.value.obraSocial,
           this.form.value.email,
           downloadURL1,
-          downloadURL2
+          downloadURL2,
         );
 
         const email: string = this.form.value.email;
@@ -142,28 +161,33 @@ export class AltaPacienteComponent implements OnInit {
         this.loginService.altaPaciente(email, password, paciente)
           .then(response => {
             if (response.success) {
-              this.showSuccessAlert(response.message).then(() => {
+              this.alertService.customAlert('Paciente dado de alta', response.message, 'success').then(() => {
                 this.form.reset();
+                this.isCaptchaValid = false;
               });
             } else {
-              this.showErrorAlert(response.message).then(() => {
+              this.alertService.customAlert('Error', response.message, 'error').then(() => {
                 this.form.reset();
+                this.isCaptchaValid = false;
               });
             }
           })
           .catch(error => {
-            this.showErrorAlert('Error al dar de alta al paciente: ' + error).then(() => {
+            this.alertService.customAlert('Error', 'Error al dar de alta al paciente: ' + error, 'error').then(() => {
               this.form.reset();
+              this.isCaptchaValid = false;
             });
           });
       } catch (e) {
-        this.showErrorAlert('Error al subir las imagenes, intente nuevamente.').then(() => {
+        this.alertService.customAlert('Error', 'Error al subir las imagenes, intente nuevamente.', 'error').then(() => {
           this.form.reset();
+          this.isCaptchaValid = false;
         });
       }
     } else {
-      this.showErrorAlert('Es necesario subir dos imagenes para el paciente, intente nuevamente.').then(() => {
+      this.alertService.customAlert('Error', 'Es necesario subir dos imagenes para el paciente, intente nuevamente.', 'error').then(() => {
         this.form.reset();
+        this.isCaptchaValid = false;
       });
     }
   }
@@ -172,20 +196,6 @@ export class AltaPacienteComponent implements OnInit {
     const imageRef = ref(this.storage, `images/${imageName}-${file.name}`);
     const response = await uploadBytes(imageRef, file);
     return await getDownloadURL(response.ref);
-  }
-
-  /**
-   * Muestra mensaje de exito
-   * @param message
-   * @private
-   */
-  private showSuccessAlert(message: string) {
-    return Swal.fire({
-      title: 'Paciente dado de alta exitosamente!',
-      text: message,
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
   }
 
   /**

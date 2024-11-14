@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
-import Swal from "sweetalert2";
 import {LoginService} from "../../services/login.service";
 import {Router} from "@angular/router";
 import {FormsModule} from "@angular/forms";
+import {AlertService} from "../../services/alert.service";
 
 @Component({
   selector: 'app-login',
@@ -20,7 +20,8 @@ export class LoginComponent {
 
   constructor(
     private router: Router,
-    private loginService: LoginService
+    private loginService: LoginService,
+    private alertService: AlertService,
   ) {
   }
 
@@ -29,29 +30,29 @@ export class LoginComponent {
 
     if (!this.email || !this.email.trim()) {
       this.msjError = "Ingrese email";
-      this.showErrorAlert(this.msjError);
+      this.alertService.customAlert('Error!', this.msjError, 'error');
       return;
     } else if (!this.isValidEmail(this.email)) {
       this.msjError = "Email no válido";
-      this.showErrorAlert(this.msjError);
+      this.alertService.customAlert('Error!', this.msjError, 'error');
       return;
     }
 
     if (!this.password || !this.password.trim()) {
       this.msjError = "Ingrese contraseña";
-      this.showErrorAlert(this.msjError);
+      this.alertService.customAlert('Error!', this.msjError, 'error');
       return;
     }
 
     this.loginService.login(this.email, this.password)
       .then((result) => {
         if (result.success) {
-          this.showSuccessAlert('Será redireccionado al home.').then(() => {
+          this.alertService.customAlert('Login exisoto!', 'Será redireccionado al home.', 'success').then(() => {
             this.router.navigate(['/home']);
           });
 
         } else {
-          this.showErrorAlert(result.message);
+          this.alertService.customAlert('Error!', result.message, 'error');
         }
       });
   }
@@ -84,24 +85,6 @@ export class LoginComponent {
   autoCompletarAdmin() {
     this.email = 'daseniba@polkaroad.net';
     this.password = 'a1234567';
-  }
-
-  private showErrorAlert(message: string) {
-    Swal.fire({
-      title: 'Error!',
-      text: message,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
-  }
-
-  private showSuccessAlert(message: string) {
-    return Swal.fire({
-      title: 'Login exisoto!',
-      text: message,
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
   }
 
   private isValidEmail(email: string): boolean {

@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgIf} from "@angular/common";
-import Swal from "sweetalert2";
 import {LoginService} from "../../../../services/login.service";
 import {Paciente} from "../../../../models/paciente";
 import {passwordValidator} from "../../../../validadores/password.validator";
@@ -196,20 +195,6 @@ export class AltaPacienteComponent implements OnInit {
     const imageRef = ref(this.storage, `images/${imageName}-${file.name}`);
     const response = await uploadBytes(imageRef, file);
     return await getDownloadURL(response.ref);
-  }
-
-  /**
-   * Muestra mensaje de error
-   * @param message
-   * @private
-   */
-  private showErrorAlert(message: string) {
-    return Swal.fire({
-      title: 'Error!',
-      text: message,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
   }
 
 }

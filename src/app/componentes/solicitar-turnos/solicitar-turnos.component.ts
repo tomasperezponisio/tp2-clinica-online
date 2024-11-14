@@ -7,10 +7,10 @@ import {TurnosService} from "../../services/turnos.service";
 import {Turno} from "../../models/turno";
 import {AuthService} from "../../services/auth.service";
 import {DatePipe, NgForOf, NgIf} from "@angular/common";
-import Swal from "sweetalert2";
 import {NgModule, LOCALE_ID} from '@angular/core';
 import {registerLocaleData} from '@angular/common';
 import localeEsAr from '@angular/common/locales/es-AR';
+import {AlertService} from "../../services/alert.service";
 
 registerLocaleData(localeEsAr, 'es-AR');
 
@@ -56,7 +56,8 @@ export class SolicitarTurnosComponent implements OnInit {
     private usuariosService: UsuariosService,
     private turnosService: TurnosService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {
   }
 
@@ -142,10 +143,9 @@ export class SolicitarTurnosComponent implements OnInit {
 
       this.turnosService.solicitarTurno(turno).then(() => {
         // @ts-ignore
-        this.showSuccessAlert(`Turno reservado para el ${this.bloqueSeleccionado.fecha} a las ${this.bloqueSeleccionado.hora}`).then(() => {
+        this.alertService.customAlert('Turno reservado con éxito!', `Turno reservado para el ${this.bloqueSeleccionado.fecha} a las ${this.bloqueSeleccionado.hora}`, 'success').then(() => {
           this.resetSelections();
         });
-
       }).catch(error => {
         console.error('Error al solicitar turno:', error);
       });
@@ -186,12 +186,4 @@ export class SolicitarTurnosComponent implements OnInit {
     );
   }
 
-  private showSuccessAlert(message: string) {
-    return Swal.fire({
-      title: 'Turno reservado con éxito!',
-      text: message,
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
-  }
 }

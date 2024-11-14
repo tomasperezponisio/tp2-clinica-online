@@ -3,7 +3,7 @@ import {Disponibilidad, Especialista} from "../../../../models/especialista";
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {UsuariosService} from "../../../../services/usuarios.service";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
-import Swal from "sweetalert2";
+import {AlertService} from "../../../../services/alert.service";
 
 @Component({
   selector: 'app-mis-horarios',
@@ -27,7 +27,8 @@ export class MisHorariosComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private usuariosService: UsuariosService
+    private usuariosService: UsuariosService,
+    private alertService: AlertService,
   ) {}
 
   ngOnInit(): void {
@@ -115,7 +116,7 @@ export class MisHorariosComponent implements OnInit {
 
     this.usuariosService.updateUserData({ disponibilidad: disponibilidadData })
       .then(() => {
-        this.showSuccessAlert('Disponibilidad actualizada con éxito.');
+        this.alertService.customAlert('Disponibilidad actualizada con éxito.', '', 'success');
       })
       .catch((error) => {
         console.error('Error al actualizar la disponibilidad:', error);
@@ -136,21 +137,6 @@ export class MisHorariosComponent implements OnInit {
       group.get('horarioFin')?.setErrors(null);
       return null;
     }
-  }
-
-  /**
-   * Muestra mensaje de exito
-   * @param title
-   * @param message
-   * @private
-   */
-  private showSuccessAlert(title: string) {
-    Swal.fire({
-      title: title,
-      text: '',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
   }
 
 }

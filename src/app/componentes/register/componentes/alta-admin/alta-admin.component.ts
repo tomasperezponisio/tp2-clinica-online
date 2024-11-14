@@ -5,7 +5,7 @@ import {LoginService} from "../../../../services/login.service";
 import {getDownloadURL, ref, Storage, uploadBytes} from "@angular/fire/storage";
 import {passwordValidator} from "../../../../validadores/password.validator";
 import {Admin} from "../../../../models/admin";
-import Swal from "sweetalert2";
+import {AlertService} from "../../../../services/alert.service";
 
 @Component({
   selector: 'app-alta-admin',
@@ -23,7 +23,8 @@ export class AltaAdminComponent implements OnInit {
 
   constructor(
     private loginService: LoginService,
-    private storage: Storage
+    private storage: Storage,
+    private alertService: AlertService
   ) {
   }
 
@@ -123,27 +124,27 @@ export class AltaAdminComponent implements OnInit {
         this.loginService.altaAdmin(email, password, admin)
           .then(response => {
             if (response.success) {
-              this.showSuccessAlert(response.message).then(() => {
+              this.alertService.customAlert('Admin dado de alta exitosamente!', response.message, 'success').then(() => {
                 this.form.reset();
               });
             } else {
-              this.showErrorAlert(response.message).then(() => {
+              this.alertService.customAlert('Error!', response.message, 'error').then(() => {
                 this.form.reset();
               });
             }
           })
           .catch(error => {
-            this.showErrorAlert('Error al dar de alta al admin: ' + error).then(() => {
+            this.alertService.customAlert('Error!', 'Error al dar de alta al admin: ' + error, 'error').then(() => {
               this.form.reset();
             });
           });
       } catch (e) {
-        this.showErrorAlert('Error al subir las imagenes, intente nuevamente.').then(() => {
+        this.alertService.customAlert('Error!', 'Error al subir las imagenes, intente nuevamente.', 'error').then(() => {
           this.form.reset();
         });
       }
     } else {
-      this.showErrorAlert('Es necesario subir dos imagenes para el admin, intente nuevamente.').then(() => {
+      this.alertService.customAlert('Error!', 'Es necesario subir dos imagenes para el admin, intente nuevamente.', 'error').then(() => {
         this.form.reset();
       });
     }
@@ -153,34 +154,6 @@ export class AltaAdminComponent implements OnInit {
     const imageRef = ref(this.storage, `images/${imageName}-${file.name}`);
     const response = await uploadBytes(imageRef, file);
     return await getDownloadURL(response.ref);
-  }
-
-  /**
-   * Muestra mensaje de exito
-   * @param message
-   * @private
-   */
-  private showSuccessAlert(message: string) {
-    return Swal.fire({
-      title: 'Admin dado de alta exitosamente!',
-      text: message,
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
-  }
-
-  /**
-   * Muestra mensaje de error
-   * @param message
-   * @private
-   */
-  private showErrorAlert(message: string) {
-    return Swal.fire({
-      title: 'Error!',
-      text: message,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
   }
 
 }

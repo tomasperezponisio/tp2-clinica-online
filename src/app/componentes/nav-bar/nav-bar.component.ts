@@ -1,10 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from "@angular/router";
 import {AsyncPipe, NgIf} from "@angular/common";
-import Swal from "sweetalert2";
 import {LoginService} from "../../services/login.service";
-import {Observable} from "rxjs";
 import {UsuariosService} from "../../services/usuarios.service";
+import {AlertService} from "../../services/alert.service";
 
 @Component({
   selector: 'app-nav-bar',
@@ -25,7 +24,8 @@ export class NavBarComponent implements OnInit {
   constructor(
     private router: Router,
     protected loginService: LoginService,
-    protected usuariosService: UsuariosService
+    protected usuariosService: UsuariosService,
+    private alertService: AlertService,
   ) {
   }
 
@@ -37,22 +37,9 @@ export class NavBarComponent implements OnInit {
 
   closeSession() {
     this.loginService.auth.signOut().then(() => {
-      this.showErrorAlert("Logueate para acceder.").then(() => {
+      this.alertService.customAlert('Cerraste sesión!', "Logueate para acceder.", 'error').then(() => {
         this.router.navigate(['home']);
       });
-    });
-  }
-
-  consoleLog() {
-    console.log(this.userData);
-  }
-
-  private showErrorAlert(message: string) {
-    return Swal.fire({
-      title: 'Cerraste sesión!',
-      text: message,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
     });
   }
 

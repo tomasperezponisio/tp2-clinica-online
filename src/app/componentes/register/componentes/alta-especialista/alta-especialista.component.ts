@@ -4,7 +4,6 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {LoginService} from "../../../../services/login.service";
 import {getDownloadURL, ref, Storage, uploadBytes} from "@angular/fire/storage";
 import {passwordValidator} from "../../../../validadores/password.validator";
-import Swal from "sweetalert2";
 import {Especialista} from "../../../../models/especialista";
 import {Observable} from "rxjs";
 import {EspecialidadesService} from "../../../../services/especialidades.service";
@@ -212,42 +211,13 @@ export class AltaEspecialistaComponent implements OnInit {
 
     try {
       await this.especialidadesService.addEspecialidad(nuevaEspecialidad);
-      this.showSuccessAlert('Nueva especialidad agregada.', `Especialidad "${nuevaEspecialidad}" agregada con éxito.`);
+      this.alertService.customAlert('Nueva especialidad agregada.', `Especialidad "${nuevaEspecialidad}" agregada con éxito.`, 'success');
 
       this.form.patchValue({especialidad: nuevaEspecialidad, customEspecialidad: ''});
     } catch (error) {
       console.error('Error adding specialty:', error);
-      this.showErrorAlert('Error al agregar la especialidad. Intenta de nuevo.');
+      this.alertService.customAlert('Error.', 'Error al agregar la especialidad. Intenta de nuevo.', 'error');
     }
-  }
-
-  /**
-   * Muestra mensaje de exito
-   * @param title
-   * @param message
-   * @private
-   */
-  private showSuccessAlert(title: string, message: string) {
-    return Swal.fire({
-      title: title,
-      text: message,
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
-  }
-
-  /**
-   * Muestra mensaje de error
-   * @param message
-   * @private
-   */
-  private showErrorAlert(message: string) {
-    return Swal.fire({
-      title: 'Error!',
-      text: message,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
   }
 
 }

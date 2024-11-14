@@ -5,6 +5,9 @@
 ***
 # Resumen
 > "Clínica Online" es una plataforma integral de gestión de salud diseñada para una clínica que opera tanto en línea como presencialmente, con 6 consultorios, 2 laboratorios y una sala de espera general. La clínica atiende de lunes a viernes de 8:00 a 19:00 hs y los sábados de 8:00 a 14:00 hs. La plataforma ofrece una interfaz para que los pacientes agenden turnos, los especialistas gestionen consultas, y los administradores supervisen las operaciones de la clínica.
+
+![image](https://github.com/user-attachments/assets/5d0bb6cd-5d0f-459b-a3f2-5fd8d478e232)
+
 ***
 # Roles y Permisos
 >La plataforma está organizada en torno a tres roles principales: **Paciente, Especialista y Administrador**. Cada rol tiene acceso a funcionalidades específicas dentro del sistema:
@@ -20,6 +23,10 @@
 >     * Completar Encuestas: Llenar encuestas de satisfacción tras los turnos completados.
 >     * Calificar Especialista: Proporcionar una valoración del especialista después de una consulta.
 >   * Gestión de Perfil: Ver y editar datos personales en la sección "Mi Perfil", que incluye el acceso a su historial médico registrado por los especialistas.
+![image](https://github.com/user-attachments/assets/572abd6a-5585-4e37-acd2-fe849b8536d3)
+![image](https://github.com/user-attachments/assets/02306322-41a9-4cee-9b4a-08fb16e5a813)
+![image](https://github.com/user-attachments/assets/021b30de-9bdc-4096-83dd-29509702e77d)
+![image](https://github.com/user-attachments/assets/4283f845-bbcf-4a2a-8773-489637d154c0)
 
 ## 2. Especialista
 > * Acceso y Registro: Los especialistas deben registrarse en la plataforma proporcionando detalles (nombre, especialidad, edad, DNI, email, contraseña e imagen de perfil). Un administrador debe aprobar el registro antes de que el especialista pueda acceder a la plataforma.
@@ -30,6 +37,9 @@
 >     * Completar: Marcar un turno como completado, incluyendo un resumen de la consulta.
 >     * Agregar Historial Médico: Añadir detalles clínicos (altura, peso, temperatura, presión) y hasta tres campos personalizados al historial médico del paciente.
 > * Gestión de Perfil: Los especialistas pueden configurar su disponibilidad y administrar detalles personales. También pueden revisar el historial de sus pacientes a través de la sección "Gestión de Pacientes".
+![image](https://github.com/user-attachments/assets/9cd67051-c8cd-4fe9-803a-43df53128a77)
+![image](https://github.com/user-attachments/assets/ef7fd66f-23f7-48e3-89a6-e44be05cb379)
+![image](https://github.com/user-attachments/assets/794b1b41-de7c-49ad-ae73-519ec2f2a031)
 
 ## 3. Administrador
 > * Acceso y Registro: Los administradores son registrados y se les otorgan permisos por otros administradores. Proporcionan información personal (nombre, edad, DNI, email, contraseña e imagen de perfil).
@@ -43,6 +53,10 @@
 > * Estadísticas e Informes:
 >   * Generar Informes: Ver y exportar informes como inicios de sesión, turnos por especialidad y actividad de los médicos.
 >   * Descargar Informes: Exportar datos de usuarios en formato Excel y descargar historiales médicos de pacientes como documentos PDF.
+![image](https://github.com/user-attachments/assets/333c96ff-513d-4b97-bd89-1cdc8a0bf18c)
+![image](https://github.com/user-attachments/assets/2a3311f5-a373-4db5-9b4d-0d30299a0a3d)
+![image](https://github.com/user-attachments/assets/37eff9d8-146b-4530-a04e-3da480ee3da4)
+
 ***
 # Funcionalidades Principales
 ## Funcionalidades Generales

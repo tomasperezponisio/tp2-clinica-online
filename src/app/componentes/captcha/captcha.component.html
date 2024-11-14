@@ -1,0 +1,36 @@
+<!-- captcha.component.html -->
+<div class="captcha-container">
+  <!-- CAPTCHA Canvas -->
+  <canvas
+    #captchaCanvas
+    [width]="captchaWidth"
+    [height]="captchaHeight"
+    class="captcha-canvas mb-2"
+    aria-label="CAPTCHA Image"
+  ></canvas>
+
+  <!-- Refresh CAPTCHA Button -->
+  <div class="text-end mb-2">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="actualizarCaptcha()">
+      🔄 Cambiar CAPTCHA
+    </button>
+  </div>
+
+  <!-- CAPTCHA Input and Verify Button -->
+  <div class="d-flex align-items-center">
+    <input
+      type="text"
+      id="captchaInput"
+      class="form-control me-2"
+      [formControl]="captchaInputControl"
+      placeholder="Texto"
+      required
+      aria-describedby="captchaHelp"
+      style="width: 100px;"
+    >
+    <button type="button" class="btn btn-primary btn-sm" (click)="validarCaptcha()">
+      Verificar CAPTCHA
+    </button>
+  </div>
+
+</div>

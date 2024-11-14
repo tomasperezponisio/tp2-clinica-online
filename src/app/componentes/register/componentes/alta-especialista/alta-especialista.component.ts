@@ -9,21 +9,27 @@ import {Especialista} from "../../../../models/especialista";
 import {Observable} from "rxjs";
 import {EspecialidadesService} from "../../../../services/especialidades.service";
 import {AlertService} from "../../../../services/alert.service";
+import {CaptchaComponent} from "../../../captcha/captcha.component";
 
 @Component({
   selector: 'app-alta-especialista',
   standalone: true,
-  imports: [
-    NgIf,
-    ReactiveFormsModule,
-    NgForOf,
-    AsyncPipe
-  ],
+    imports: [
+        NgIf,
+        ReactiveFormsModule,
+        NgForOf,
+        AsyncPipe,
+        CaptchaComponent
+    ],
   templateUrl: './alta-especialista.component.html',
   styleUrl: './alta-especialista.component.css'
 })
 export class AltaEspecialistaComponent implements OnInit {
   form!: FormGroup;
+
+  // Flag to track CAPTCHA validity
+  isCaptchaValid: boolean = false;
+
   // especialidades: string[] = ['Cardiología', 'Neurología', 'Dermatología'];
   especialidades$!: Observable<string[]>;
 
@@ -121,6 +127,16 @@ export class AltaEspecialistaComponent implements OnInit {
   }
 
   /**
+   * Handles the CAPTCHA validation result emitted by CaptchaComponent.
+   * @param isValid Boolean indicating whether CAPTCHA is valid.
+   */
+  onCaptchaValid(isValid: boolean): void {
+    this.isCaptchaValid = isValid;
+    // Optionally, you can trigger form validation
+    // this.form.updateValueAndValidity();
+  }
+
+  /**
    * Registra un nuevo especialista si el formulario es válido y se proporciona la imagen requerida.
    * El metodo sube la imagen, crea un nuevo objeto `Especialista`, y llama al
    * servicio de login para registrar al especialista. Se muestran diversas alertas de éxito
@@ -129,7 +145,8 @@ export class AltaEspecialistaComponent implements OnInit {
    * @return {Promise<void>} Una promesa que se resuelve cuando el proceso de registro del especialista se completa.
    */
   async altaEspecialista(): Promise<void> {
-    if (this.form.invalid) {
+    if (this.form.invalid || !this.isCaptchaValid) {
+      await this.alertService.customAlert('Formulario inválido', 'Por favor, complete correctamente todos los campos y resuelva el CAPTCHA.', 'error');
       return;
     }
 

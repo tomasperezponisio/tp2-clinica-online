@@ -136,10 +136,16 @@
       </ng-container>
     </div>
 
+    <!-- CAPTCHA Component -->
+    <div class="col-12">
+      <app-captcha
+        (captchaValid)="onCaptchaValid($event)"
+      ></app-captcha>
+    </div>
 
   </div>
 
   <hr class="my-4">
 
-  <button type="submit" class="w-100 btn btn-primary btn-lg" [disabled]="form.invalid">Alta Paciente</button>
+  <button type="submit" class="w-100 btn btn-primary btn-lg" [disabled]="form.invalid || !isCaptchaValid">Alta Paciente</button>
 </form>

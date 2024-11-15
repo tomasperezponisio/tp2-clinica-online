@@ -65,6 +65,15 @@ export class TurnosService {
         while (horaInicio + duracion <= horaFin) {
           const hora = this.formatTime(horaInicio);
 
+          // Salteo los bloques de horas pasadas
+          if (fecha === this.formatDate(today)) {
+            const currentMinutes = this.getCurrentTimeInMinutes();
+            if (horaInicio < currentMinutes) {
+              horaInicio += duracion;
+              continue; 
+            }
+          }
+
           // Verifico si en este bloque ya hay un turno reservado
           const slotKey = `${fecha}_${hora}`;
           if (!bloquesReservados.has(slotKey)) {
@@ -80,6 +89,11 @@ export class TurnosService {
     }
 
     return bloques;
+  }
+
+  private getCurrentTimeInMinutes(): number {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
   }
 
   /**

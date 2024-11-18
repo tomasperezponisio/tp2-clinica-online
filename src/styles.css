@@ -2,7 +2,7 @@
 :root {
   --midnight-green: #1B5061;
   --light-blue: #A8BFC5;
-  --columbia-blue: #BDD0D3;
+  --columbia-blue: rgba(189, 208, 211, 0.25);
   --turquoise: #38D3C5;
   --azure-web: #E2ECED;
 }

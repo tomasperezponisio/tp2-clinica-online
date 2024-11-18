@@ -6,7 +6,7 @@ import {Bloque} from "../../models/bloque";
 import {TurnosService} from "../../services/turnos.service";
 import {Turno} from "../../models/turno";
 import {AuthService} from "../../services/auth.service";
-import {DatePipe, NgForOf, NgIf} from "@angular/common";
+import {DatePipe, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
 import {NgModule, LOCALE_ID} from '@angular/core';
 import {registerLocaleData} from '@angular/common';
 import localeEsAr from '@angular/common/locales/es-AR';
@@ -21,9 +21,9 @@ registerLocaleData(localeEsAr, 'es-AR');
     NgForOf,
     NgIf,
     DatePipe,
+    TitleCasePipe,
   ],
   providers: [
-    // Set the LOCALE_ID to 'es-AR' for the entire application
     {provide: LOCALE_ID, useValue: 'es-AR'},
   ],
   templateUrl: './solicitar-turnos.component.html',
@@ -32,10 +32,9 @@ registerLocaleData(localeEsAr, 'es-AR');
 export class SolicitarTurnosComponent implements OnInit {
   // Pasos
   step: number = 1;
-  maxStep: number = 4; // Total steps for regular users
+  maxStep: number = 4;
 
-  // Add a property to store the user's role
-  userRole: string = ''; // 'paciente', 'admin', or other roles
+  tipoDeUsuario: string = '';
 
   // Data
   especialidades: string[] = [];
@@ -64,10 +63,10 @@ export class SolicitarTurnosComponent implements OnInit {
   ngOnInit(): void {
     this.authService.traerUsuarioActual().subscribe(user => {
       this.usuarioActual = user;
-      this.userRole = user.tipo; // Determine the user's role
+      this.tipoDeUsuario = user.tipo; // Determine the user's role
 
       // If the user is an admin, fetch the list of pacientes
-      if (this.userRole === 'admin') {
+      if (this.tipoDeUsuario === 'admin') {
         this.traerPacientes();
         this.maxStep = 5; // Admins have an extra step
       }
@@ -82,7 +81,6 @@ export class SolicitarTurnosComponent implements OnInit {
     });
   }
 
-  // Method to handle paciente selection
   elegirPaciente(paciente: any) {
     this.pacienteSeleccionado = paciente;
     this.step += 1; // Move to the next step
@@ -127,7 +125,7 @@ export class SolicitarTurnosComponent implements OnInit {
 
   confirmarTurno() {
     // Determine the paciente based on user role
-    const paciente = this.userRole === 'admin' ? this.pacienteSeleccionado : this.usuarioActual;
+    const paciente = this.tipoDeUsuario === 'admin' ? this.pacienteSeleccionado : this.usuarioActual;
 
     if (paciente && this.especialistaSeleccionado && this.especialidadSeleccionada && this.bloqueSeleccionado) {
       const turno: Turno = {
@@ -176,14 +174,6 @@ export class SolicitarTurnosComponent implements OnInit {
     const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
-
-  toTitleCase(str: string | null) {
-    // @ts-ignore
-    return str.replace(
-      /\w\S*/g,
-      text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-    );
   }
 
 }

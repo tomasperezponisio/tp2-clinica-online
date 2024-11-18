@@ -30,6 +30,7 @@
       <th *ngIf="selectedTipo === 'especialista'">Especialidad</th>
       <th>Imagen</th>
       <th *ngIf="selectedTipo === 'especialista'">Verificado</th>
+      <th *ngIf="selectedTipo === 'paciente'">Historia Clínica</th>
     </tr>
     </thead>
     <tbody>
@@ -37,22 +38,62 @@
       <td>{{ usuario.nombre }}</td>
       <td>{{ usuario.apellido }}</td>
       <td>{{ usuario.dni }}</td>
-
-      <!-- Show specific columns based on the selected user type -->
       <td *ngIf="selectedTipo === 'paciente'">{{ usuario.obraSocial }}</td>
       <td *ngIf="selectedTipo === 'especialista'">{{ usuario.especialidad?.join(', ') }}</td>
-
-      <!-- Show images -->
       <td>
-        <img *ngIf="usuario.imagenUno" [src]="usuario.imagenUno" class="img-thumbnail" width="50" appHoverZoom>
-        <img *ngIf="usuario.imagenDos" [src]="usuario.imagenDos" class="img-thumbnail" width="50" appHoverZoom>
+        <img alt="imagenUno" *ngIf="usuario.imagenUno" [src]="usuario.imagenUno" class="img-thumbnail" width="50" appHoverZoom>
+        <img alt="imagenDos" *ngIf="usuario.imagenDos" [src]="usuario.imagenDos" class="img-thumbnail" width="50" appHoverZoom>
       </td>
-
-      <!-- Verificado toggle for 'especialista' -->
       <td *ngIf="selectedTipo === 'especialista'">
         <input type="checkbox" [checked]="usuario.verificado" (change)="toggleVerificado(usuario)">
+      </td>
+      <td *ngIf="selectedTipo === 'paciente'">
+        <button class="btn btn-info btn-sm" (click)="mostrarHistoriaClinica(usuario)">Mostrar Historia Clínica</button>
       </td>
     </tr>
     </tbody>
   </table>
+
+  <!-- Modal for Historia Clínica -->
+  <div *ngIf="showHistoriaClinicaModal" class="overlay">
+    <div class="overlay-content">
+      <h4 class="text-center fs-3 text fw-bold text-primary-emphasis mb-4">Historia Clínica de {{ pacienteSeleccionado?.nombre }} {{ pacienteSeleccionado?.apellido }}</h4>
+
+      <!-- If there are historias -->
+      <div *ngIf="historiasClinicas.length > 0; else noHistorias" class="historia-clinica-list">
+        <div *ngFor="let historia of historiasClinicas" class="historia-clinica-card">
+          <div class="card-body">
+            <p><strong>Especialista:</strong> {{ historia.especialistaNombre }}</p>
+            <p><strong>Especialidad:</strong> {{ historia.especialidad }}</p>
+            <p><strong>Fecha:</strong> {{ historia.fecha | date: 'fullDate' }}</p>
+            <p><strong>Hora:</strong> {{ historia.hora }}</p>
+            <p><strong>Reseña:</strong> {{ historia['reseña'] }}</p>
+            <p><strong>Altura:</strong> {{ historia.altura }} cm</p>
+            <p><strong>Peso:</strong> {{ historia.peso }} kg</p>
+            <p><strong>Temperatura:</strong> {{ historia.temperatura }} °C</p>
+            <p><strong>Presión:</strong> {{ historia.presion }}</p>
+            <h6>Datos Dinámicos:</h6>
+            <ul>
+              <li *ngFor="let dato of historia.dinamicos">
+                {{ dato.key }}: {{ dato.value }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message if no historia clinica -->
+      <ng-template #noHistorias>
+        <p class="text-center  text-danger">No hay historia clínica cargada para este paciente.</p>
+      </ng-template>
+
+      <!-- Close Button -->
+      <div class="d-flex justify-content-end mt-4">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+
+
 </div>

@@ -2,7 +2,15 @@ import {Component, LOCALE_ID, OnInit} from '@angular/core';
 import {Turno} from "../../models/turno";
 import {TurnosService} from "../../services/turnos.service";
 import {AuthService} from "../../services/auth.service";
-import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators
+} from "@angular/forms";
 import {DatePipe, NgClass, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
 import {AlertService} from "../../services/alert.service";
 import {registerLocaleData} from '@angular/common';
@@ -34,6 +42,7 @@ export class MisTurnosComponent implements OnInit {
   usuarioActual: any;
   tipoDeUsuario: string = ''; // 'paciente' or 'especialista'
   encuestaForm!: FormGroup;
+  historiaClinicaForm!: FormGroup;
   showEncuestaForm: boolean = false;
   selectedTurno: Turno | null = null;
   showHistoriaClinicaForm: boolean = false;
@@ -54,10 +63,20 @@ export class MisTurnosComponent implements OnInit {
       this.tipoDeUsuario = user.tipo; // 'paciente', 'especialista', or 'admin'
       this.cargarTurnos();
     });
-    // Initialize the survey form
+
+    // Inicializo el form de la encuesta
     this.encuestaForm = this.fb.group({
       puntualidad: ['', Validators.required],
       satisfaccion: ['', Validators.required]
+    });
+
+    // Inicializo el form de la historia clinica
+    this.historiaClinicaForm = this.fb.group({
+      altura: ['', [Validators.required, Validators.min(25), Validators.max(250)]],
+      peso: ['', [Validators.required, Validators.min(1), Validators.max(300)]],
+      temperatura: ['', [Validators.required, Validators.min(25), Validators.max(45)]],
+      presion: ['', [Validators.required, Validators.pattern(/^\d+\/\d+$/)]],
+      dinamicos: this.fb.array([]) // FormArray para los campos dinamicos
     });
   }
 
@@ -84,32 +103,45 @@ export class MisTurnosComponent implements OnInit {
 
   filtrar() {
     const searchText = this.textoParaFiltrar.toLowerCase();
-    if (this.tipoDeUsuario === 'paciente') {
-      this.turnosFiltrados = this.turnos.filter(turno =>
-        turno.especialidad.toLowerCase().includes(searchText) ||
-        turno.especialistaNombre.toLowerCase().includes(searchText)
-      );
-    } else if (this.tipoDeUsuario === 'especialista') {
-      this.turnosFiltrados = this.turnos.filter(turno =>
-        turno.especialidad.toLowerCase().includes(searchText) ||
-        turno.pacienteNombre.toLowerCase().includes(searchText)
-      );
-    } else if (this.tipoDeUsuario === 'admin') {
-      this.turnosFiltrados = this.turnos.filter(turno =>
-        turno.especialidad.toLowerCase().includes(searchText) ||
-        turno.pacienteNombre.toLowerCase().includes(searchText) ||
-        turno.especialistaNombre.toLowerCase().includes(searchText)
-      );
-    } else {
-      this.turnosFiltrados = [];
-    }
 
+    this.turnosFiltrados = this.turnos.filter(turno => {
+      // Base fields filtering
+      const baseFieldsMatch =
+        turno.especialidad.toLowerCase().includes(searchText) ||
+        turno.especialistaNombre.toLowerCase().includes(searchText) ||
+        turno.pacienteNombre?.toLowerCase().includes(searchText) || // For especialistas or admins
+        turno.fecha.includes(searchText) ||
+        turno.hora.includes(searchText) ||
+        turno.reseña?.toLowerCase().includes(searchText) ||
+        turno.estado.toLowerCase().includes(searchText);
+
+      // Fixed fields in historiaClinica
+      const fixedFieldsMatch = turno.historiaClinica &&
+        (
+          turno.historiaClinica.altura?.toString().includes(searchText) ||
+          turno.historiaClinica.peso?.toString().includes(searchText) ||
+          turno.historiaClinica.temperatura?.toString().includes(searchText) ||
+          turno.historiaClinica.presion?.toLowerCase().includes(searchText)
+        );
+
+      // Dynamic fields in historiaClinica
+      const dynamicFieldsMatch = turno.historiaClinica?.dinamicos?.some(dato =>
+        dato.key.toLowerCase().includes(searchText) ||
+        dato.value.toLowerCase().includes(searchText)
+      );
+
+      // Combine all matches
+      return baseFieldsMatch || fixedFieldsMatch || dynamicFieldsMatch;
+    });
+
+    // Sorting by date and time
     this.turnosFiltrados.sort((a, b) => {
       const dateA = this.parseDateTime(a.fecha, a.hora);
       const dateB = this.parseDateTime(b.fecha, b.hora);
-      return dateA.getTime() - dateB.getTime(); // Ascendiente
+      return dateA.getTime() - dateB.getTime(); // Ascending order
     });
   }
+
 
   parseDateTime(fecha: string, hora: string): Date {
     const dateTimeString = `${fecha} ${hora}`;
@@ -334,14 +366,8 @@ export class MisTurnosComponent implements OnInit {
         } else if (result.isDismissed) {
           console.log('Operación cancelada por el usuario.');
         }
-      });  }
-
-  historiaClinicaForm: FormGroup = new FormGroup({
-    altura: new FormControl('', [Validators.required, Validators.min(25), Validators.max(250)]),
-    peso: new FormControl('', [Validators.required, Validators.min(1), Validators.max(300)]),
-    temperatura: new FormControl('', [Validators.required, Validators.min(25), Validators.max(45)]),
-    presion: new FormControl('', [Validators.required, Validators.pattern(/^\d+\/\d+$/)]), // Format "120/80"
-  });
+      });
+  }
 
   get altura() {
     return this.historiaClinicaForm.get('altura');
@@ -362,6 +388,23 @@ export class MisTurnosComponent implements OnInit {
   // Dynamic fields
   dynamicFields: { key: string; value: string }[] = [];
 
+  get dinamicos(): FormArray {
+    return this.historiaClinicaForm.get('dinamicos') as FormArray;
+  }
+
+  agregarCampoDinamico(): void {
+    if (this.dinamicos.length < 3) {
+      this.dinamicos.push(this.fb.group({
+        key: ['', Validators.required],
+        value: ['', Validators.required]
+      }));
+    }
+  }
+
+  eliminarCampoDinamico(index: number): void {
+    this.dinamicos.removeAt(index);
+  }
+
   abrirModalHistoriaClinica(turno: Turno): void {
     this.selectedTurno = turno;
     this.showHistoriaClinicaForm = true;
@@ -374,20 +417,16 @@ export class MisTurnosComponent implements OnInit {
     this.showHistoriaClinicaForm = false;
   }
 
-  agregarCampoDinamico(): void {
-    if (this.dynamicFields.length < 3) {
-      this.dynamicFields.push({ key: '', value: '' });
-    }
-  }
-
   submitHistoriaClinica(): void {
-    if (!this.selectedTurno) return;
+    if (!this.selectedTurno || this.historiaClinicaForm.invalid) return;
 
     // Combine fixed and dynamic fields
     const historiaClinica = {
       ...this.historiaClinicaForm.value,
-      dinamicos: this.dynamicFields.filter(field => field.key && field.value), // Filter out empty fields
+      dinamicos: this.dinamicos.value // Retrieve dynamic fields from the FormArray
     };
+
+    console.log('historiaClinica', historiaClinica);
 
     // Save historiaClinica in the selected turno
     this.selectedTurno.historiaClinica = historiaClinica;
@@ -409,9 +448,6 @@ export class MisTurnosComponent implements OnInit {
       );
     });
   }
-
-
-
 
   getEstadoClass(estado: string): string {
     switch (estado.toLowerCase()) {

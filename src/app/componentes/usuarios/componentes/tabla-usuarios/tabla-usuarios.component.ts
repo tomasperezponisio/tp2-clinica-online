@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe, DatePipe, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
 import {map, Observable} from "rxjs";
 import {UsuariosService} from "../../../../services/usuarios.service";
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive.directive";
+import {TurnosService} from "../../../../services/turnos.service";
 
 @Component({
   selector: 'app-tabla-usuarios',
@@ -13,7 +14,9 @@ import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive.di
     NgForOf,
     AsyncPipe,
     ReactiveFormsModule,
-    HoverZoomDirective
+    HoverZoomDirective,
+    DatePipe,
+    TitleCasePipe
   ],
   templateUrl: './tabla-usuarios.component.html',
   styleUrl: './tabla-usuarios.component.css'
@@ -24,10 +27,14 @@ export class TablaUsuariosComponent implements OnInit {
 
   usuarios$!: Observable<any[]>;
   filteredUsuarios$!: Observable<any[]>;
+  showHistoriaClinicaModal: boolean = false;
+  historiasClinicas: any[] = [];
+  pacienteSeleccionado: any = null;
 
   constructor(
     private fb: FormBuilder,
-    private usuariosService: UsuariosService
+    private usuariosService: UsuariosService,
+    private turnosService: TurnosService
   ) {
   }
 
@@ -58,4 +65,23 @@ export class TablaUsuariosComponent implements OnInit {
     user.verificado = !user.verificado;
     this.usuariosService.updateVerificado(user.uid, user.verificado);
   }
+
+  mostrarHistoriaClinica(usuario: any): void {
+    this.pacienteSeleccionado = usuario;
+    this.turnosService.traerHistoriaClinicaPaciente(usuario.uid).then(historias => {
+      this.historiasClinicas = historias;
+      this.showHistoriaClinicaModal = true;
+    }).catch(error => {
+      console.error('Error al cargar historias clínicas:', error);
+      this.historiasClinicas = []; // Ensure we show the "No data" message
+      this.showHistoriaClinicaModal = true;
+    });
+  }
+
+  cerrarModal(): void {
+    this.showHistoriaClinicaModal = false;
+    this.pacienteSeleccionado = null;
+    this.historiasClinicas = [];
+  }
+
 }

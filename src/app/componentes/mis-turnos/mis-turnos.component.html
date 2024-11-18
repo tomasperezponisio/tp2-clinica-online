@@ -247,17 +247,20 @@
 
       <!-- Dynamic Fields -->
       <h5 class="mt-4">Datos Dinámicos (Máximo 3)</h5>
-      <div *ngFor="let field of dynamicFields; let i = index" class="form-group mt-2">
-        <label>Campo {{ i + 1 }}</label>
-        <div class="d-flex gap-2">
-          <input type="text" [(ngModel)]="field.key" class="form-control" placeholder="Clave">
-          <input type="text" [(ngModel)]="field.value" class="form-control" placeholder="Valor">
+      <div formArrayName="dinamicos">
+        <div *ngFor="let field of dinamicos.controls; let i = index" [formGroupName]="i" class="form-group mt-2">
+          <label>Campo {{ i + 1 }}</label>
+          <div class="d-flex gap-2">
+            <input type="text" formControlName="key" class="form-control" placeholder="Clave">
+            <input type="text" formControlName="value" class="form-control" placeholder="Valor">
+            <button type="button" class="btn btn-danger btn-sm" (click)="eliminarCampoDinamico(i)">X</button>
+          </div>
         </div>
       </div>
       <button
         type="button"
         class="btn btn-secondary mt-3"
-        [disabled]="dynamicFields.length >= 3"
+        [disabled]="dinamicos.length >= 3"
         (click)="agregarCampoDinamico()"
       >
         Añadir Campo Dinámico

@@ -70,7 +70,7 @@ export class TurnosService {
             const currentMinutes = this.getCurrentTimeInMinutes();
             if (horaInicio < currentMinutes) {
               horaInicio += duracion;
-              continue; 
+              continue;
             }
           }
 
@@ -172,6 +172,73 @@ export class TurnosService {
     const turnosRef = collection(this.firestore, 'turnos');
     const q = query(turnosRef); // You can apply filters if needed
     return collectionData(q, { idField: 'id' }) as Observable<Turno[]>;
+  }
+
+  /**
+   * Retrieves all 'realizado' turnos for a given patient.
+   * @param pacienteUid - The patient's UID.
+   * @returns A Promise with a list of turnos containing historiaClinica.
+   */
+  async traerHistoriaClinicaPaciente(uid: string): Promise<any[]> {
+    const turnosRef = collection(this.firestore, 'turnos');
+    const q = query(turnosRef, where('pacienteUid', '==', uid), where('estado', '==', 'realizado'));
+
+    const snapshot = await getDocs(q);
+    const historiasClinicas: any[] = [];
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data['historiaClinica']) {
+        historiasClinicas.push({
+          especialistaNombre: data['especialistaNombre'],
+          especialidad: data['especialidad'],
+          fecha: data['fecha'],
+          hora: data['hora'],
+          reseña: data['reseña'],
+          ...data['historiaClinica'],
+        });
+      }
+    });
+
+    return historiasClinicas;
+  }
+
+
+  /**
+   * Retrieves all unique patients an especialista has attended at least once.
+   * @param especialistaUid - The specialist's UID.
+   * @returns A Promise with a list of patients.
+   */
+  async traerPacientesAtendidos(especialistaUid: string): Promise<any[]> {
+    const turnosRef = collection(this.firestore, 'turnos');
+    const q = query(turnosRef, where('especialistaUid', '==', especialistaUid), where('estado', '==', 'realizado'));
+    const snapshot = await getDocs(q);
+    const pacientesMap = new Map<string, any>();
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      // Only proceed if the turno has a historia clinica
+      if (data['historiaClinica']) {
+        // Add the patient to the map if not already present
+        if (!pacientesMap.has(data['pacienteUid'])) {
+          pacientesMap.set(data['pacienteUid'], {
+            uid: data['pacienteUid'],
+            nombre: data['pacienteNombre'],
+            historiasClinicas: [],
+          });
+        }
+
+        // Add the historia clinica to the patient's list
+        pacientesMap.get(data['pacienteUid']).historiasClinicas.push({
+          especialistaNombre: data['especialistaNombre'],
+          especialidad: data['especialidad'],
+          fecha: data['fecha'],
+          hora: data['hora'],
+          reseña: data['reseña'],
+          ...data['historiaClinica'],
+        });
+      }
+    });
+    return Array.from(pacientesMap.values());
   }
 
 }

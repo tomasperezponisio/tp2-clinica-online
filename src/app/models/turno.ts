@@ -14,4 +14,11 @@ export interface Turno {
   encuesta?: any; // Patient's survey after the appointment
   calificacion?: number; // Patient's rating
   comentarioAdmin?: string;
+  historiaClinica?: {
+    altura: number;
+    peso: number;
+    temperatura: number;
+    presion: string;
+    dinamicos: { key: string; value: string }[];
+  };
 }

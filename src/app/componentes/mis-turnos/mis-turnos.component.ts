@@ -2,7 +2,7 @@ import {Component, LOCALE_ID, OnInit} from '@angular/core';
 import {Turno} from "../../models/turno";
 import {TurnosService} from "../../services/turnos.service";
 import {AuthService} from "../../services/auth.service";
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {DatePipe, NgClass, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
 import {AlertService} from "../../services/alert.service";
 import {registerLocaleData} from '@angular/common';
@@ -36,6 +36,7 @@ export class MisTurnosComponent implements OnInit {
   encuestaForm!: FormGroup;
   showEncuestaForm: boolean = false;
   selectedTurno: Turno | null = null;
+  showHistoriaClinicaForm: boolean = false;
 
   textoParaFiltrar: string = '';
 
@@ -43,7 +44,7 @@ export class MisTurnosComponent implements OnInit {
     private turnosService: TurnosService,
     private authService: AuthService,
     private alertService: AlertService,
-    private fb: FormBuilder  // Inject FormBuilder for reactive forms
+    private fb: FormBuilder
   ) {
   }
 
@@ -171,24 +172,6 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
- /* completarEncuesta(turno: Turno) {
-    // TODO: implementar encuesta
-
-    const respuesta1 = prompt('Pregunta 1: ¿Cómo calificaría la puntualidad del especialista?');
-    const respuesta2 = prompt('Pregunta 2: ¿Está satisfecho con la atención recibida?');
-
-    turno.encuesta = {
-      respuesta1,
-      respuesta2,
-    };
-
-    this.turnosService.updateTurno(turno).then(() => {
-      alert('Encuesta completada con éxito.');
-    }).catch(error => {
-      console.error('Error al completar la encuesta:', error);
-    });
-  }*/
-
   completarEncuesta(turno: Turno): void {
     this.showEncuestaForm = true;
     this.selectedTurno = turno;
@@ -243,9 +226,6 @@ export class MisTurnosComponent implements OnInit {
       }
     });
   }
-
-
-
 
   // Methods for Especialista
   puedeCancelarTurnoEsp(turno: Turno): boolean {
@@ -355,6 +335,83 @@ export class MisTurnosComponent implements OnInit {
           console.log('Operación cancelada por el usuario.');
         }
       });  }
+
+  historiaClinicaForm: FormGroup = new FormGroup({
+    altura: new FormControl('', [Validators.required, Validators.min(25), Validators.max(250)]),
+    peso: new FormControl('', [Validators.required, Validators.min(1), Validators.max(300)]),
+    temperatura: new FormControl('', [Validators.required, Validators.min(25), Validators.max(45)]),
+    presion: new FormControl('', [Validators.required, Validators.pattern(/^\d+\/\d+$/)]), // Format "120/80"
+  });
+
+  get altura() {
+    return this.historiaClinicaForm.get('altura');
+  }
+
+  get peso() {
+    return this.historiaClinicaForm.get('peso');
+  }
+
+  get temperatura() {
+    return this.historiaClinicaForm.get('temperatura');
+  }
+
+  get presion() {
+    return this.historiaClinicaForm.get('presion');
+  }
+
+  // Dynamic fields
+  dynamicFields: { key: string; value: string }[] = [];
+
+  abrirModalHistoriaClinica(turno: Turno): void {
+    this.selectedTurno = turno;
+    this.showHistoriaClinicaForm = true;
+    this.historiaClinicaForm.reset(); // Clear the form
+    this.dynamicFields = []; // Reset dynamic fields
+  }
+
+  cerrarModalHistoriaClinica(): void {
+    this.selectedTurno = null;
+    this.showHistoriaClinicaForm = false;
+  }
+
+  agregarCampoDinamico(): void {
+    if (this.dynamicFields.length < 3) {
+      this.dynamicFields.push({ key: '', value: '' });
+    }
+  }
+
+  submitHistoriaClinica(): void {
+    if (!this.selectedTurno) return;
+
+    // Combine fixed and dynamic fields
+    const historiaClinica = {
+      ...this.historiaClinicaForm.value,
+      dinamicos: this.dynamicFields.filter(field => field.key && field.value), // Filter out empty fields
+    };
+
+    // Save historiaClinica in the selected turno
+    this.selectedTurno.historiaClinica = historiaClinica;
+
+    // Update the turno in the database
+    this.turnosService.updateTurno(this.selectedTurno).then(() => {
+      this.alertService.customAlert(
+        'Historia Clínica Guardada',
+        'La historia clínica se ha guardado con éxito.',
+        'success'
+      );
+      this.cerrarModalHistoriaClinica(); // Close modal
+    }).catch(error => {
+      console.error('Error al guardar la historia clínica:', error);
+      this.alertService.customAlert(
+        'Error',
+        'Hubo un error al guardar la historia clínica. Por favor, inténtelo nuevamente.',
+        'error'
+      );
+    });
+  }
+
+
+
 
   getEstadoClass(estado: string): string {
     switch (estado.toLowerCase()) {

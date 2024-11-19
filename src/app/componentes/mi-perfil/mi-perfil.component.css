@@ -1,14 +1,37 @@
-/* mi-perfil.component.css */
-.card {
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+.historias-clinicas {
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
 
-.card-header {
-  background-color: #f8f9fa;
-  border-bottom: none;
-}
+  .card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background-color: var(--columbia-blue);
+  }
 
-.img-fluid {
-  object-fit: cover;
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+
+  .card-subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .list-group-item {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border: none;
+  }
+
+  h6 {
+    font-size: 1rem;
+    margin-top: 0.75rem;
+    color: #343a40;
+  }
+
+
 }

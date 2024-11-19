@@ -14,3 +14,47 @@
 .form-check {
   margin-right: 15px; /* Space between each radio button */
 }
+
+/* Fullscreen overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Ensure it's above other content */
+  overflow: auto; /* Enable scrolling for large content */
+}
+
+/* Centered modal content */
+.overlay-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90%; /* Ensure content fits within the viewport */
+  overflow-y: auto; /* Allow scrolling if content exceeds max-height */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Style for each historia clinica card */
+.historia-clinica-card {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+/* Style the "No historias" message */
+.text-center {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-top: 20px;
+}
+

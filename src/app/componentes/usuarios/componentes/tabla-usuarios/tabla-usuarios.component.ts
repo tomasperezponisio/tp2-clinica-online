@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe, DatePipe, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
 import {map, Observable} from "rxjs";
 import {UsuariosService} from "../../../../services/usuarios.service";
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive.directive";
+import {TurnosService} from "../../../../services/turnos.service";
 
 @Component({
   selector: 'app-tabla-usuarios',
@@ -13,21 +14,27 @@ import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive.di
     NgForOf,
     AsyncPipe,
     ReactiveFormsModule,
-    HoverZoomDirective
+    HoverZoomDirective,
+    DatePipe,
+    TitleCasePipe
   ],
   templateUrl: './tabla-usuarios.component.html',
   styleUrl: './tabla-usuarios.component.css'
 })
 export class TablaUsuariosComponent implements OnInit {
   formUsuario!: FormGroup;
-  selectedTipo: string = 'paciente';
+  tipoDeUsuario: string = 'paciente';
 
   usuarios$!: Observable<any[]>;
-  filteredUsuarios$!: Observable<any[]>;
+  usuariosFiltrados$!: Observable<any[]>;
+  mostrarModalHistoriaClinica: boolean = false;
+  historiasClinicas: any[] = [];
+  pacienteSeleccionado: any = null;
 
   constructor(
     private fb: FormBuilder,
-    private usuariosService: UsuariosService
+    private usuariosService: UsuariosService,
+    private turnosService: TurnosService
   ) {
   }
 
@@ -36,26 +43,45 @@ export class TablaUsuariosComponent implements OnInit {
       tipoDeUsuario: ['paciente']
     });
 
-    this.usuarios$ = this.usuariosService.getUsuarios(); // Fetch all users
+    this.usuarios$ = this.usuariosService.traerUsuarios();
 
     // Update `selectedTipo` whenever the radio button selection changes
     this.formUsuario.get('tipoDeUsuario')?.valueChanges.subscribe(tipo => {
-      this.selectedTipo = tipo;
-      this.filterUsuarios();
+      this.tipoDeUsuario = tipo;
+      this.filtrarUsuarios();
     });
 
     // Set up filtered list based on the selected type
-    this.filterUsuarios();
+    this.filtrarUsuarios();
   }
 
-  filterUsuarios(): void {
-    this.filteredUsuarios$ = this.usuarios$.pipe(
-      map(usuarios => usuarios.filter(usuario => usuario.tipo === this.selectedTipo))
+  filtrarUsuarios(): void {
+    this.usuariosFiltrados$ = this.usuarios$.pipe(
+      map(usuarios => usuarios.filter(usuario => usuario.tipo === this.tipoDeUsuario))
     );
   }
 
   toggleVerificado(user: any) {
     user.verificado = !user.verificado;
-    this.usuariosService.updateVerificado(user.uid, user.verificado);
+    this.usuariosService.actualizarVerificado(user.uid, user.verificado);
   }
+
+  mostrarHistoriaClinica(usuario: any): void {
+    this.pacienteSeleccionado = usuario;
+    this.turnosService.traerHistoriaClinicaPaciente(usuario.uid).then(historias => {
+      this.historiasClinicas = historias;
+      this.mostrarModalHistoriaClinica = true;
+    }).catch(error => {
+      console.error('Error al cargar historias clínicas:', error);
+      this.historiasClinicas = []; // Ensure we show the "No data" message
+      this.mostrarModalHistoriaClinica = true;
+    });
+  }
+
+  cerrarModal(): void {
+    this.mostrarModalHistoriaClinica = false;
+    this.pacienteSeleccionado = null;
+    this.historiasClinicas = [];
+  }
+
 }

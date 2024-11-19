@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, LOCALE_ID, OnInit} from '@angular/core';
 import {Especialista} from "../../models/especialista";
 import {Router} from "@angular/router";
 import {UsuariosService} from "../../services/usuarios.service";
@@ -6,9 +6,7 @@ import {Bloque} from "../../models/bloque";
 import {TurnosService} from "../../services/turnos.service";
 import {Turno} from "../../models/turno";
 import {AuthService} from "../../services/auth.service";
-import {DatePipe, NgForOf, NgIf} from "@angular/common";
-import {NgModule, LOCALE_ID} from '@angular/core';
-import {registerLocaleData} from '@angular/common';
+import {DatePipe, NgForOf, NgIf, registerLocaleData, TitleCasePipe} from "@angular/common";
 import localeEsAr from '@angular/common/locales/es-AR';
 import {AlertService} from "../../services/alert.service";
 
@@ -21,9 +19,9 @@ registerLocaleData(localeEsAr, 'es-AR');
     NgForOf,
     NgIf,
     DatePipe,
+    TitleCasePipe,
   ],
   providers: [
-    // Set the LOCALE_ID to 'es-AR' for the entire application
     {provide: LOCALE_ID, useValue: 'es-AR'},
   ],
   templateUrl: './solicitar-turnos.component.html',
@@ -32,22 +30,33 @@ registerLocaleData(localeEsAr, 'es-AR');
 export class SolicitarTurnosComponent implements OnInit {
   // Pasos
   step: number = 1;
-  maxStep: number = 4; // Total steps for regular users
+  maxStep: number = 4;
 
-  // Add a property to store the user's role
-  userRole: string = ''; // 'paciente', 'admin', or other roles
+  tipoDeUsuario: string = '';
 
   // Data
   especialidades: string[] = [];
   especialistas: Especialista[] = [];
   bloquesDisponibles: Bloque[] = [];
   pacientes: any[] = [];
+  imagenesEspecialidades: any[] = [
+    {'cardiología':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/cardiologia.png?alt=media&token=a049af7f-01ad-4d8a-ab50-fbcec4fbead7'},
+    {'clínica':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/clinica.png?alt=media&token=cc5faae7-1f29-4fbb-a453-a97717fdc3f8'},
+    {'Default':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/default.png?alt=media&token=a1f3dad0-8eaf-4d77-92b3-18c8a777235a'},
+    {'neonatología':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/neonatologia.png?alt=media&token=675a074e-c18b-44fb-84a6-bacf1307b1df'},
+    {'psicología':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/psicologia.png?alt=media&token=a6976a3a-9df4-4b9f-8c73-7e6982cd96b3'},
+    {'psiquiatría':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/psiquiatria.png?alt=media&token=ef2b2294-c1ae-43d4-9d86-04b6b71e6abf'},
+    {'toxicología':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/toxicologia.png?alt=media&token=cf5a91a2-a506-41b7-9e30-329c553c58bf'},
+    {'traumatología':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/traumatologia.png?alt=media&token=82690d59-d58a-4f38-8fe3-7226be03f3e2'},
+    {'pediatría':'https://firebasestorage.googleapis.com/v0/b/tp2-clinica-online.appspot.com/o/pediatria.png?alt=media&token=f08a38a9-2485-4f33-b7c8-0ca103a86ea5'}
+  ]
 
   // Selecciones
   especialidadSeleccionada: string = '';
   especialistaSeleccionado: Especialista | null = null;
   bloqueSeleccionado: Bloque | null = null;
   pacienteSeleccionado: any = null;
+  fechaSeleccionada: string | null = null;
 
   // Usuario actual
   usuarioActual: any;
@@ -64,10 +73,10 @@ export class SolicitarTurnosComponent implements OnInit {
   ngOnInit(): void {
     this.authService.traerUsuarioActual().subscribe(user => {
       this.usuarioActual = user;
-      this.userRole = user.tipo; // Determine the user's role
+      this.tipoDeUsuario = user.tipo; // Determine the user's role
 
       // If the user is an admin, fetch the list of pacientes
-      if (this.userRole === 'admin') {
+      if (this.tipoDeUsuario === 'admin') {
         this.traerPacientes();
         this.maxStep = 5; // Admins have an extra step
       }
@@ -82,7 +91,6 @@ export class SolicitarTurnosComponent implements OnInit {
     });
   }
 
-  // Method to handle paciente selection
   elegirPaciente(paciente: any) {
     this.pacienteSeleccionado = paciente;
     this.step += 1; // Move to the next step
@@ -127,7 +135,7 @@ export class SolicitarTurnosComponent implements OnInit {
 
   confirmarTurno() {
     // Determine the paciente based on user role
-    const paciente = this.userRole === 'admin' ? this.pacienteSeleccionado : this.usuarioActual;
+    const paciente = this.tipoDeUsuario === 'admin' ? this.pacienteSeleccionado : this.usuarioActual;
 
     if (paciente && this.especialistaSeleccionado && this.especialidadSeleccionada && this.bloqueSeleccionado) {
       const turno: Turno = {
@@ -162,12 +170,15 @@ export class SolicitarTurnosComponent implements OnInit {
 
   traerFechas(): Date[] {
     const dateStrings = Array.from(new Set(this.bloquesDisponibles.map(slot => slot.fecha)));
-    const dates = dateStrings.map(dateStr => new Date(dateStr + 'T00:00:00')); // Ensure proper parsing
-    return dates;
+    return dateStrings.map(dateStr => new Date(dateStr + 'T00:00:00'));
   }
 
-  traerBloquesPorFecha(date: Date): Bloque[] {
-    const dateStr = this.formatearFecha(date); // Convert Date object back to 'YYYY-MM-DD' string
+  traerBloquesPorFecha(date: string | Date | null): Bloque[] {
+    if (!date) {
+      return []; // Return an empty array if no date is provided
+    }
+
+    const dateStr = typeof date === 'string' ? date : this.formatearFecha(date); // Handle both types
     return this.bloquesDisponibles.filter(slot => slot.fecha === dateStr);
   }
 
@@ -178,12 +189,21 @@ export class SolicitarTurnosComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  toTitleCase(str: string | null) {
-    // @ts-ignore
-    return str.replace(
-      /\w\S*/g,
-      text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-    );
+  traerImagenDeEspecialidad(especialidad: string): string {
+    const lowerEspecialidad = especialidad.toLowerCase();
+    const match = this.imagenesEspecialidades.find(imgObj => Object.keys(imgObj)[0].toLowerCase() === lowerEspecialidad);
+
+    if (match) {
+      return match[Object.keys(match)[0]]; // Return the matched image URL
+    }
+
+    const defaultMatch = this.imagenesEspecialidades.find(imgObj => 'Default' in imgObj);
+    return defaultMatch ? defaultMatch['Default'] : '';
+  }
+
+  seleccionarFecha(date: Date): void {
+    this.fechaSeleccionada = this.formatearFecha(date); // Store the selected date
+    this.step += 1; // Move to the next step
   }
 
 }

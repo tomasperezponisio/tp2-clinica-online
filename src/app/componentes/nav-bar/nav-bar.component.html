@@ -28,6 +28,10 @@
               <a class="nav-link" aria-current="page" routerLink="mis-turnos" routerLinkActive="active-route">Mis Turnos</a>
             </li>
 
+            <li class="nav-item" *ngIf="userData.isLoggedIn && userData.tipo === 'especialista'">
+              <a class="nav-link" aria-current="page" routerLink="pacientes" routerLinkActive="active-route">Pacientes</a>
+            </li>
+
             <li class="nav-item" *ngIf="userData.isLoggedIn && userData.tipo !== 'especialista'">
               <a class="nav-link" aria-current="page" routerLink="solicitar-turno" routerLinkActive="active-route">Solicitar Turno</a>
             </li>

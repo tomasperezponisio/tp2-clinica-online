@@ -14,7 +14,7 @@ export class AuthService {
     return authState(this.auth).pipe(
       switchMap((user: User | null) => {
         if (user) {
-          return this.usuariosService.getUserData(user.uid);
+          return this.usuariosService.traerDataDeUsuario(user.uid);
         } else {
           return of(null);
         }

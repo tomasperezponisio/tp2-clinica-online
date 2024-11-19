@@ -57,18 +57,17 @@ export class UsuariosService {
     );
   }
 
-
-  getUsuarios(): Observable<any[]> {
+  traerUsuarios(): Observable<any[]> {
     return collectionData(this.usuariosCollection, { idField: 'uid' }) as Observable<any[]>;
   }
 
-  updateVerificado(uid: string, verificado: boolean): Promise<void> {
+  actualizarVerificado(uid: string, verificado: boolean): Promise<void> {
     const userDoc = doc(this.firestore, `usuarios/${uid}`);
     return updateDoc(userDoc, { verificado });
   }
 
   // Update user data
-  updateUserData(userData: any): Promise<void> {
+  actualizarDataDeUsuario(userData: any): Promise<void> {
     const user = this.auth.currentUser;
     if (user) {
       const userDocRef = doc(this.firestore, 'usuarios', user.uid);
@@ -124,7 +123,7 @@ export class UsuariosService {
     );
   }
 
-  getUserData(uid: string): Observable<any> {
+  traerDataDeUsuario(uid: string): Observable<any> {
     const userDocRef = doc(this.firestore, 'usuarios', uid);
     return docData(userDocRef);
   }

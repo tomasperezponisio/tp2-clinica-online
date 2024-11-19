@@ -8,6 +8,8 @@ import {TurnosComponent} from "./componentes/turnos/turnos.component";
 import {SolicitarTurnosComponent} from "./componentes/solicitar-turnos/solicitar-turnos.component";
 import {adminYPacienteGuard} from "./guards/admin-y-paciente.guard";
 import {especialistaYPacienteGuard} from "./guards/especialista-y-paciente.guard";
+import {PacientesComponent} from "./componentes/pacientes/pacientes.component";
+import {especialistaGuard} from "./guards/especialista.guard";
 
 export const routes: Routes = [
   {
@@ -59,6 +61,12 @@ export const routes: Routes = [
     data: {midata: "datos de ruta"},
     component: SolicitarTurnosComponent,
     canActivate: [adminYPacienteGuard],
+  },
+  {
+    path: "pacientes",
+    data: {midata: "datos de ruta"},
+    component: PacientesComponent,
+    canActivate: [especialistaGuard],
   },
   {
     path: '**', loadComponent: () => import('./componentes/error-page/error-page.component')

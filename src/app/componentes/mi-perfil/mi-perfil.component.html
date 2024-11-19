@@ -35,9 +35,54 @@
       <div *ngIf="user.tipo === 'especialista'" class="mt-4">
         <app-mis-horarios [especialista]="user"></app-mis-horarios>
       </div>
+
+      <!-- Historia Clínica Section for Paciente -->
+      <div *ngIf="user.tipo === 'paciente'" class="mt-4">
+        <div *ngIf="historiasClinicas.length > 0" class="mt-4 historias-clinicas">
+          <h3 class="mb-4">Historia Clínica</h3>
+          <div class="row">
+            <div *ngFor="let historia of historiasClinicas" class="col-md-6 col-lg-4 mb-4">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <!-- Title and Specialist Info -->
+                  <h5 class="card-title">Consulta</h5>
+                  <p class="card-subtitle mb-2 text-muted">
+                    <strong>Especialista:</strong> {{ historia.especialistaNombre }}<br>
+                    <strong>Especialidad:</strong> {{ historia.especialidad }}
+                  </p>
+                  <hr>
+                  <!-- Fixed Fields -->
+                  <p><strong>Altura:</strong> {{ historia.altura }} cm</p>
+                  <p><strong>Peso:</strong> {{ historia.peso }} kg</p>
+                  <p><strong>Temperatura:</strong> {{ historia.temperatura }} °C</p>
+                  <p><strong>Presión:</strong> {{ historia.presion }}</p>
+                  <hr>
+                  <!-- Dynamic Fields -->
+                  <div *ngIf="historia.dinamicos && historia.dinamicos.length > 0">
+                    <h6>Datos Dinámicos:</h6>
+                    <ul class="list-group list-group-flush">
+                      <li *ngFor="let dato of historia.dinamicos" class="list-group-item">
+                        <strong>{{ dato.key }}:</strong> {{ dato.value }}
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- Additional Info -->
+                  <hr>
+                  <p><strong>Fecha:</strong> {{ historia.fecha | date: 'fullDate' | titlecase }}</p>
+                  <p><strong>Hora:</strong> {{ historia.hora }}</p>
+                  <p><strong>Reseña:</strong> {{ historia['reseña'] }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
   </div>
 </div>
+
 
 <!-- Loading Template -->
 <ng-template #loading>

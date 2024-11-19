@@ -23,7 +23,7 @@ export class MisHorariosComponent implements OnInit {
 
   diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-  availableHours: string[] = [];
+  horasDisponibles: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -41,14 +41,13 @@ export class MisHorariosComponent implements OnInit {
       disponibilidades: this.fb.array([]),
     });
 
-    this.initDisponibilidades();
+    this.iniciarDisponibilidades();
 
-    // Initialize availableHours
-    this.availableHours = this.generateHours(8, 19); // Clinic hours from 8:00 to 19:00
+    this.horasDisponibles = this.generarHoras(8, 19);
 
   }
 
-  generateHours(start: number, end: number): string[] {
+  generarHoras(start: number, end: number): string[] {
     const hours = [];
     for (let i = start; i <= end; i++) {
       hours.push(i.toString().padStart(2, '0') + ':00');
@@ -56,11 +55,11 @@ export class MisHorariosComponent implements OnInit {
     return hours;
   }
 
-  initDisponibilidades() {
+  iniciarDisponibilidades() {
     const disponibilidades = this.horarioForm.get('disponibilidades') as FormArray;
 
     this.especialista.especialidad.forEach((esp) => {
-      // Use default empty array if disponibilidad is undefined
+
       const existingDisp = (this.especialista.disponibilidad || []).find(d => d.especialidad === esp);
 
       disponibilidades.push(
@@ -70,7 +69,7 @@ export class MisHorariosComponent implements OnInit {
           horarioInicio: [existingDisp?.horarioInicio || '', Validators.required],
           horarioFin: [existingDisp?.horarioFin || '', Validators.required],
           duracionTurno: [existingDisp?.duracionTurno || 30, [Validators.required, Validators.min(30)]],
-        }, { validators: this.validateClinicHours.bind(this) })
+        }, { validators: this.validarHorariosDeLaClinica.bind(this) })
       );
     });
   }
@@ -94,7 +93,7 @@ export class MisHorariosComponent implements OnInit {
     return this.diasSemana[index];
   }
 
-  saveHorarios() {
+  guardarHorarios() {
     const disponibilidadData: Disponibilidad[] = this.disponibilidades.controls.map((group, i) => {
       const diasControlArray = group.get('dias') as FormArray;
       const selectedDias = diasControlArray.controls
@@ -114,7 +113,7 @@ export class MisHorariosComponent implements OnInit {
 
     console.log('Disponibilidad: ', disponibilidadData);
 
-    this.usuariosService.updateUserData({ disponibilidad: disponibilidadData })
+    this.usuariosService.actualizarDataDeUsuario({ disponibilidad: disponibilidadData })
       .then(() => {
         this.alertService.customAlert('Disponibilidad actualizada con éxito.', '', 'success');
       })
@@ -123,11 +122,10 @@ export class MisHorariosComponent implements OnInit {
       });
   }
 
-  validateClinicHours(group: FormGroup) {
+  validarHorariosDeLaClinica(group: FormGroup) {
     const horarioInicio = group.get('horarioInicio')?.value;
     const horarioFin = group.get('horarioFin')?.value;
 
-    // Check that horarioInicio is before horarioFin
     if (horarioInicio && horarioFin && horarioInicio >= horarioFin) {
       group.get('horarioInicio')?.setErrors({ invalidTimeRange: true });
       group.get('horarioFin')?.setErrors({ invalidTimeRange: true });

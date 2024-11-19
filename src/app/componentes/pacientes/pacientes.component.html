@@ -1,0 +1,48 @@
+<div class="container mt-4">
+  <h3 class="mb-4 text-center">Pacientes Atendidos</h3>
+
+  <!-- Check if there are pacientes -->
+  <div *ngIf="pacientesConHistorias.length > 0; else noPacientes">
+    <div *ngFor="let paciente of pacientesConHistorias" class="mb-5">
+      <h4>{{ paciente.nombre }}</h4>
+      <div class="row">
+        <div *ngFor="let historia of paciente.historiasClinicas" class="col-md-6 col-lg-4 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Consulta</h5>
+              <p class="card-subtitle mb-2 text-muted">
+                <strong>Especialista:</strong> {{ historia.especialistaNombre }}<br>
+                <strong>Especialidad:</strong> {{ historia.especialidad }}
+              </p>
+              <hr>
+              <p><strong>Altura:</strong> {{ historia.altura }} cm</p>
+              <p><strong>Peso:</strong> {{ historia.peso }} kg</p>
+              <p><strong>Temperatura:</strong> {{ historia.temperatura }} °C</p>
+              <p><strong>Presión:</strong> {{ historia.presion }}</p>
+              <hr>
+              <div *ngIf="historia.dinamicos && historia.dinamicos.length > 0">
+                <h6>Datos Dinámicos:</h6>
+                <ul class="list-group list-group-flush">
+                  <li *ngFor="let dato of historia.dinamicos" class="list-group-item">
+                    <strong>{{ dato.key }}:</strong> {{ dato.value }}
+                  </li>
+                </ul>
+              </div>
+              <hr>
+              <p><strong>Fecha:</strong> {{ historia.fecha }}</p>
+              <p><strong>Hora:</strong> {{ historia.hora }}</p>
+              <p><strong>Reseña:</strong> {{ historia['reseña'] }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Pacientes -->
+  <ng-template #noPacientes>
+    <div class="alert alert-warning text-center" role="alert">
+      No se encontraron pacientes con historias clínicas registradas.
+    </div>
+  </ng-template>
+</div>

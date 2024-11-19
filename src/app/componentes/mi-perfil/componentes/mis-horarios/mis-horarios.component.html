@@ -1,7 +1,7 @@
 <!-- mis-horarios.component.html -->
 <div>
   <h3>Mis Horarios</h3>
-  <form [formGroup]="horarioForm" (ngSubmit)="saveHorarios()">
+  <form [formGroup]="horarioForm" (ngSubmit)="guardarHorarios()">
     <div formArrayName="disponibilidades">
       <div *ngFor="let disp of disponibilidades.controls; let i = index" [formGroupName]="i" class="card mb-3">
         <div class="card-body">
@@ -31,7 +31,7 @@
                 class="form-control"
               >
                 <option value="" disabled>Seleccione hora</option>
-                <option *ngFor="let hour of availableHours" [value]="hour">{{ hour }}</option>
+                <option *ngFor="let hour of horasDisponibles" [value]="hour">{{ hour }}</option>
               </select>
             </div>
             <div class="col-md-4">
@@ -41,7 +41,7 @@
                 class="form-control"
               >
                 <option value="" disabled>Seleccione hora</option>
-                <option *ngFor="let hour of availableHours" [value]="hour">{{ hour }}</option>
+                <option *ngFor="let hour of horasDisponibles" [value]="hour">{{ hour }}</option>
               </select>
             </div>
             <div class="col-md-4">

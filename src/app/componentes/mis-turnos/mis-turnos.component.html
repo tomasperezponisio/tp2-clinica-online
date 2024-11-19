@@ -132,6 +132,15 @@
               >
                 Ver Reseña
               </button>
+
+              <!-- Cargar Historia Clínica -->
+              <button
+                *ngIf="turno.estado === 'realizado' && !turno.historiaClinica"
+                class="btn btn-success btn-sm m-1"
+                (click)="abrirModalHistoriaClinica(turno)"
+              >
+                Cargar Historia Clínica
+              </button>
             </ng-container>
           </div>
         </div>
@@ -146,16 +155,124 @@
       <form [formGroup]="encuestaForm" (ngSubmit)="submitEncuesta(selectedTurno)">
         <div class="form-group">
           <label for="puntualidad">¿Cómo calificaría la puntualidad del especialista?</label>
-          <input id="puntualidad" type="text" formControlName="puntualidad" class="form-control" placeholder="Puntualidad">
+          <input id="puntualidad" type="text" formControlName="puntualidad" class="form-control"
+                 placeholder="Puntualidad">
         </div>
 
         <div class="form-group mt-3">
           <label for="satisfaccion">¿Está satisfecho con la atención recibida?</label>
-          <input id="satisfaccion" type="text" formControlName="satisfaccion" class="form-control" placeholder="Satisfacción">
+          <input id="satisfaccion" type="text" formControlName="satisfaccion" class="form-control"
+                 placeholder="Satisfacción">
         </div>
 
         <button type="submit" class="btn btn-primary mt-3" [disabled]="encuestaForm.invalid">Enviar Encuesta</button>
         <button type="button" class="btn btn-secondary mt-3" (click)="cancelEncuesta()">Cancelar</button>
       </form>
     </div>
+  </div>
 </div>
+
+<!-- Fullscreen overlay for Historia Clinica -->
+<div *ngIf="showHistoriaClinicaForm" class="modal-backdrop">
+  <div class="modal-content">
+    <h4 class="text-center mb-4">Cargar Historia Clínica</h4>
+    <form [formGroup]="historiaClinicaForm" (ngSubmit)="submitHistoriaClinica()">
+      <!-- Fixed Fields -->
+      <div class="form-group">
+        <label for="altura">Altura (cm)</label>
+        <input id="altura" type="number" formControlName="altura" class="form-control" placeholder="Altura en cm">
+
+        <ng-container *ngIf="altura?.hasError('required') && altura?.touched">
+          <small class="text-danger">Este campo es obligatorio  y sólo números</small>
+        </ng-container>
+
+        <ng-container *ngIf="altura?.hasError('min')">
+          <small class="text-danger">Debe ser mayor de 25 cm</small>
+        </ng-container>
+
+        <ng-container *ngIf="altura?.hasError('max')">
+          <small class="text-danger">Debe ser menor a 250 cm</small>
+        </ng-container>
+
+      </div>
+      <div class="form-group mt-3">
+        <label for="peso">Peso (kg)</label>
+        <input id="peso" type="number" formControlName="peso" class="form-control" placeholder="Peso en kg">
+
+        <ng-container *ngIf="peso?.hasError('required') && peso?.touched">
+          <small class="text-danger">Este campo es obligatorio y sólo números</small>
+        </ng-container>
+
+        <ng-container *ngIf="peso?.hasError('min')">
+          <small class="text-danger">Debe ser mayor a 1 kg</small>
+        </ng-container>
+
+        <ng-container *ngIf="peso?.hasError('max')">
+          <small class="text-danger">Debe ser menor a 300 kg</small>
+        </ng-container>
+
+      </div>
+      <div class="form-group mt-3">
+        <label for="temperatura">Temperatura (°C)</label>
+        <input id="temperatura" type="number" formControlName="temperatura" class="form-control"
+               placeholder="Temperatura en °C">
+
+        <ng-container *ngIf="temperatura?.hasError('required') && temperatura?.touched">
+          <small class="text-danger">Este campo es obligatorio  y sólo números</small>
+        </ng-container>
+
+        <ng-container *ngIf="temperatura?.hasError('min')">
+          <small class="text-danger">Debe ser mayor a 25 ºC</small>
+        </ng-container>
+
+        <ng-container *ngIf="temperatura?.hasError('max')">
+          <small class="text-danger">Debe ser menor a 45 ºC</small>
+        </ng-container>
+
+      </div>
+      <div class="form-group mt-3">
+        <label for="presion">Presión (mmHg)</label>
+        <input id="presion" type="text" formControlName="presion" class="form-control"
+               placeholder="Presión arterial (mmHg)">
+
+        <ng-container *ngIf="presion?.hasError('required') && presion?.touched">
+          <small class="text-danger">Este campo es obligatorio  y sólo números</small>
+        </ng-container>
+
+        <ng-container *ngIf="presion?.hasError('pattern')">
+          <small class="text-danger">Debe cargasre con el siguiente formato: 120/80</small>
+        </ng-container>
+
+      </div>
+
+      <!-- Dynamic Fields -->
+      <h5 class="mt-4">Datos Dinámicos (Máximo 3)</h5>
+      <div formArrayName="dinamicos">
+        <div *ngFor="let field of dinamicos.controls; let i = index" [formGroupName]="i" class="form-group mt-2">
+          <label>Campo {{ i + 1 }}</label>
+          <div class="d-flex gap-2">
+            <input type="text" formControlName="key" class="form-control" placeholder="Clave">
+            <input type="text" formControlName="value" class="form-control" placeholder="Valor">
+            <button type="button" class="btn btn-danger btn-sm" (click)="eliminarCampoDinamico(i)">X</button>
+          </div>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn btn-secondary mt-3"
+        [disabled]="dinamicos.length >= 3"
+        (click)="agregarCampoDinamico()"
+      >
+        Añadir Campo Dinámico
+      </button>
+
+      <!-- Submit Buttons -->
+      <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-primary me-2" [disabled]="historiaClinicaForm.invalid">Guardar</button>
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalHistoriaClinica()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+

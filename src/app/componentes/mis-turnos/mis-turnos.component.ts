@@ -102,39 +102,39 @@ export class MisTurnosComponent implements OnInit {
   }
 
   filtrar() {
-    const searchText = this.textoParaFiltrar.toLowerCase();
+    const textoABuscar = this.textoParaFiltrar.toLowerCase();
 
     this.turnosFiltrados = this.turnos.filter(turno => {
-      // Base fields filtering
-      const baseFieldsMatch =
-        turno.especialidad.toLowerCase().includes(searchText) ||
-        turno.especialistaNombre.toLowerCase().includes(searchText) ||
-        turno.pacienteNombre?.toLowerCase().includes(searchText) || // For especialistas or admins
-        turno.fecha.includes(searchText) ||
-        turno.hora.includes(searchText) ||
-        turno.reseña?.toLowerCase().includes(searchText) ||
-        turno.estado.toLowerCase().includes(searchText);
+      // Campos del turno
+      const camposDelTurno =
+        turno.especialidad.toLowerCase().includes(textoABuscar) ||
+        turno.especialistaNombre.toLowerCase().includes(textoABuscar) ||
+        turno.pacienteNombre?.toLowerCase().includes(textoABuscar) || // For especialistas or admins
+        turno.fecha.includes(textoABuscar) ||
+        turno.hora.includes(textoABuscar) ||
+        turno.reseña?.toLowerCase().includes(textoABuscar) ||
+        turno.estado.toLowerCase().includes(textoABuscar);
 
-      // Fixed fields in historiaClinica
-      const fixedFieldsMatch = turno.historiaClinica &&
+      // Campos de la historia clinica
+      const camposDeHistoriaClinica = turno.historiaClinica &&
         (
-          turno.historiaClinica.altura?.toString().includes(searchText) ||
-          turno.historiaClinica.peso?.toString().includes(searchText) ||
-          turno.historiaClinica.temperatura?.toString().includes(searchText) ||
-          turno.historiaClinica.presion?.toLowerCase().includes(searchText)
+          turno.historiaClinica.altura?.toString().includes(textoABuscar) ||
+          turno.historiaClinica.peso?.toString().includes(textoABuscar) ||
+          turno.historiaClinica.temperatura?.toString().includes(textoABuscar) ||
+          turno.historiaClinica.presion?.toLowerCase().includes(textoABuscar)
         );
 
-      // Dynamic fields in historiaClinica
-      const dynamicFieldsMatch = turno.historiaClinica?.dinamicos?.some(dato =>
-        dato.key.toLowerCase().includes(searchText) ||
-        dato.value.toLowerCase().includes(searchText)
+      // Campos dinamicos de la historia clinica
+      const camposDinamicos = turno.historiaClinica?.dinamicos?.some(dato =>
+        dato.key.toLowerCase().includes(textoABuscar) ||
+        dato.value.toLowerCase().includes(textoABuscar)
       );
 
-      // Combine all matches
-      return baseFieldsMatch || fixedFieldsMatch || dynamicFieldsMatch;
+      // Combinacion de las tres busquedas anteriores
+      return camposDelTurno || camposDeHistoriaClinica || camposDinamicos;
     });
 
-    // Sorting by date and time
+    // Ordeno por fecha desc
     this.turnosFiltrados.sort((a, b) => {
       const dateA = this.parseDateTime(a.fecha, a.hora);
       const dateB = this.parseDateTime(b.fecha, b.hora);

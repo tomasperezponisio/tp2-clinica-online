@@ -37,7 +37,7 @@
       </div>
 
       <!-- Historia Clínica Section for Paciente -->
-      <div *ngIf="user.tipo === 'paciente'" class="mt-4">
+      <div #pdfContent *ngIf="user.tipo === 'paciente'" class="mt-4">
         <div *ngIf="historiasClinicas.length > 0" class="mt-4 historias-clinicas">
           <h3 class="mb-4">Historia Clínica</h3>
           <div class="row">
@@ -78,6 +78,10 @@
         </div>
       </div>
 
+      <!-- Boton exportar a PDF -->
+      <div class="text-center mt-4">
+        <button class="btn btn-primary" (click)="descargarComoPDF()">Exportar a PDF</button>
+      </div>
 
     </div>
   </div>

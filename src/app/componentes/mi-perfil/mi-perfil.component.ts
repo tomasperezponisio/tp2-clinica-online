@@ -76,13 +76,13 @@ export class MiPerfilComponent implements OnInit {
       const currentDate = new Date().toLocaleDateString('es-AR');
 
       // Add the logo
-      pdf.addImage(logoUrl, 'PNG', 10, 10, 40, 20); // x, y, width, height
+      pdf.addImage(logoUrl, 'PNG', 10, 10, 20, 20); // x, y, width, height
 
       // Add the clinic name and date
       pdf.setFontSize(14);
-      pdf.text(`Clínica Online - ${this.nombreDeUsuario}`, 60, 20);
+      pdf.text(`Clínica Online - ${this.nombreDeUsuario}`, 40, 20);
       pdf.setFontSize(10);
-      pdf.text(`Fecha de emisión: ${currentDate}`, 60, 26); // Date
+      pdf.text(`Fecha de emisión: ${currentDate}`, 40, 26); // Date
 
       pdf.line(10, 35, pdfWidth - 10, 35); // x1, y1, x2, y2
 

@@ -23,11 +23,11 @@ import {TurnosService} from "../../../../services/turnos.service";
 })
 export class TablaUsuariosComponent implements OnInit {
   formUsuario!: FormGroup;
-  selectedTipo: string = 'paciente';
+  tipoDeUsuario: string = 'paciente';
 
   usuarios$!: Observable<any[]>;
-  filteredUsuarios$!: Observable<any[]>;
-  showHistoriaClinicaModal: boolean = false;
+  usuariosFiltrados$!: Observable<any[]>;
+  mostrarModalHistoriaClinica: boolean = false;
   historiasClinicas: any[] = [];
   pacienteSeleccionado: any = null;
 
@@ -43,43 +43,43 @@ export class TablaUsuariosComponent implements OnInit {
       tipoDeUsuario: ['paciente']
     });
 
-    this.usuarios$ = this.usuariosService.getUsuarios(); // Fetch all users
+    this.usuarios$ = this.usuariosService.traerUsuarios();
 
     // Update `selectedTipo` whenever the radio button selection changes
     this.formUsuario.get('tipoDeUsuario')?.valueChanges.subscribe(tipo => {
-      this.selectedTipo = tipo;
-      this.filterUsuarios();
+      this.tipoDeUsuario = tipo;
+      this.filtrarUsuarios();
     });
 
     // Set up filtered list based on the selected type
-    this.filterUsuarios();
+    this.filtrarUsuarios();
   }
 
-  filterUsuarios(): void {
-    this.filteredUsuarios$ = this.usuarios$.pipe(
-      map(usuarios => usuarios.filter(usuario => usuario.tipo === this.selectedTipo))
+  filtrarUsuarios(): void {
+    this.usuariosFiltrados$ = this.usuarios$.pipe(
+      map(usuarios => usuarios.filter(usuario => usuario.tipo === this.tipoDeUsuario))
     );
   }
 
   toggleVerificado(user: any) {
     user.verificado = !user.verificado;
-    this.usuariosService.updateVerificado(user.uid, user.verificado);
+    this.usuariosService.actualizarVerificado(user.uid, user.verificado);
   }
 
   mostrarHistoriaClinica(usuario: any): void {
     this.pacienteSeleccionado = usuario;
     this.turnosService.traerHistoriaClinicaPaciente(usuario.uid).then(historias => {
       this.historiasClinicas = historias;
-      this.showHistoriaClinicaModal = true;
+      this.mostrarModalHistoriaClinica = true;
     }).catch(error => {
       console.error('Error al cargar historias clínicas:', error);
       this.historiasClinicas = []; // Ensure we show the "No data" message
-      this.showHistoriaClinicaModal = true;
+      this.mostrarModalHistoriaClinica = true;
     });
   }
 
   cerrarModal(): void {
-    this.showHistoriaClinicaModal = false;
+    this.mostrarModalHistoriaClinica = false;
     this.pacienteSeleccionado = null;
     this.historiasClinicas = [];
   }

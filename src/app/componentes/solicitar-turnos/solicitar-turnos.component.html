@@ -1,6 +1,6 @@
 <div class="container bg-light rounded">
 
-  <!-- Step 1: Select Paciente (Admin Only) -->
+  <!-- Step 1: Seleccionar Paciente (En caso de Admin) -->
   <div *ngIf="tipoDeUsuario === 'admin' && step === 1" class="container mt-4 step">
     <h3 class="mb-4 text-center">Seleccione un Paciente</h3>
     <div *ngFor="let paciente of pacientes" class="card mb-2">
@@ -14,63 +14,92 @@
     </div>
   </div>
 
-  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 1) || (tipoDeUsuario === 'admin' && step === 2)" class="container mt-4 step">
-    <!-- Step 1: Select Especialidad -->
+  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 1) || (tipoDeUsuario === 'admin' && step === 2)"
+       class="container mt-4 step">
+    <!-- Step 1: Seleccionar Especialidad -->
     <h3 class="mb-4 text-center">Seleccione una Especialidad</h3>
     <div class="row">
       <div class="col-12">
         <div class="d-flex flex-wrap justify-content-center">
           <button
             *ngFor="let esp of especialidades"
-            class="btn btn-outline-primary m-2"
+            class="btn btn-outline-primary m-2 p-2 specialty-btn"
             (click)="elegirEspecialidad(esp)"
           >
-            {{ esp }}
+            <img
+              [src]="traerImagenDeEspecialidad(esp)"
+              alt="Especialidad Image"
+              class="img-fluid mb-2"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;"
+            />
+            <div class="text-center">{{ esp }}</div>
           </button>
         </div>
+
       </div>
     </div>
   </div>
 
-  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 2) || (tipoDeUsuario === 'admin' && step === 3)" class="container mt-4">
-    <!-- Step 2: Select Especialista -->
+  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 2) || (tipoDeUsuario === 'admin' && step === 3)"
+       class="container mt-4">
+    <!-- Step 2: Seleccionar Especialista -->
     <h3 class="mb-4 text-center">Seleccione un Especialista</h3>
     <div class="row">
       <div class="col-12">
         <div class="d-flex flex-wrap justify-content-center">
           <button
             *ngFor="let especialista of especialistas"
-            class="btn btn-outline-primary m-2"
+            class="btn btn-outline-primary m-2 p-2 specialist-btn"
             (click)="elegirEspecialista(especialista)"
           >
-            {{ especialista.nombre }} {{ especialista.apellido }}
+            <img
+              [src]="especialista.imagenUno || 'default-profile-image-url.jpg'"
+              alt="Especialista Image"
+              class="img-fluid mb-2"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;"
+            />
+            <div class="text-center">{{ especialista.nombre }} {{ especialista.apellido }}</div>
           </button>
         </div>
+
       </div>
     </div>
   </div>
 
-  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 3) || (tipoDeUsuario === 'admin' && step === 4)" class="container mt-4">
-    <!-- Step 3: Select Appointment Slot -->
-    <h3 class="mb-4 text-center">Seleccione un Turno</h3>
-    <div class="appointments-grid">
-      <div *ngFor="let date of traerFechas()" class="date-group mb-4">
-        <h4 class="mb-3">{{ date | date: 'fullDate' | titlecase }}</h4>
-        <div class="d-flex flex-wrap">
-          <button
-            *ngFor="let slot of traerBloquesPorFecha(date)"
-            class="btn btn-outline-success m-2"
-            (click)="seleccionarBloque(slot)"
-          >
-            {{ slot.hora }}
-          </button>
-        </div>
-      </div>
+  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 3) || (tipoDeUsuario === 'admin' && step === 4)"
+       class="container mt-4">
+    <!-- Step 3: Seleccionar día -->
+    <h3 class="mb-4 text-center">Seleccione un Día</h3>
+    <div class="d-flex flex-wrap justify-content-center">
+      <button
+        *ngFor="let date of traerFechas()"
+        class="btn btn-outline-info m-2 p-2 day-btn"
+        (click)="seleccionarFecha(date)"
+      >
+        {{ date | date: 'dd \'de\' MMMM' | titlecase }}
+      </button>
     </div>
   </div>
 
-  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 4) || (tipoDeUsuario === 'admin' && step === 5)" class="container mt-4">
-    <!-- Step 4: Confirm Appointment -->
+  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 4) || (tipoDeUsuario === 'admin' && step === 5)"
+       class="container mt-4">
+    <!-- Step 4: Seleccionar bloque de tiempo -->
+    <h3 class="mb-4 text-center">Seleccione un Horario</h3>
+    <div class="d-flex flex-wrap justify-content-center">
+      <button
+        *ngFor="let slot of traerBloquesPorFecha(fechaSeleccionada)"
+        class="btn btn-outline-success m-2 p-2 time-slot-btn"
+        (click)="seleccionarBloque(slot)"
+      >
+        {{ slot.hora }}
+      </button>
+    </div>
+  </div>
+
+
+  <div *ngIf="(tipoDeUsuario !== 'admin' && step === 5) || (tipoDeUsuario === 'admin' && step === 6)"
+       class="container mt-4">
+    <!-- Step 5: Confirmar Turno -->
     <h3 class="mb-4 text-center">Confirmar Turno</h3>
     <div class="card">
       <div class="card-body">

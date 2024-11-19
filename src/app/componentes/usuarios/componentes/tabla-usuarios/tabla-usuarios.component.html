@@ -18,19 +18,19 @@
       </div>
     </div>
   </form>
-  <h4 class="text-capitalize">{{selectedTipo}}</h4>
+  <h4 class="text-capitalize">{{tipoDeUsuario}}</h4>
 
-  <table class="table table-striped mt-3" *ngIf="filteredUsuarios$ | async as usuarios">
+  <table class="table table-striped mt-3" *ngIf="usuariosFiltrados$ | async as usuarios">
     <thead>
     <tr>
       <th>Nombre</th>
       <th>Apellido</th>
       <th>DNI</th>
-      <th *ngIf="selectedTipo === 'paciente'">Obra Social</th>
-      <th *ngIf="selectedTipo === 'especialista'">Especialidad</th>
+      <th *ngIf="tipoDeUsuario === 'paciente'">Obra Social</th>
+      <th *ngIf="tipoDeUsuario === 'especialista'">Especialidad</th>
       <th>Imagen</th>
-      <th *ngIf="selectedTipo === 'especialista'">Verificado</th>
-      <th *ngIf="selectedTipo === 'paciente'">Historia Clínica</th>
+      <th *ngIf="tipoDeUsuario === 'especialista'">Verificado</th>
+      <th *ngIf="tipoDeUsuario === 'paciente'">Historia Clínica</th>
     </tr>
     </thead>
     <tbody>
@@ -38,28 +38,28 @@
       <td>{{ usuario.nombre }}</td>
       <td>{{ usuario.apellido }}</td>
       <td>{{ usuario.dni }}</td>
-      <td *ngIf="selectedTipo === 'paciente'">{{ usuario.obraSocial }}</td>
-      <td *ngIf="selectedTipo === 'especialista'">{{ usuario.especialidad?.join(', ') }}</td>
+      <td *ngIf="tipoDeUsuario === 'paciente'">{{ usuario.obraSocial }}</td>
+      <td *ngIf="tipoDeUsuario === 'especialista'">{{ usuario.especialidad?.join(', ') }}</td>
       <td>
         <img alt="imagenUno" *ngIf="usuario.imagenUno" [src]="usuario.imagenUno" class="img-thumbnail" width="50" appHoverZoom>
         <img alt="imagenDos" *ngIf="usuario.imagenDos" [src]="usuario.imagenDos" class="img-thumbnail" width="50" appHoverZoom>
       </td>
-      <td *ngIf="selectedTipo === 'especialista'">
+      <td *ngIf="tipoDeUsuario === 'especialista'">
         <input type="checkbox" [checked]="usuario.verificado" (change)="toggleVerificado(usuario)">
       </td>
-      <td *ngIf="selectedTipo === 'paciente'">
+      <td *ngIf="tipoDeUsuario === 'paciente'">
         <button class="btn btn-info btn-sm" (click)="mostrarHistoriaClinica(usuario)">Mostrar Historia Clínica</button>
       </td>
     </tr>
     </tbody>
   </table>
 
-  <!-- Modal for Historia Clínica -->
-  <div *ngIf="showHistoriaClinicaModal" class="overlay">
+  <!-- Modal de Historia Clínica -->
+  <div *ngIf="mostrarModalHistoriaClinica" class="overlay">
     <div class="overlay-content">
       <h4 class="text-center fs-3 text fw-bold text-primary-emphasis mb-4">Historia Clínica de {{ pacienteSeleccionado?.nombre }} {{ pacienteSeleccionado?.apellido }}</h4>
 
-      <!-- If there are historias -->
+      <!-- Si hay historia clinica -->
       <div *ngIf="historiasClinicas.length > 0; else noHistorias" class="historia-clinica-list">
         <div *ngFor="let historia of historiasClinicas" class="historia-clinica-card">
           <div class="card-body">
@@ -82,12 +82,12 @@
         </div>
       </div>
 
-      <!-- Message if no historia clinica -->
+      <!-- Mensaje si no hay historia clinica -->
       <ng-template #noHistorias>
         <p class="text-center  text-danger">No hay historia clínica cargada para este paciente.</p>
       </ng-template>
 
-      <!-- Close Button -->
+      <!-- Botón cerrar modal -->
       <div class="d-flex justify-content-end mt-4">
         <button class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
       </div>

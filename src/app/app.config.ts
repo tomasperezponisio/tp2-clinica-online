@@ -1,6 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
 import { routes } from './app.routes';
 import {provideHttpClient} from "@angular/common/http";
 import {provideFirebaseApp, initializeApp} from "@angular/fire/app";
@@ -10,6 +9,7 @@ import {getDatabase, provideDatabase} from "@angular/fire/database";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {getStorage, provideStorage} from "@angular/fire/storage";
 import {provideAuth, getAuth} from "@angular/fire/auth";
+import { provideAnimations } from '@angular/platform-browser/animations'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,5 +21,6 @@ export const appConfig: ApplicationConfig = {
     provideDatabase(() => getDatabase()), provideAnimationsAsync(),
     provideStorage(()=>getStorage()),
     provideAuth(() => getAuth()),
+    provideAnimations()
   ]
 };

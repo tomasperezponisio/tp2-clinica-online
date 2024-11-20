@@ -14,57 +14,57 @@ import {especialistaGuard} from "./guards/especialista.guard";
 export const routes: Routes = [
   {
     path: '', loadComponent: () => import('./componentes/home/home.component')
-      .then(c => c.HomeComponent), pathMatch: "full"
+      .then(c => c.HomeComponent), pathMatch: "full", data: { animation: 'home' }
   },
   {
     path: 'home', loadComponent: () => import('./componentes/home/home.component')
-      .then(c => c.HomeComponent), pathMatch: "full"
+      .then(c => c.HomeComponent), pathMatch: "full", data: { animation: 'home' }
   },
   {
     path: 'login', loadComponent: () => import('./componentes/login/login.component')
-      .then(c => c.LoginComponent)
+      .then(c => c.LoginComponent), data: { animation: 'login' }
   },
   {
     path: 'register', loadComponent: () => import('./componentes/register/register.component')
-      .then(c => c.RegisterComponent)
+      .then(c => c.RegisterComponent), data: { animation: 'register' }
   },
   {
     path: 'error', loadComponent: () => import('./componentes/error-page/error-page.component')
-      .then(c => c.ErrorPageComponent)
+      .then(c => c.ErrorPageComponent), data: { animation: 'error' }
   },
   {
     path: "usuarios",
-    data: {midata: "datos de ruta"},
+    data: { animation: 'usuarios' },
     component: UsuariosComponent,
     canActivate: [adminGuard],
   },
   {
     path: "turnos",
-    data: {midata: "datos de ruta"},
+    data: { animation: 'turnos' },
     component: MisTurnosComponent,
     canActivate: [adminGuard],
   },
   {
     path: "mi-perfil",
-    data: {midata: "datos de ruta"},
+    data: { animation: 'mi-perfil' },
     component: MiPerfilComponent,
     canActivate: [authGuard],
   },
   {
     path: "mis-turnos",
-    data: {midata: "datos de ruta"},
+    data: { animation: 'mis-turnos' },
     component: MisTurnosComponent,
     canActivate: [especialistaYPacienteGuard],
   },
   {
     path: "solicitar-turno",
-    data: {midata: "datos de ruta"},
+    data: { animation: 'solicitar-turnos' },
     component: SolicitarTurnosComponent,
     canActivate: [adminYPacienteGuard],
   },
   {
     path: "pacientes",
-    data: {midata: "datos de ruta"},
+    data: { animation: 'pacientes' },
     component: PacientesComponent,
     canActivate: [especialistaGuard],
   },

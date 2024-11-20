@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {Router, RouterLink, RouterLinkActive, RouterOutlet} from "@angular/router";
+import {Router, RouterLink, RouterLinkActive, RouterOutlet, ChildrenOutletContexts} from "@angular/router";
 import {AsyncPipe, NgIf} from "@angular/common";
 import {LoginService} from "../../services/login.service";
 import {UsuariosService} from "../../services/usuarios.service";
 import {AlertService} from "../../services/alert.service";
+import { slideInAnimation } from '../../animations/animations';
 
 @Component({
   selector: 'app-nav-bar',
@@ -16,7 +17,10 @@ import {AlertService} from "../../services/alert.service";
     AsyncPipe
   ],
   templateUrl: './nav-bar.component.html',
-  styleUrl: './nav-bar.component.css'
+  styleUrl: './nav-bar.component.css',
+  animations: [
+    slideInAnimation
+  ]
 })
 export class NavBarComponent implements OnInit {
   userData: { isLoggedIn: boolean; tipo?: string; nombre?: string } | null = null;
@@ -26,6 +30,7 @@ export class NavBarComponent implements OnInit {
     protected loginService: LoginService,
     protected usuariosService: UsuariosService,
     private alertService: AlertService,
+    private contexts: ChildrenOutletContexts,
   ) {
   }
 
@@ -41,6 +46,10 @@ export class NavBarComponent implements OnInit {
         this.router.navigate(['home']);
       });
     });
+  }
+
+  getRouteAnimationData() {
+    return this.contexts.getContext('primary')?.route?.snapshot?.data?.['animation'];
   }
 
 }

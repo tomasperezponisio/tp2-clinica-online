@@ -1,0 +1,24 @@
+.table-responsive {
+  font-size: 0.9rem;
+  max-height: 300px; /* Adjust height as needed */
+  overflow-y: auto;
+
+  .td {
+    width: 25%; /* Adjust width as needed */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+  }
+}
+
+.email-column {
+  min-width: 200px; /* Adjust width as needed */
+}
+
+h5 {
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}

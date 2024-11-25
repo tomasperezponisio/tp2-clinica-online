@@ -1,0 +1,174 @@
+<div #pdfContent class="container mt-4 py-2 bg-light rounded-3">
+  <div class="container mt-4">
+    <h1 class="text-center">Informes</h1>
+
+    <!-------------------------------------------------------------------------------------->
+    <!-- Logins por Día -->
+    <div id="loginsSection" class="container mt-4">
+      <h3 class="text-center mb-4">Log de Ingresos al Sistema</h3>
+
+      <!-- Date Range Selection -->
+      <div class="d-flex justify-content-center mb-3">
+        <div class="me-3">
+          <label for="fechaInicioLogins" class="form-label">Desde:</label>
+          <input
+            type="date"
+            id="fechaInicioLogins"
+            class="form-control"
+            [(ngModel)]="fechaInicioLogins"
+            (change)="filtrarLogins()"
+          />
+        </div>
+        <div>
+          <label for="fechaFinLogins" class="form-label">Hasta:</label>
+          <input
+            type="date"
+            id="fechaFinLogins"
+            class="form-control"
+            [(ngModel)]="fechaFinLogins"
+            (change)="filtrarLogins()"
+          />
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="loading" class="text-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Table -->
+      <div *ngIf="!loading" id="table-responsive" class="table-responsive">
+        <div *ngFor="let date of Object.keys(loginsPorDia)" class="mb-4">
+          <h5 class="text-center">{{ date | formatearFecha:'es-AR' }}</h5>
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <th>Nombre y Apellido</th>
+              <th>Email</th>
+              <th>Tipo</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let login of loginsPorDia[date]">
+              <td>{{ login.nombreYApellido }}</td>
+              <td class="email-column" hoverEmail="{{ login.email }}">{{ login.email | obscureEmail }}</td>
+              <td>{{ login.tipo | ucfirst }}</td>
+              <td>{{ login.hora | formatearFecha:'es-AR' }}</td>
+              <td>{{ login.hora | date:'shortTime' }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <hr>
+
+    <!-------------------------------------------------------------------------------------->
+    <!-- Turnos por Especialidad -->
+    <div id="turnosEspecialidadSection" class="mb-5">
+      <h3 class="text-center">Cantidad de Turnos por Especialidad</h3>
+      <canvas id="chartEspecialidades"></canvas>
+    </div>
+  </div>
+  <hr>
+
+  <!-------------------------------------------------------------------------------------->
+  <!-- Turnos por Día -->
+  <div id="turnosDiaSection" class="container mt-4">
+    <h3 class="text-center">Cantidad de Turnos por Día</h3>
+
+    <!-- Date Range Selection -->
+    <div class="d-flex justify-content-center mb-3">
+      <div class="me-3">
+        <label for="fechaInicioTurno" class="form-label">Desde:</label>
+        <input type="date" id="fechaInicioTurno" class="form-control" [(ngModel)]="fechaInicioTurnos"
+               (change)="chartTurnosPorDia()"/>
+      </div>
+      <div>
+        <label for="fechaFinTurnos" class="form-label">Hasta:</label>
+        <input type="date" id="fechaFinTurnos" class="form-control" [(ngModel)]="fechaFinTurnos"
+               (change)="chartTurnosPorDia()"/>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <canvas id="chartTurnosPorDia"></canvas>
+  </div>
+  <hr>
+
+  <!------------------------------------------------------------------------------------- -->
+  <!-- Turnos por Médico -->
+  <div id="turnosMedicoSection" class="container mt-4">
+    <h3 class="text-center">Cantidad de Turnos Solicitado por Médico</h3>
+
+    <!-- Date Range Selection -->
+    <div class="d-flex justify-content-center mb-3">
+      <div class="me-3">
+        <label for="fechaInicioTurnosMedico" class="form-label">Desde:</label>
+        <input
+          type="date"
+          id="fechaInicioTurnosMedico"
+          class="form-control"
+          [(ngModel)]="fechaInicioTurnos"
+          (change)="chartTurnosPorMedico()"
+        />
+      </div>
+      <div>
+        <label for="fechaFinTurnosMedico" class="form-label">Hasta:</label>
+        <input
+          type="date"
+          id="fechaFinTurnosMedico"
+          class="form-control"
+          [(ngModel)]="fechaFinTurnos"
+          (change)="chartTurnosPorMedico()"
+        />
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <canvas id="chartTurnosPorMedico"></canvas>
+  </div>
+
+  <!------------------------------------------------------------------------------------- -->
+  <!-- Turnos Finalizados por Médico -->
+  <div id="turnosFinalizadosMedicoSection" class="container mt-4">
+    <h3 class="text-center">Cantidad de Turnos Finalizados por Médico</h3>
+
+    <!-- Date Range Selection -->
+    <div class="d-flex justify-content-center mb-3">
+      <div class="me-3">
+        <label for="fechaInicioTurnosFinalizados" class="form-label">Desde:</label>
+        <input
+          type="date"
+          id="fechaInicioTurnosFinalizados"
+          class="form-control"
+          [(ngModel)]="fechaInicioTurnosFinalizados"
+          (change)="chartTurnosFinalizadosPorMedico()"
+        />
+      </div>
+      <div>
+        <label for="fechaFinTurnosFinalizados" class="form-label">Hasta:</label>
+        <input
+          type="date"
+          id="fechaFinTurnosFinalizados"
+          class="form-control"
+          [(ngModel)]="fechaFinTurnosFinalizados"
+          (change)="chartTurnosFinalizadosPorMedico()"
+        />
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <canvas id="chartTurnosFinalizadosPorMedico"></canvas>
+  </div>
+
+  <!-- Boton exportar a PDF -->
+  <div class="text-center mt-4">
+    <button class="btn btn-primary" (click)="descargarComoPDF()">Exportar a PDF</button>
+  </div>
+
+</div>

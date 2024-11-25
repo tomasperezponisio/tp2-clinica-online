@@ -5,6 +5,10 @@ import {FormsModule} from "@angular/forms";
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 import {jsPDF} from 'jspdf';
 import html2canvas from 'html2canvas';
+import {Login} from "../../models/login";
+import {UcfirstPipe} from "../../pipes/ucfirst.pipe";
+import {ObscureEmailPipe} from "../../pipes/obscure-email.pipe";
+import {HoverEmailDirective} from "../../directivas/hover.email.directive";
 
 @Component({
   selector: 'app-informes',
@@ -13,6 +17,9 @@ import html2canvas from 'html2canvas';
     FormsModule,
     NgIf,
     NgForOf,
+    UcfirstPipe,
+    ObscureEmailPipe,
+    HoverEmailDirective
   ],
   templateUrl: './informes.component.html',
   styleUrl: './informes.component.css',
@@ -27,7 +34,7 @@ export class InformesComponent implements OnInit {
   // para logins
   fechaInicioLogins: string = '';
   fechaFinLogins: string = '';
-  loginsPorDia: { [key: string]: any[] } = {}; // Grouped logins by date
+  loginsPorDia: { [key: string]: Login[] } = {}; // Grouped logins by date
   loading: boolean = true;
 
   // para turnos por medico
@@ -330,38 +337,6 @@ export class InformesComponent implements OnInit {
     });
   }
 
-  // descargarComoPDF() {
-  //   const pdfContent = this.pdfContent.nativeElement;
-  //
-  //   const logoUrl = 'https://i.imgur.com/e7Swn1C.png';
-  //
-  //   html2canvas(pdfContent).then((canvas) => {
-  //     const imgData = canvas.toDataURL('image/png');
-  //     const pdf = new jsPDF('p', 'mm', 'a4');
-  //     const pdfWidth = pdf.internal.pageSize.getWidth();
-  //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-  //
-  //     const currentDate = new Date().toLocaleDateString('es-AR');
-  //
-  //     // Add the logo
-  //     pdf.addImage(logoUrl, 'PNG', 10, 10, 20, 20); // x, y, width, height
-  //
-  //     // Add the clinic name and date
-  //     pdf.setFontSize(14);
-  //     pdf.text(`Clínica Online - Informe administración`, 40, 20);
-  //     pdf.setFontSize(10);
-  //     pdf.text(`Fecha de emisión: ${currentDate}`, 40, 26); // Date
-  //
-  //     pdf.line(10, 35, pdfWidth - 10, 35); // x1, y1, x2, y2
-  //
-  //     // Add the content below the header
-  //     pdf.addImage(imgData, 'PNG', 10, 40, pdfWidth - 20, pdfHeight);
-  //     pdf.save(`Informe_Administracion_${new Date().toISOString().slice(0, 10)}.pdf`);
-  //   }).catch((error) => {
-  //     console.error('Error exporting to PDF:', error);
-  //   });
-  // }
-
   descargarComoPDF() {
     const logoUrl = 'https://i.imgur.com/e7Swn1C.png';
 
@@ -398,9 +373,34 @@ export class InformesComponent implements OnInit {
       pdf.line(10, 35, pdfWidth - 10, 35);
     };
 
+    const addPageNumbers = (totalPages: number) => {
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(10);
+        pdf.text(`Página ${i} de ${totalPages}`, pdfWidth / 2, pdf.internal.pageSize.getHeight() - 10, {
+          align: 'center'
+        });
+      }
+    };
+
+    const adjustScrollableContent = (sectionElement: HTMLElement, enable: boolean) => {
+      if (enable) {
+        sectionElement.style.overflow = 'visible';
+        sectionElement.style.maxHeight = 'none';
+      } else {
+        sectionElement.style.removeProperty('overflow');
+        sectionElement.style.removeProperty('max-height');
+      }
+    };
+
     const captureSection = async (section: { id: string, title: string }) => {
       const sectionElement = document.getElementById(section.id);
-      if (sectionElement) {
+      const tableResponsive = document.getElementById('table-responsive');
+
+      if (sectionElement && tableResponsive) {
+        // Temporarily remove scroll styles
+        adjustScrollableContent(tableResponsive, true);
+
         const canvas = await html2canvas(sectionElement);
         const imgData = canvas.toDataURL('image/png');
         const imgWidth = pdfWidth - 20; // Account for margins
@@ -411,6 +411,9 @@ export class InformesComponent implements OnInit {
         pdf.setFontSize(12);
         pdf.text(section.title, 10, 40);
         pdf.addImage(imgData, 'PNG', 10, 50, imgWidth, imgHeight);
+
+        // Restore scroll styles
+        adjustScrollableContent(tableResponsive, false);
       }
     };
 
@@ -420,6 +423,8 @@ export class InformesComponent implements OnInit {
       sections.map((section) => captureSection(section))
     ).then(() => {
       pdf.deletePage(1);
+      const totalPages = pdf.getNumberOfPages();
+      addPageNumbers(totalPages);
       pdf.save(`Informe_Administracion_${currentDateTime}.pdf`);
     }).catch((error) => {
       console.error('Error exporting to PDF:', error);

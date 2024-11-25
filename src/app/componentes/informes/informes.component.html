@@ -39,7 +39,7 @@
       </div>
 
       <!-- Scrollable Table -->
-      <div *ngIf="!loading" class="table-responsive">
+      <div *ngIf="!loading" id="table-responsive" class="table-responsive">
         <div *ngFor="let date of Object.keys(loginsPorDia)" class="mb-4">
           <h5 class="text-center">{{ date }}</h5>
           <table class="table table-striped">
@@ -54,8 +54,8 @@
             <tbody>
             <tr *ngFor="let login of loginsPorDia[date]">
               <td>{{ login.nombreYApellido }}</td>
-              <td>{{ login.email }}</td>
-              <td>{{ login.tipo }}</td>
+              <td class="email-column" hoverEmail="{{ login.email }}">{{ login.email | obscureEmail }}</td>
+              <td>{{ login.tipo | ucfirst }}</td>
               <td>{{ login.hora }}</td>
             </tr>
             </tbody>

@@ -1,10 +1,10 @@
-<div class="container mt-4 py-2 bg-light rounded-3">
+<div #pdfContent class="container mt-4 py-2 bg-light rounded-3">
   <div class="container mt-4">
     <h1 class="text-center">Informes</h1>
 
     <!-------------------------------------------------------------------------------------->
     <!-- Logins por Día -->
-    <div class="container mt-4">
+    <div id="loginsSection" class="container mt-4">
       <h3 class="text-center mb-4">Log de Ingresos al Sistema</h3>
 
       <!-- Date Range Selection -->
@@ -67,7 +67,7 @@
 
     <!-------------------------------------------------------------------------------------->
     <!-- Turnos por Especialidad -->
-    <div class="mb-5">
+    <div id="turnosEspecialidadSection" class="mb-5">
       <h3 class="text-center">Cantidad de Turnos por Especialidad</h3>
       <canvas id="chartEspecialidades"></canvas>
     </div>
@@ -76,7 +76,7 @@
 
   <!-------------------------------------------------------------------------------------->
   <!-- Turnos por Día -->
-  <div class="container mt-4">
+  <div id="turnosDiaSection" class="container mt-4">
     <h3 class="text-center">Cantidad de Turnos por Día</h3>
 
     <!-- Date Range Selection -->
@@ -100,7 +100,7 @@
 
   <!------------------------------------------------------------------------------------- -->
   <!-- Turnos por Médico -->
-  <div class="container mt-4">
+  <div id="turnosMedicoSection" class="container mt-4">
     <h3 class="text-center">Cantidad de Turnos Solicitado por Médico</h3>
 
     <!-- Date Range Selection -->
@@ -133,7 +133,7 @@
 
   <!------------------------------------------------------------------------------------- -->
   <!-- Turnos Finalizados por Médico -->
-  <div class="container mt-4">
+  <div id="turnosFinalizadosMedicoSection" class="container mt-4">
     <h3 class="text-center">Cantidad de Turnos Finalizados por Médico</h3>
 
     <!-- Date Range Selection -->
@@ -164,5 +164,9 @@
     <canvas id="chartTurnosFinalizadosPorMedico"></canvas>
   </div>
 
+  <!-- Boton exportar a PDF -->
+  <div class="text-center mt-4">
+    <button class="btn btn-primary" (click)="descargarComoPDF()">Exportar a PDF</button>
+  </div>
 
 </div>

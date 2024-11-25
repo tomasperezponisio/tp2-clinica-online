@@ -1,8 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import { Chart, registerables } from 'chart.js';
-import { ReportesService } from '../../services/reportes.service';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Chart, registerables} from 'chart.js';
+import {ReportesService} from '../../services/reportes.service';
 import {FormsModule} from "@angular/forms";
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import {jsPDF} from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-informes',
@@ -37,6 +39,8 @@ export class InformesComponent implements OnInit {
   fechaInicioTurnosFinalizados: string = '';
   fechaFinTurnosFinalizados: string = '';
   graficoTurnosFinalizadosPorMedico: Chart | null = null;
+
+  @ViewChild('pdfContent', {static: false}) pdfContent!: ElementRef;
 
   constructor(
     private reportesService: ReportesService
@@ -323,8 +327,102 @@ export class InformesComponent implements OnInit {
           },
         },
       },
-  });
+    });
   }
 
+  // descargarComoPDF() {
+  //   const pdfContent = this.pdfContent.nativeElement;
+  //
+  //   const logoUrl = 'https://i.imgur.com/e7Swn1C.png';
+  //
+  //   html2canvas(pdfContent).then((canvas) => {
+  //     const imgData = canvas.toDataURL('image/png');
+  //     const pdf = new jsPDF('p', 'mm', 'a4');
+  //     const pdfWidth = pdf.internal.pageSize.getWidth();
+  //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  //
+  //     const currentDate = new Date().toLocaleDateString('es-AR');
+  //
+  //     // Add the logo
+  //     pdf.addImage(logoUrl, 'PNG', 10, 10, 20, 20); // x, y, width, height
+  //
+  //     // Add the clinic name and date
+  //     pdf.setFontSize(14);
+  //     pdf.text(`Clínica Online - Informe administración`, 40, 20);
+  //     pdf.setFontSize(10);
+  //     pdf.text(`Fecha de emisión: ${currentDate}`, 40, 26); // Date
+  //
+  //     pdf.line(10, 35, pdfWidth - 10, 35); // x1, y1, x2, y2
+  //
+  //     // Add the content below the header
+  //     pdf.addImage(imgData, 'PNG', 10, 40, pdfWidth - 20, pdfHeight);
+  //     pdf.save(`Informe_Administracion_${new Date().toISOString().slice(0, 10)}.pdf`);
+  //   }).catch((error) => {
+  //     console.error('Error exporting to PDF:', error);
+  //   });
+  // }
 
+  descargarComoPDF() {
+    const logoUrl = 'https://i.imgur.com/e7Swn1C.png';
+
+    const getCurrentDateTime = (): string => {
+      const now = new Date();
+      const pad = (n: number) => (n < 10 ? `0${n}` : n); // Helper to pad single digits
+      const day = pad(now.getDate());
+      const month = pad(now.getMonth() + 1); // Months are 0-based
+      const year = now.getFullYear();
+      const hours = pad(now.getHours());
+      const minutes = pad(now.getMinutes());
+      const seconds = pad(now.getSeconds());
+      return `${day}-${month}-${year}_${hours}:${minutes}:${seconds}`;
+    };
+
+    const currentDateTime = getCurrentDateTime();
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+
+    const sections = [
+      {id: 'loginsSection', title: 'Log de Ingresos al Sistema'},
+      {id: 'turnosEspecialidadSection', title: 'Cantidad de Turnos por Especialidad'},
+      {id: 'turnosDiaSection', title: 'Cantidad de Turnos por Día'},
+      {id: 'turnosMedicoSection', title: 'Cantidad de Turnos Solicitado por Médico'},
+      {id: 'turnosFinalizadosMedicoSection', title: 'Cantidad de Turnos Finalizados por Médico'},
+    ];
+
+    const addHeader = () => {
+      pdf.addImage(logoUrl, 'PNG', 10, 10, 20, 20);
+      pdf.setFontSize(14);
+      pdf.text('Clínica Online - Informe administración', 40, 20);
+      pdf.setFontSize(10);
+      pdf.text(`Fecha de emisión: ${currentDateTime}`, 40, 26);
+      pdf.line(10, 35, pdfWidth - 10, 35);
+    };
+
+    const captureSection = async (section: { id: string, title: string }) => {
+      const sectionElement = document.getElementById(section.id);
+      if (sectionElement) {
+        const canvas = await html2canvas(sectionElement);
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pdfWidth - 20; // Account for margins
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        pdf.addPage();
+        addHeader();
+        pdf.setFontSize(12);
+        pdf.text(section.title, 10, 40);
+        pdf.addImage(imgData, 'PNG', 10, 50, imgWidth, imgHeight);
+      }
+    };
+
+    addHeader();
+
+    Promise.all(
+      sections.map((section) => captureSection(section))
+    ).then(() => {
+      pdf.deletePage(1);
+      pdf.save(`Informe_Administracion_${currentDateTime}.pdf`);
+    }).catch((error) => {
+      console.error('Error exporting to PDF:', error);
+    });
+  }
 }

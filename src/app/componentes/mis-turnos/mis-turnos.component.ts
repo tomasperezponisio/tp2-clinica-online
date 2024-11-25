@@ -15,6 +15,7 @@ import {DatePipe, NgClass, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
 import {AlertService} from "../../services/alert.service";
 import {registerLocaleData} from '@angular/common';
 import localeEsAr from '@angular/common/locales/es-AR';
+import {HighlightEstadoDirective} from "../../directivas/highlight.estado.directive";
 
 registerLocaleData(localeEsAr, 'es-AR');
 
@@ -28,7 +29,8 @@ registerLocaleData(localeEsAr, 'es-AR');
     TitleCasePipe,
     NgIf,
     NgClass,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HighlightEstadoDirective
   ],
   providers: [
     {provide: LOCALE_ID, useValue: 'es-AR'},

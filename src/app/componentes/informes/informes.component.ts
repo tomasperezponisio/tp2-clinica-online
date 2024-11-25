@@ -9,6 +9,7 @@ import {Login} from "../../models/login";
 import {UcfirstPipe} from "../../pipes/ucfirst.pipe";
 import {ObscureEmailPipe} from "../../pipes/obscure-email.pipe";
 import {HoverEmailDirective} from "../../directivas/hover.email.directive";
+import {FormatearFechaPipe} from "../../pipes/formatear-fecha.pipe";
 
 @Component({
   selector: 'app-informes',
@@ -19,7 +20,9 @@ import {HoverEmailDirective} from "../../directivas/hover.email.directive";
     NgForOf,
     UcfirstPipe,
     ObscureEmailPipe,
-    HoverEmailDirective
+    HoverEmailDirective,
+    FormatearFechaPipe,
+    DatePipe
   ],
   templateUrl: './informes.component.html',
   styleUrl: './informes.component.css',
@@ -201,11 +204,7 @@ export class InformesComponent implements OnInit {
   LoginsPorDia(logins: any[]): void {
     this.loginsPorDia = logins.reduce((acc: any, login: any) => {
       const date = new Date(login.fecha.seconds * 1000); // Firestore timestamp
-      const formattedDate = date.toLocaleDateString('es-AR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
+      const formattedDate = date.toISOString().split('T')[0]; // Store in ISO format for grouping (e.g., 2024-11-24)
 
       if (!acc[formattedDate]) {
         acc[formattedDate] = [];
@@ -214,7 +213,7 @@ export class InformesComponent implements OnInit {
         email: login.email,
         nombreYApellido: login.nombreYApellido,
         tipo: login.tipo,
-        hora: date.toLocaleTimeString('es-AR'),
+        hora: date,
       });
 
       return acc;

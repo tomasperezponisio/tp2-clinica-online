@@ -3,7 +3,7 @@ import {AsyncPipe, DatePipe, NgForOf, NgIf, TitleCasePipe} from "@angular/common
 import {map, Observable} from "rxjs";
 import {UsuariosService} from "../../../../services/usuarios.service";
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive.directive";
+import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive";
 import {TurnosService} from "../../../../services/turnos.service";
 
 @Component({

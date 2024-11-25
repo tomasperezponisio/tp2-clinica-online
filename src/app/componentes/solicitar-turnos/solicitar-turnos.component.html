@@ -52,13 +52,14 @@
             class="btn btn-outline-primary m-2 p-2 specialist-btn"
             (click)="elegirEspecialista(especialista)"
           >
+            <div class="text-center">{{ especialista.nombre }} {{ especialista.apellido }}</div>
             <img
               [src]="especialista.imagenUno || 'default-profile-image-url.jpg'"
               alt="Especialista Image"
               class="img-fluid mb-2"
               style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;"
             />
-            <div class="text-center">{{ especialista.nombre }} {{ especialista.apellido }}</div>
+
           </button>
         </div>
 

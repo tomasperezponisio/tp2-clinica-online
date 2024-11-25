@@ -1,0 +1,12 @@
+.table-responsive {
+  font-size: 0.9rem;
+  max-height: 300px; /* Adjust height as needed */
+  overflow-y: auto;
+}
+
+h5 {
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}

@@ -7,7 +7,7 @@ import {
   signOut,
   UserCredential,
 } from '@angular/fire/auth';
-import {Firestore, DocumentData, doc, setDoc, getDoc} from "@angular/fire/firestore";
+import {Firestore, DocumentData, doc, setDoc, getDoc, addDoc, collection} from "@angular/fire/firestore";
 import {Paciente} from "../models/paciente";
 import {Especialista} from "../models/especialista";
 import {Admin} from "../models/admin";
@@ -50,6 +50,14 @@ export class LoginService {
         await signOut(this.auth);
         return {success: false, message: 'Por favor verifica tu correo eléctronico para finalizar el registro.'};
       }
+      // logueo el usuario que ingresó
+      let col = collection(this.firestore, 'logins');
+      await addDoc(col, {
+        fecha: new Date(),
+        "email": email,
+        "nombreYApellido": userData['nombre'] + " " + userData['apellido'],
+        "tipo": userTipo,
+      });
       return {success: true, message: 'Login exitoso!'};
 
     } catch (error) {

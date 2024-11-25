@@ -10,6 +10,7 @@ import {adminYPacienteGuard} from "./guards/admin-y-paciente.guard";
 import {especialistaYPacienteGuard} from "./guards/especialista-y-paciente.guard";
 import {PacientesComponent} from "./componentes/pacientes/pacientes.component";
 import {especialistaGuard} from "./guards/especialista.guard";
+import {InformesComponent} from "./componentes/informes/informes.component";
 
 export const routes: Routes = [
   {
@@ -42,6 +43,12 @@ export const routes: Routes = [
     path: "turnos",
     data: { animation: 'turnos' },
     component: MisTurnosComponent,
+    canActivate: [adminGuard],
+  },
+  {
+    path: "informes",
+    data: { animation: 'informes' },
+    component: InformesComponent,
     canActivate: [adminGuard],
   },
   {

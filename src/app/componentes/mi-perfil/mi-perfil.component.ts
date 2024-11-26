@@ -7,6 +7,7 @@ import {MisHorariosComponent} from "./componentes/mis-horarios/mis-horarios.comp
 import {TurnosService} from "../../services/turnos.service";
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import {FormsModule} from "@angular/forms";
 
 registerLocaleData(localeEsAr, 'es-AR');
 
@@ -19,7 +20,8 @@ registerLocaleData(localeEsAr, 'es-AR');
     MisHorariosComponent,
     NgForOf,
     DatePipe,
-    TitleCasePipe
+    TitleCasePipe,
+    FormsModule
   ],
   providers: [
     // Set the LOCALE_ID to 'es-AR' for the entire application
@@ -33,6 +35,9 @@ export class MiPerfilComponent implements OnInit {
   tipoDeUsuario: string = '';
   nombreDeUsuario: string = '';
   historiasClinicas: any[] = [];
+  historiasClinicasFiltradas: any[] = []; // For filtered results
+  especialistas: string[] = [];
+  selectedEspecialista: string = 'Todos'; // Default selection
 
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
 
@@ -51,8 +56,13 @@ export class MiPerfilComponent implements OnInit {
         this.nombreDeUsuario = data.nombre + ' ' + data.apellido;
 
         if (this.tipoDeUsuario === 'paciente') {
-          this.turnosService.traerHistoriaClinicaPaciente(data.uid).then(historias => {
+          this.turnosService.traerHistoriaClinicaPaciente(data.uid).then((historias) => {
             this.historiasClinicas = historias;
+            this.especialistas = [
+              'Todos',
+              ...new Set(historias.map((historia) => historia.especialistaNombre)),
+            ];
+            this.filtrar(); // Initialize filtered list
           });
         }
 
@@ -60,6 +70,27 @@ export class MiPerfilComponent implements OnInit {
         console.log('No hay data para mostrar.');
       }
     });
+  }
+
+  // Filter based on selected especialista
+  filtrar(): void {
+    if (this.selectedEspecialista === 'Todos') {
+      this.historiasClinicasFiltradas = [...this.historiasClinicas];
+    } else {
+      this.historiasClinicasFiltradas = this.historiasClinicas.filter(
+        (historia) => historia.especialistaNombre === this.selectedEspecialista
+      );
+    }
+  }
+
+  // Filter historias clínicas based on selected specialist
+  getFilteredHistoriasClinicas(): any[] {
+    if (this.selectedEspecialista === 'Todos') {
+      return this.historiasClinicas;
+    }
+    return this.historiasClinicas.filter(
+      historia => historia.especialistaNombre === this.selectedEspecialista
+    );
   }
 
   descargarComoPDF() {

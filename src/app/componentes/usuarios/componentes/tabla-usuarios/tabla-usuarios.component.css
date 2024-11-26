@@ -58,3 +58,36 @@
   margin-top: 20px;
 }
 
+/* Patient button styles */
+.paciente-btn {
+  width: 100px;
+  height: 100px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Hover effect for buttons */
+.paciente-btn:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Text inside the button */
+.paciente-nombre {
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background for text */
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+

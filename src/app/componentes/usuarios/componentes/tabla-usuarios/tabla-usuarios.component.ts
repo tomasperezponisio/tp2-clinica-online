@@ -5,6 +5,9 @@ import {UsuariosService} from "../../../../services/usuarios.service";
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive";
 import {TurnosService} from "../../../../services/turnos.service";
+import {UcfirstPipe} from "../../../../pipes/ucfirst.pipe";
+import * as XLSX from 'xlsx';
+import {AlertService} from "../../../../services/alert.service";
 
 @Component({
   selector: 'app-tabla-usuarios',
@@ -16,7 +19,8 @@ import {TurnosService} from "../../../../services/turnos.service";
     ReactiveFormsModule,
     HoverZoomDirective,
     DatePipe,
-    TitleCasePipe
+    TitleCasePipe,
+    UcfirstPipe
   ],
   templateUrl: './tabla-usuarios.component.html',
   styleUrl: './tabla-usuarios.component.css'
@@ -34,7 +38,8 @@ export class TablaUsuariosComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private usuariosService: UsuariosService,
-    private turnosService: TurnosService
+    private turnosService: TurnosService,
+    private alertService: AlertService,
   ) {
   }
 
@@ -83,5 +88,48 @@ export class TablaUsuariosComponent implements OnInit {
     this.pacienteSeleccionado = null;
     this.historiasClinicas = [];
   }
+
+  exportTurnosToExcel(usuario: any): void {
+    console.log(`Fetching turnos for user: ${usuario.uid}`);
+    const nombreCompleto = usuario.nombre + ' ' + usuario.apellido;
+
+    this.turnosService.traerTurnosPorUidDePaciente(usuario.uid).subscribe({
+      next: (turnos) => {
+        if (!turnos || turnos.length === 0) {
+          console.log('No turnos found for user:', usuario.nombre);
+          this.alertService.customAlert('No hay turnos', `No hay turnos de ${nombreCompleto}.`, 'error');
+          return;
+        }
+
+        console.log('Fetched turnos:', turnos);
+
+        const formattedData = turnos.map((turno) => ({
+          Paciente: turno.pacienteNombre || 'N/A',
+          Especialista: turno.especialistaNombre || 'N/A',
+          Especialidad: turno.especialidad || 'N/A',
+          Fecha: turno.fecha || 'N/A',
+          Hora: turno.hora || 'N/A',
+          Estado: turno.estado || 'N/A',
+          Reseña: turno.reseña || 'N/A',
+        }));
+
+        console.log('Formatted data for Excel:', formattedData);
+
+        // Generate the Excel file
+        const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(formattedData);
+        const wb: XLSX.WorkBook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Turnos');
+
+        const nombreCompletoExcel = `${usuario.nombre}_${usuario.apellido}`;
+        XLSX.writeFile(wb, `turnos-${nombreCompletoExcel}.xlsx`);
+        console.log(`Excel file generated for user: ${nombreCompletoExcel}`);
+      },
+      error: (err) => {
+        console.error('Error fetching turnos:', err);
+        this.alertService.customAlert('Error', `Error al traer los turnos de ${nombreCompleto}.`, 'error');
+      },
+    });
+  }
+
 
 }

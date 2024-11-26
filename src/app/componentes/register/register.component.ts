@@ -13,8 +13,7 @@ import {Auth} from "@angular/fire/auth";
     ReactiveFormsModule,
     NgIf,
     AltaPacienteComponent,
-    AltaEspecialistaComponent,
-    AltaAdminComponent
+    AltaEspecialistaComponent
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'

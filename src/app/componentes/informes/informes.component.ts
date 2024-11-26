@@ -40,7 +40,7 @@ export class InformesComponent implements OnInit {
   loginsPorDia: { [key: string]: Login[] } = {}; // Grouped logins by date
   loading: boolean = true;
 
-  // para turnos por medico
+  // para turnos por médico
   fechaInicioTurnosPorMedico: string = '';
   fechaFinTurnosPorMedico: string = '';
   graficoTurnosPorMedico: Chart | null = null;
@@ -142,7 +142,7 @@ export class InformesComponent implements OnInit {
   // ################# TURNOS POR DIA ###############################
   /**
    * Genera un gráfico de barras apiladas que muestra la cantidad de turnos por día diferenciados por su estado.
-   * La gráfica es generada en un elemento canvas con el id 'chartTurnosPorDia'.
+   * La gráfica es generada en un elemento canvas con el ID 'chartTurnosPorDia'.
    * Destruye la gráfica anterior si ya existe para evitar duplicación.
    * Los estados considerados son: 'pendiente', 'aceptado', 'rechazado', 'cancelado', y 'realizado'.
    * Los datos son obtenidos desde un servicio que devuelve turnos por día y estado dentro del rango de fechas especificado.
@@ -296,7 +296,7 @@ export class InformesComponent implements OnInit {
   /**
    * Genera un gráfico de barras que representa la cantidad de turnos por médico
    * en un rango de fechas especificado. Utiliza los datos obtenidos desde el
-   * servicio de reportes y los renderiza en un canvas con id 'chartTurnosPorMedico'.
+   * servicio de reportes y los renderiza en un canvas con ID 'chartTurnosPorMedico'.
    *
    * @return {Promise<void>} Promesa que se resuelve cuando el gráfico ha sido generado.
    */

@@ -19,7 +19,6 @@ import {AlertService} from "../../../../services/alert.service";
     ReactiveFormsModule,
     HoverZoomDirective,
     DatePipe,
-    TitleCasePipe,
     UcfirstPipe
   ],
   templateUrl: './tabla-usuarios.component.html',

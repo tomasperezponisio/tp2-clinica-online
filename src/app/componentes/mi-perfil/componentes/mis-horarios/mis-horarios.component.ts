@@ -10,9 +10,7 @@ import {AlertService} from "../../../../services/alert.service";
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgForOf,
-    NgClass,
-    NgIf
+    NgForOf
   ],
   templateUrl: './mis-horarios.component.html',
   styleUrl: './mis-horarios.component.css'

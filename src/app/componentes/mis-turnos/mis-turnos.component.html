@@ -1,5 +1,6 @@
 <div class="container mt-4">
-  <h3 class="mb-4 text-center">Mis Turnos</h3>
+  <h3 *ngIf="tipoDeUsuario === 'admin'" class="mb-4 text-center">Turnos</h3>
+  <h3 *ngIf="tipoDeUsuario !== 'admin'" class="mb-4 text-center">Mis Turnos</h3>
 
   <!-- Input del filtro -->
   <div class="mb-3">

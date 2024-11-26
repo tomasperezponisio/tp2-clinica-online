@@ -10,6 +10,12 @@ import { switchMap } from 'rxjs/operators';
 export class AuthService {
   constructor(private auth: Auth, private usuariosService: UsuariosService) { }
 
+  /**
+   * Método que obtiene el usuario actualmente autenticado.
+   *
+   * @return {Observable<any>} Un observable que emite la información del usuario autenticado,
+   *                            o null si no hay un usuario autenticado.
+   */
   traerUsuarioActual(): Observable<any> {
     return authState(this.auth).pipe(
       switchMap((user: User | null) => {

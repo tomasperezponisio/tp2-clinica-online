@@ -1,16 +1,9 @@
 import { Routes } from '@angular/router';
 import {adminGuard} from "./guards/admin.guard";
-import {UsuariosComponent} from "./componentes/usuarios/usuarios.component";
-import {MiPerfilComponent} from "./componentes/mi-perfil/mi-perfil.component";
 import {authGuard} from "./guards/auth.guard";
-import {MisTurnosComponent} from "./componentes/mis-turnos/mis-turnos.component";
-import {TurnosComponent} from "./componentes/turnos/turnos.component";
-import {SolicitarTurnosComponent} from "./componentes/solicitar-turnos/solicitar-turnos.component";
 import {adminYPacienteGuard} from "./guards/admin-y-paciente.guard";
 import {especialistaYPacienteGuard} from "./guards/especialista-y-paciente.guard";
-import {PacientesComponent} from "./componentes/pacientes/pacientes.component";
 import {especialistaGuard} from "./guards/especialista.guard";
-import {InformesComponent} from "./componentes/informes/informes.component";
 
 export const routes: Routes = [
   {

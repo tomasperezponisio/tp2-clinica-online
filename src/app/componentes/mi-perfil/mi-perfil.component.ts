@@ -47,6 +47,11 @@ export class MiPerfilComponent implements OnInit {
   ) {
   }
 
+  /**
+   * Método de ciclo de vida que se ejecuta cuando se inicializa el componente.
+   *
+   * @return {void} No devuelve ningún valor.
+   */
   ngOnInit(): void {
     this.userData$ = this.usuariosService.userData$;
 
@@ -72,7 +77,13 @@ export class MiPerfilComponent implements OnInit {
     });
   }
 
-  // Filter based on selected especialista
+  /**
+   * Filtra las historias clínicas según el especialista seleccionado.
+   * Si el especialista seleccionado es 'Todos', se mostrarán todas las historias clínicas.
+   * De lo contrario, solo se mostrarán las historias clínicas del especialista seleccionado.
+   *
+   * @return {void} No retorna ningún valor.
+   */
   filtrar(): void {
     if (this.selectedEspecialista === 'Todos') {
       this.historiasClinicasFiltradas = [...this.historiasClinicas];
@@ -93,7 +104,16 @@ export class MiPerfilComponent implements OnInit {
     );
   }
 
-  descargarComoPDF() {
+  /**
+   * Genera un archivo PDF a partir del contenido HTML de la página.
+   *
+   * Este método captura el contenido HTML de un elemento específico,
+   * añade un logo, el nombre de usuario y la fecha de emisión,
+   * y finalmente descarga dicho contenido en formato PDF.
+   *
+   * @return {void} No retorna ningún valor.
+   */
+  descargarComoPDF(): void {
     const pdfContent = this.pdfContent.nativeElement;
 
     const logoUrl = 'https://i.imgur.com/e7Swn1C.png';

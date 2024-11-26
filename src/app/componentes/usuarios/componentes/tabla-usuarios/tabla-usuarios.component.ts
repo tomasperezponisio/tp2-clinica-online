@@ -43,6 +43,16 @@ export class TablaUsuariosComponent implements OnInit {
   ) {
   }
 
+  /**
+   * Método del ciclo de vida de Angular que se ejecuta al inicializar el componente.
+   *
+   * Inicializa el formulario `formUsuario` con un grupo que contiene el campo `tipoDeUsuario` establecido en 'paciente'.
+   * Obtiene la lista de usuarios a través del servicio `usuariosService` y la asigna a `usuarios$`.
+   * Configura un suscriptor para actualizar `tipoDeUsuario` y filtrar la lista de usuarios siempre que cambie la selección del tipo de usuario.
+   * Filtra la lista de usuarios basada en el tipo de usuario seleccionado.
+   *
+   * @return {void} No devuelve ningún valor.
+   */
   ngOnInit(): void {
     this.formUsuario = this.fb.group({
       tipoDeUsuario: ['paciente']
@@ -60,17 +70,38 @@ export class TablaUsuariosComponent implements OnInit {
     this.filtrarUsuarios();
   }
 
+  /**
+   * Filtra usuarios en función del tipo de usuario especificado.
+   * Asigna el resultado filtrado a la propiedad `usuariosFiltrados$`.
+   * @return {void} No devuelve ningún valor.
+   */
   filtrarUsuarios(): void {
     this.usuariosFiltrados$ = this.usuarios$.pipe(
       map(usuarios => usuarios.filter(usuario => usuario.tipo === this.tipoDeUsuario))
     );
   }
 
-  toggleVerificado(user: any) {
+  /**
+   * Cambia el estado de verificación de un usuario. Si el usuario está
+   * verificado, lo desverifica y viceversa. Luego, actualiza este estado
+   * en el servicio de usuarios.
+   *
+   * @param {Object} user - El objeto usuario cuyo estado de verificación
+   * se desea cambiar. Debe incluir las propiedades `uid` y `verificado`.
+   *
+   * @return {void}
+   */
+  toggleVerificado(user: any): void {
     user.verificado = !user.verificado;
     this.usuariosService.actualizarVerificado(user.uid, user.verificado);
   }
 
+  /**
+   * Muestra la historia clínica del paciente seleccionado.
+   *
+   * @param {any} usuario - El objeto que representa el usuario del cual se desea mostrar la historia clínica.
+   * @return {void} No retorna ningún valor.
+   */
   mostrarHistoriaClinica(usuario: any): void {
     this.pacienteSeleccionado = usuario;
     this.turnosService.traerHistoriaClinicaPaciente(usuario.uid).then(historias => {
@@ -83,12 +114,28 @@ export class TablaUsuariosComponent implements OnInit {
     });
   }
 
+  /**
+   * Este método cierra el modal de la historia clínica.
+   *
+   * Al invocar este método, se realiza lo siguiente:
+   * - La propiedad `mostrarModalHistoriaClinica` se establece en `false`, ocultando el modal.
+   * - La propiedad `pacienteSeleccionado` se establece en `null`, limpiando cualquier selección de paciente.
+   * - La propiedad `historiasClinicas` se inicializa como un arreglo vacío.
+   *
+   * @return {void} No se devuelve ningún valor.
+   */
   cerrarModal(): void {
     this.mostrarModalHistoriaClinica = false;
     this.pacienteSeleccionado = null;
     this.historiasClinicas = [];
   }
 
+  /**
+   * Exporta los turnos de un usuario a un archivo Excel.
+   *
+   * @param {any} usuario - El usuario cuya información de turnos se va a exportar.
+   * @return {void} No retorna ningún valor.
+   */
   exportTurnosToExcel(usuario: any): void {
     console.log(`Fetching turnos for user: ${usuario.uid}`);
     const nombreCompleto = usuario.nombre + ' ' + usuario.apellido;

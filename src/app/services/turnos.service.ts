@@ -24,6 +24,12 @@ export class TurnosService {
     private firestore: Firestore
   ) { }
 
+  /**
+   * Solicita un turno agregando un nuevo documento en la colección de turnos en Firestore.
+   *
+   * @param {Turno} turno - El objeto turno que contiene la información del turno a solicitar.
+   * @return {Promise<void>} - Una promesa que se resuelve cuando se completa la operación de agregar el turno.
+   */
   async solicitarTurno(turno: Turno): Promise<void> {
     const turnosCollection = collection(this.firestore, 'turnos');
     await addDoc(turnosCollection, turno);
@@ -91,6 +97,11 @@ export class TurnosService {
     return bloques;
   }
 
+  /**
+   * Obtiene la hora actual en minutos desde la medianoche.
+   *
+   * @return El tiempo actual en minutos desde las 00:00 horas.
+   */
   private getCurrentTimeInMinutes(): number {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
@@ -127,38 +138,83 @@ export class TurnosService {
     return bloquesReservados;
   }
 
+  /**
+   * Convierte una cadena de tiempo en minutos.
+   *
+   * @param {string} timeStr - La cadena de tiempo en formato "HH:MM".
+   * @return {number} - El tiempo en minutos.
+   */
   private parseTime(timeStr: string): number {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
   }
 
+  /**
+   * Convierte una cantidad de minutos en una representación de tiempo con formato hh:mm.
+   *
+   * @param {number} minutes - La cantidad de minutos que se desea convertir.
+   * @return {string} - La representación de tiempo en formato hh:mm.
+   */
   private formatTime(minutes: number): string {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
   }
 
+  /**
+   * Formatea un objeto de fecha en una cadena con el formato 'YYYY-MM-DD'.
+   *
+   * @param {Date} date - El objeto de fecha que se formateará.
+   * @return {string} La fecha formateada en el formato 'YYYY-MM-DD'.
+   */
   private formatDate(date: Date): string {
     return date.toISOString().split('T')[0]; // 'YYYY-MM-DD'
   }
 
+  /**
+   *
+   * Devuelve el nombre del día de la semana en español para una fecha dada.
+   *
+   * @param {Date} date - La fecha de la cual se desea obtener el nombre del día de la semana.
+   * @return {string} El nombre del día de la semana en español.
+   */
   private getDayName(date: Date): string {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     return days[date.getDay()];
   }
 
+  /**
+   * Recupera los turnos de un paciente específico a partir de su UID.
+   *
+   * @param {string} pacienteUid - El UID del paciente cuyos turnos se desean recuperar.
+   * @return {Observable<Turno[]>} Un observable que emite una lista de turnos del paciente especificado.
+   */
   traerTurnosPorUidDePaciente(pacienteUid: string): Observable<Turno[]> {
     const turnosRef = collection(this.firestore, 'turnos');
     const q = query(turnosRef, where('pacienteUid', '==', pacienteUid));
     return collectionData(q, { idField: 'id' }) as Observable<Turno[]>;
   }
 
+  /**
+   * Obtiene los turnos de un especialista según su UID.
+   *
+   * @param {string} especialistaUid - El UID del especialista.
+   * @return {Observable<Turno[]>} - Un observable que emite una lista de turnos asociados al especialista.
+   */
   getTurnosByEspecialistaUid(especialistaUid: string): Observable<Turno[]> {
     const turnosRef = collection(this.firestore, 'turnos');
     const q = query(turnosRef, where('especialistaUid', '==', especialistaUid));
     return collectionData(q, { idField: 'id' }) as Observable<Turno[]>;
   }
 
+  /**
+   * Actualiza un turno existente en la base de datos.
+   *
+   * @param {Turno} turno - El objeto Turno que contiene los datos del turno a actualizar.
+   *                         Debe incluir una propiedad 'id' que identifique al turno.
+   * @return {Promise<void>} - Una promesa que se resuelve cuando la actualización es exitosa
+   *                           o se rechaza si el ID del turno falta o si ocurre un error durante la actualización.
+   */
   updateTurno(turno: Turno): Promise<void> {
     if (!turno.id) {
       return Promise.reject('Turno ID is missing');
@@ -168,6 +224,11 @@ export class TurnosService {
   }
 
   // turnos.service.ts
+  /**
+   * Obtiene todos los turnos almacenados en la colección 'turnos' de Firestore.
+   *
+   * @return {Observable<Turno[]>} Un observable que emite una lista de objetos Turno.
+   */
   traerTodosLosTurnos(): Observable<Turno[]> {
     const turnosRef = collection(this.firestore, 'turnos');
     const q = query(turnosRef); // You can apply filters if needed
@@ -175,9 +236,10 @@ export class TurnosService {
   }
 
   /**
-   * Retrieves all 'realizado' turnos for a given patient.
-   * @param pacienteUid - The patient's UID.
-   * @returns A Promise with a list of turnos containing historiaClinica.
+   * Obtiene la historia clínica del paciente especificado por el UID.
+   *
+   * @param {string} uid - El UID del paciente cuya historia clínica se desea obtener.
+   * @return {Promise<any[]>} Una promesa que se resuelve en un arreglo con las historias clínicas del paciente.
    */
   async traerHistoriaClinicaPaciente(uid: string): Promise<any[]> {
     const turnosRef = collection(this.firestore, 'turnos');
@@ -203,71 +265,12 @@ export class TurnosService {
     return historiasClinicas;
   }
 
-
   /**
-   * Retrieves all unique patients an especialista has attended at least once.
-   * @param especialistaUid - The specialist's UID.
-   * @returns A Promise with a list of patients.
+   * Trae una lista de pacientes atendidos por un especialista en particular.
+   *
+   * @param {string} especialistaUid - El UID del especialista cuyos pacientes atendidos se quieren obtener.
+   * @return {Promise<any[]>} Una promesa que resuelve a un array de objetos que contienen información de los pacientes, como su UID, nombre completo e imagen.
    */
-/*
-  async traerPacientesAtendidos(especialistaUid: string): Promise<any[]> {
-    // Reference to the 'turnos' collection in Firestore
-    const turnosRef = collection(this.firestore, 'turnos');
-
-    // Query to find all turnos attended by the current especialista with status 'realizado'
-    const q = query(
-      turnosRef,
-      where('especialistaUid', '==', especialistaUid), // Filter by especialista's UID
-      where('estado', '==', 'realizado') // Only include finalized appointments
-    );
-
-    // Perform the query and get the matching documents
-    const snapshot = await getDocs(q);
-
-    // Create a map to store patients (avoids duplicates)
-    const pacientesMap = new Map<string, any>();
-
-    // A set to track all unique patient UIDs attended by this especialista
-    const pacienteUids = new Set<string>();
-
-    // Iterate through each turno (appointment) document from the query results
-    snapshot.forEach(doc => {
-      const data = doc.data(); // Get the appointment data
-
-      // Check if the appointment has a valid patient UID
-      if (data['pacienteUid']) {
-        pacienteUids.add(data['pacienteUid']); // Add the patient's UID to the set
-
-        // If the patient is not already in the map, add a new entry
-        if (!pacientesMap.has(data['pacienteUid'])) {
-          pacientesMap.set(data['pacienteUid'], {
-            uid: data['pacienteUid'], // Patient's UID
-            nombre: data['pacienteNombre'], // Patient's name
-            historiasClinicas: [], // Initialize an empty array for their medical histories
-          });
-        }
-      }
-    });
-
-    // Now we need to fetch all medical histories (historias clinicas) for the patients
-    for (const pacienteUid of pacienteUids) {
-      // Fetch all finalized medical histories for this patient
-      const historias = await this.traerHistoriaClinicaPaciente(pacienteUid);
-
-      // Retrieve the existing patient object from the map
-      const paciente = pacientesMap.get(pacienteUid);
-
-      // If the patient exists in the map, append their medical histories
-      if (paciente) {
-        paciente.historiasClinicas.push(...historias); // Add all medical histories to the array
-      }
-    }
-
-    // Convert the map to an array and return it
-    return Array.from(pacientesMap.values());
-  }
-*/
-
   async traerPacientesAtendidos(especialistaUid: string): Promise<any[]> {
     const turnosRef = collection(this.firestore, 'turnos');
 

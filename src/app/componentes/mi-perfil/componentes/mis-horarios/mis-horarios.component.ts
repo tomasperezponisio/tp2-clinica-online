@@ -31,6 +31,15 @@ export class MisHorariosComponent implements OnInit {
     private alertService: AlertService,
   ) {}
 
+  /**
+   * Método de ciclo de vida de Angular que se ejecuta una vez que se inicializa el componente.
+   * Inicializa la lista de disponibilidad del especialista si no está definida.
+   * Configura el formulario de horario.
+   * Inicia las disponibilidades del especialista.
+   * Genera las horas disponibles entre las 8:00 y las 19:00.
+   *
+   * @return {void} No devuelve ningún valor.
+   */
   ngOnInit(): void {
     // Initialize disponibilidad if it's undefined
     if (!this.especialista.disponibilidad) {
@@ -47,6 +56,13 @@ export class MisHorariosComponent implements OnInit {
 
   }
 
+  /**
+   * Genera una lista de horas en formato de cadena, en un rango especificado.
+   *
+   * @param {number} start - La hora de inicio del rango (inclusive).
+   * @param {number} end - La hora de fin del rango (inclusive).
+   * @return {string[]} Una lista de horas en formato "HH:00".
+   */
   generarHoras(start: number, end: number): string[] {
     const hours = [];
     for (let i = start; i <= end; i++) {
@@ -55,7 +71,16 @@ export class MisHorariosComponent implements OnInit {
     return hours;
   }
 
-  iniciarDisponibilidades() {
+  /**
+   * Inicializa las disponibilidades del especialista basándose en su especialidad.
+   * Este método actualiza un FormArray con varias estructuras de formulario para cada especialidad,
+   * incorporando los días, horarios de inicio y fin, y duración del turno, todos provenientes del objeto especialista.
+   * Si ya existen disponibilidades previamente almacenadas para alguna especialidad, estos valores son incluidos.
+   * Adiciona validadores específicos para los horarios de la clínica.
+   *
+   * @return {void} No retorna ningún valor.
+   */
+  iniciarDisponibilidades(): void {
     const disponibilidades = this.horarioForm.get('disponibilidades') as FormArray;
 
     this.especialista.especialidad.forEach((esp) => {
@@ -74,6 +99,12 @@ export class MisHorariosComponent implements OnInit {
     });
   }
 
+  /**
+   * Construye un FormArray de los días de la semana con base en los días seleccionados.
+   *
+   * @param {string[]} selectedDias - Arreglo de cadenas que representan los días seleccionados.
+   * @return {FormArray} FormArray donde cada control indica si el día correspondiente ha sido seleccionado.
+   */
   buildDiasFormArray(selectedDias: string[]): FormArray {
     const arr = this.diasSemana.map(dia => {
       return this.fb.control(selectedDias.includes(dia));
@@ -81,19 +112,35 @@ export class MisHorariosComponent implements OnInit {
     return this.fb.array(arr);
   }
 
+  /**
+   * Obtiene el array de formularios para las disponibilidades del horario.
+   *
+   * @return {FormArray} El array de formularios asociado a las disponibilidades del horario.
+   */
   get disponibilidades(): FormArray {
     return this.horarioForm.get('disponibilidades') as FormArray;
   }
 
+  /**
+   * Obtiene el FormArray de días a partir de un índice específico en el array de disponibilidades.
+   *
+   * @param {number} index - El índice del array de disponibilidades del cual se desea obtener el FormArray de días.
+   * @return {FormArray} - El FormArray de días correspondiente al índice especificado.
+   */
   getDiasFormArray(index: number): FormArray {
     return this.disponibilidades.at(index).get('dias') as FormArray;
   }
 
-  getDiaLabel(index: number): string {
-    return this.diasSemana[index];
-  }
-
-  guardarHorarios() {
+  /**
+   * Guarda los horarios de disponibilidad del especialista y actualiza la información del usuario.
+   *
+   * Este método recorre los controles de disponibilidad y asigna los valores seleccionados a un objeto
+   * que luego se guardará en el atributo `disponibilidad` del especialista. Finalmente, se actualiza
+   * la información del usuario y se maneja el resultado de forma apropiada.
+   *
+   * @return {void} No retorna ningún valor.
+   */
+  guardarHorarios(): void {
     const disponibilidadData: Disponibilidad[] = this.disponibilidades.controls.map((group, i) => {
       const diasControlArray = group.get('dias') as FormArray;
       const selectedDias = diasControlArray.controls
@@ -122,7 +169,13 @@ export class MisHorariosComponent implements OnInit {
       });
   }
 
-  validarHorariosDeLaClinica(group: FormGroup) {
+  /**
+   * Valida que el horario de inicio sea anterior al horario de fin.
+   *
+   * @param {FormGroup} group - El formulario que contiene los campos de horario de inicio y horario de fin.
+   * @return {null|{invalidTimeRange: true}} - Retorna un objeto con la propiedad `invalidTimeRange: true` si el horario de inicio es mayor o igual al horario de fin, de lo contrario retorna null.
+   */
+  validarHorariosDeLaClinica(group: FormGroup): null | { invalidTimeRange: true } {
     const horarioInicio = group.get('horarioInicio')?.value;
     const horarioFin = group.get('horarioFin')?.value;
 

@@ -32,10 +32,6 @@ export class RegisterComponent {
     });
   }
 
-  // get tipoDeUsuario() {
-  //   const control = this.formUsuario.get('tipoDeUsuario');
-  //   return control ? control.value : null;
-  // }
 
   /**
    * Método para seleccionar el tipo de usuario.

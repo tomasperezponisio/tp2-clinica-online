@@ -70,57 +70,105 @@ export class SolicitarTurnosComponent implements OnInit {
   ) {
   }
 
+  /**
+   * Inicializa el componente obteniendo el usuario actual y actualizando su rol.
+   * Si el usuario es admin, obtiene la lista de pacientes y ajusta el paso máximo.
+   * También obtiene la lista de especialidades.
+   * @return {void} No retorna un valor.
+   */
   ngOnInit(): void {
     this.authService.traerUsuarioActual().subscribe(user => {
       this.usuarioActual = user;
-      this.tipoDeUsuario = user.tipo; // Determine the user's role
+      this.tipoDeUsuario = user.tipo;
 
-      // If the user is an admin, fetch the list of pacientes
       if (this.tipoDeUsuario === 'admin') {
         this.traerPacientes();
-        this.maxStep = 5; // Admins have an extra step
+        this.maxStep = 5;
       }
     });
 
     this.traerEspecialidades();
   }
 
-  traerPacientes() {
+  /**
+   * Método para obtener la lista de pacientes a través del servicio `usuariosService`.
+   *
+   * @return {void} No retornará ningún valor directamente, pero suscribirá a los datos de pacientes.
+   */
+  traerPacientes(): void {
     this.usuariosService.traerPacientes().subscribe(pacientes => {
       this.pacientes = pacientes;
     });
   }
 
-  elegirPaciente(paciente: any) {
+  /**
+   * Selecciona un paciente y avanza al siguiente paso en el proceso.
+   *
+   * @param {object} paciente - El paciente que será seleccionado.
+   * @return {void} - No retorna ningún valor.
+   */
+  elegirPaciente(paciente: any): void {
     this.pacienteSeleccionado = paciente;
     this.step += 1; // Move to the next step
   }
 
-  traerEspecialidades() {
+  /**
+   * Método que trae las especialidades desde el servicio de usuarios y las asigna a la propiedad local.
+   *
+   * @return {void} Este método no retorna un valor explícito, actualiza la propiedad "especialidades" de la instancia actual.
+   */
+  traerEspecialidades(): void {
     this.usuariosService.traerEspecialidades().subscribe(especialidades => {
       this.especialidades = especialidades;
     });
   }
 
-  elegirEspecialidad(especialidad: string) {
+  /**
+   * Selecciona una especialidad y avanza al siguiente paso del proceso.
+   *
+   * @param {string} especialidad - El nombre de la especialidad que se va a seleccionar.
+   * @return {void} Esta función no retorna un valor.
+   */
+  elegirEspecialidad(especialidad: string): void {
     this.especialidadSeleccionada = especialidad;
     this.step += 1; // Move to the next step
     this.traerEspecialistas();
   }
 
-  traerEspecialistas() {
+  /**
+   * Método que obtiene la lista de especialistas según la especialidad seleccionada.
+   * Realiza una llamada al servicio usuariosService para obtener los especialistas.
+   * Al suscribirse, asigna la lista de especialistas obtenida a la propiedad especialistas.
+   *
+   * @return {void} No devuelve ningún valor.
+   */
+  traerEspecialistas(): void {
     this.usuariosService.traerEspecialistasPorEspecialidad(this.especialidadSeleccionada).subscribe(especialistas => {
       this.especialistas = especialistas;
     });
   }
 
-  elegirEspecialista(especialista: Especialista) {
+  /**
+   * Selecciona un especialista y avanza al siguiente paso del proceso.
+   *
+   * @param {Especialista} especialista - El especialista seleccionado.
+   * @return {void} No devuelve ningún valor.
+   */
+  elegirEspecialista(especialista: Especialista): void {
     this.especialistaSeleccionado = especialista;
     this.step += 1; // Move to the next step
     this.traerBloquesDisponibles();
   }
 
-  traerBloquesDisponibles() {
+  /**
+   * Método para traer los bloques disponibles.
+   * Este método verifica si se ha seleccionado un especialista y una especialidad,
+   * y en ese caso, solicita al servicio de turnos los bloques disponibles para dicha combinación.
+   * Los bloques disponibles son luego asignados a la propiedad 'bloquesDisponibles'.
+   *
+   * @return {void} No retorna ningún valor.
+   */
+  traerBloquesDisponibles(): void {
     if (this.especialistaSeleccionado && this.especialidadSeleccionada) {
       this.turnosService.generarBloquesDisponibles(this.especialistaSeleccionado, this.especialidadSeleccionada).then(slots => {
         this.bloquesDisponibles = slots;
@@ -128,12 +176,29 @@ export class SolicitarTurnosComponent implements OnInit {
     }
   }
 
-  seleccionarBloque(slot: Bloque) {
+  /**
+   * Selecciona un bloque específico y avanza un paso en el proceso.
+   *
+   * @param {Bloque} slot - El bloque que se va a seleccionar.
+   * @return {void} No retorna ningún valor.
+   */
+  seleccionarBloque(slot: Bloque): void {
     this.bloqueSeleccionado = slot;
     this.step += 1; // Move to the next step
   }
 
-  confirmarTurno() {
+  /**
+   * Confirma la solicitud de un turno médico.
+   *
+   * Basado en el rol del usuario (admin o paciente), determina el paciente adecuado y
+   * crea un objeto de turno que incluye datos del paciente, especialista, especialidad,
+   * fecha y hora del turno. Si todos los datos necesarios están disponibles, solicita el turno
+   * a través del servicio `turnosService` y muestra una alerta de éxito en caso de que la
+   * solicitud sea exitosa. En caso de error, imprime el error en la consola.
+   *
+   * @return {void} No retorna ningún valor.
+   */
+  confirmarTurno(): void {
     // Determine the paciente based on user role
     const paciente = this.tipoDeUsuario === 'admin' ? this.pacienteSeleccionado : this.usuarioActual;
 
@@ -160,7 +225,15 @@ export class SolicitarTurnosComponent implements OnInit {
     }
   }
 
-  resetSelections() {
+  /**
+   * Restablece las selecciones en la aplicación.
+   *
+   * Este método reinicia la variable `step` a 1 y limpia todas las selecciones previas
+   * de especialidad, especialista, bloque y paciente.
+   *
+   * @return {void} Este método no retorna ningún valor.
+   */
+  resetSelections(): void {
     this.step = 1;
     this.especialidadSeleccionada = '';
     this.especialistaSeleccionado = null;
@@ -168,11 +241,23 @@ export class SolicitarTurnosComponent implements OnInit {
     this.pacienteSeleccionado = null;
   }
 
+  /**
+   * Obtiene un arreglo de objetos Date a partir de las fechas únicas en los bloques disponibles.
+   *
+   * @return {Date[]} Arreglo de objetos Date correspondientes a las fechas únicas.
+   */
   traerFechas(): Date[] {
     const dateStrings = Array.from(new Set(this.bloquesDisponibles.map(slot => slot.fecha)));
     return dateStrings.map(dateStr => new Date(dateStr + 'T00:00:00'));
   }
 
+  /**
+   * Obtiene una lista de bloques disponibles filtrados por la fecha proporcionada.
+   *
+   * @param {string | Date | null} date - La fecha para filtrar los bloques. Puede ser una cadena en formato
+   * de fecha o un objeto Date. Si es null, se devolverá un arreglo vacío.
+   * @return {Bloque[]} Un arreglo de bloques disponibles que coinciden con la fecha proporcionada.
+   */
   traerBloquesPorFecha(date: string | Date | null): Bloque[] {
     if (!date) {
       return []; // Return an empty array if no date is provided
@@ -182,6 +267,12 @@ export class SolicitarTurnosComponent implements OnInit {
     return this.bloquesDisponibles.filter(slot => slot.fecha === dateStr);
   }
 
+  /**
+   * Formatea una fecha dada en el formato "YYYY-MM-DD".
+   *
+   * @param {Date} date - La fecha que se desea formatear.
+   * @return {string} La fecha formateada como una cadena en el formato "YYYY-MM-DD".
+   */
   formatearFecha(date: Date): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
@@ -189,6 +280,13 @@ export class SolicitarTurnosComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
+  /**
+   * Obtiene la URL de la imagen correspondiente a la especialidad dada.
+   *
+   * @param {string} especialidad - El nombre de la especialidad para la cual se busca la imagen.
+   * @return {string} La URL de la imagen correspondiente a la especialidad dada,
+   *                   o la imagen por defecto si no se encuentra una coincidencia.
+   */
   traerImagenDeEspecialidad(especialidad: string): string {
     const lowerEspecialidad = especialidad.toLowerCase();
     const match = this.imagenesEspecialidades.find(imgObj => Object.keys(imgObj)[0].toLowerCase() === lowerEspecialidad);
@@ -201,6 +299,12 @@ export class SolicitarTurnosComponent implements OnInit {
     return defaultMatch ? defaultMatch['Default'] : '';
   }
 
+  /**
+   * Selecciona una fecha y avanza al siguiente paso del proceso.
+   *
+   * @param {Date} date - La fecha que será seleccionada.
+   * @return {void} No retorna ningún valor.
+   */
   seleccionarFecha(date: Date): void {
     this.fechaSeleccionada = this.formatearFecha(date); // Store the selected date
     this.step += 1; // Move to the next step

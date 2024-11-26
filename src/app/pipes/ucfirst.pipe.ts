@@ -1,5 +1,13 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * UcfirstPipe es una clase que implementa la interfaz PipeTransform.
+ *
+ * Este pipe toma una cadena de texto como entrada y transforma la
+ * primera letra a mayúscula y el resto de las letras a minúsculas.
+ *
+ * @class
+ */
 @Pipe({
   name: 'ucfirst',
   standalone: true

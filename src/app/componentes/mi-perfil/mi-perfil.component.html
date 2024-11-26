@@ -96,7 +96,7 @@
       </div>
 
       <!-- Boton exportar a PDF -->
-      <div class="text-center mt-4">
+      <div *ngIf="historiasClinicasFiltradas.length > 0" class="text-center mt-4">
         <button class="btn btn-primary" (click)="descargarComoPDF()">Exportar a PDF</button>
       </div>
 

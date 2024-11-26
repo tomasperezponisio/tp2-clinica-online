@@ -58,6 +58,14 @@ export class InformesComponent implements OnInit {
     Chart.register(...registerables);
   }
 
+  /**
+   * Método llamado al iniciar el componente. Realiza varias operaciones asíncronas para obtener y formatear datos
+   * necesarios para la generación de diferentes gráficos y reportes. Establece intervalos de fechas y llama a métodos
+   * de generación de gráficos específicos para especialidades, turnos por día, turnos por médico, turnos finalizados
+   * por médico y logins por día. Marca la carga del componente como completada al terminar.
+   *
+   * @return {Promise<void>} Promesa que se resuelve cuando todas las operaciones asíncronas han finalizado.
+   */
   async ngOnInit(): Promise<void> {
     const data = await this.reportesService.traerTurnosPorEspecialidad();
     this.chartEspecialidades(data);
@@ -85,6 +93,12 @@ export class InformesComponent implements OnInit {
   }
 
   // ################# TURNOS POR ESPECIALIDAD ###############################
+  /**
+   * Genera un gráfico de barras que muestra la cantidad de turnos por especialidad médica.
+   *
+   * @param {Object} data Un objeto donde las claves son las especialidades y los valores la cantidad de turnos.
+   * @return {void} No retorna ningún valor.
+   */
   chartEspecialidades(data: any): void {
     const ctx1 = (document.getElementById('chartEspecialidades') as HTMLCanvasElement).getContext('2d');
     if (!ctx1) return;
@@ -126,6 +140,15 @@ export class InformesComponent implements OnInit {
   }
 
   // ################# TURNOS POR DIA ###############################
+  /**
+   * Genera un gráfico de barras apiladas que muestra la cantidad de turnos por día diferenciados por su estado.
+   * La gráfica es generada en un elemento canvas con el id 'chartTurnosPorDia'.
+   * Destruye la gráfica anterior si ya existe para evitar duplicación.
+   * Los estados considerados son: 'pendiente', 'aceptado', 'rechazado', 'cancelado', y 'realizado'.
+   * Los datos son obtenidos desde un servicio que devuelve turnos por día y estado dentro del rango de fechas especificado.
+   *
+   * @return {Promise<void>} Una promesa que se resuelve cuando la gráfica ha sido generada y representada en el canvas.
+   */
   async chartTurnosPorDia(): Promise<void> {
     const data = await this.reportesService.traerTurnosPorDiaAndEstado(this.fechaInicioTurnos, this.fechaFinTurnos);
 
@@ -179,16 +202,36 @@ export class InformesComponent implements OnInit {
     });
   }
 
+  /**
+   * Formatea la fecha dada en un string en el formato YYYY-MM-DD.
+   *
+   * @param {Date} date - La fecha a formatear.
+   * @return {string} La fecha formateada en el formato YYYY-MM-DD.
+   */
   formatDate(date: Date): string {
     return date.toISOString().split('T')[0];
   }
 
+  /**
+   * Resta una cantidad específica de días a una fecha dada.
+   *
+   * @param {Date} date - La fecha de inicio que se utilizará para la resta.
+   * @param {number} days - El número de días que se restarán de la fecha.
+   * @return {Date} - Una nueva fecha que representa la fecha original menos los días especificados.
+   */
   subtractDays(date: Date, days: number): Date {
     const result = new Date(date);
     result.setDate(result.getDate() - days);
     return result;
   }
 
+  /**
+   * Obtiene el color correspondiente para un estado dado.
+   *
+   * @param {string} estado - El nombre del estado para el cual se necesita obtener el color.
+   *
+   * @return {string} El color en formato RGBA correspondiente al estado proporcionado.
+   */
   getColorForEstado(estado: string): string {
     const colors: { [key: string]: string } = {
       cancelado: 'rgba(255, 99, 132, 0.8)',
@@ -201,10 +244,16 @@ export class InformesComponent implements OnInit {
   }
 
   // ################# LOGINS ###############################
+  /**
+   * Procesa una lista de registros de inicio de sesión y los agrupa por día.
+   *
+   * @param {any[]} logins - Una lista de objetos de login, cada uno con la propiedad `fecha`, `email`, `nombreYApellido` y `tipo`.
+   * @return {void} No devuelve ningún valor.
+   */
   LoginsPorDia(logins: any[]): void {
     this.loginsPorDia = logins.reduce((acc: any, login: any) => {
       const date = new Date(login.fecha.seconds * 1000); // Firestore timestamp
-      const formattedDate = date.toISOString().split('T')[0]; // Store in ISO format for grouping (e.g., 2024-11-24)
+      const formattedDate = date.toLocaleDateString('es-AR');
 
       if (!acc[formattedDate]) {
         acc[formattedDate] = [];
@@ -216,10 +265,17 @@ export class InformesComponent implements OnInit {
         hora: date,
       });
 
+      acc[formattedDate].sort((a: any, b: any) => b.hora.getTime() - a.hora.getTime());
+
       return acc;
     }, {});
   }
 
+  /**
+   * Filtra los inicios de sesión (logins) dentro de un rango de fechas especificado.
+   *
+   * @return {Promise<void>} Una promesa que se resuelve cuando la operación de filtrado se ha completado.
+   */
   async filtrarLogins(): Promise<void> {
     if (this.fechaInicioLogins && this.fechaFinLogins) {
       this.loading = true;
@@ -237,6 +293,13 @@ export class InformesComponent implements OnInit {
   protected readonly Object = Object;
 
   // ################# TURNOS POR ESPECIALISTA ###############################
+  /**
+   * Genera un gráfico de barras que representa la cantidad de turnos por médico
+   * en un rango de fechas especificado. Utiliza los datos obtenidos desde el
+   * servicio de reportes y los renderiza en un canvas con id 'chartTurnosPorMedico'.
+   *
+   * @return {Promise<void>} Promesa que se resuelve cuando el gráfico ha sido generado.
+   */
   async chartTurnosPorMedico(): Promise<void> {
     const data = await this.reportesService.traerTurnosPorMedico(this.fechaInicioTurnos, this.fechaFinTurnos);
 
@@ -287,6 +350,17 @@ export class InformesComponent implements OnInit {
   }
 
   // ################# TURNOS FINALIZADOS POR ESPECIALISTA ###############################
+  /**
+   * Método que genera un gráfico de barras mostrando la cantidad de turnos
+   * finalizados por cada médico, en un rango de fechas especificado.
+   *
+   * Obtiene los datos de turnos finalizados desde un servicio de reportes, y
+   * utiliza la librería Chart.js para renderizar el gráfico en un elemento
+   * canvas del documento HTML.
+   *
+   * @return {Promise<void>} Una promesa que resuelve cuando el gráfico ha sido
+   * generado y renderizado en la página.
+   */
   async chartTurnosFinalizadosPorMedico(): Promise<void> {
     const data = await this.reportesService.traerTurnosFinalizadosPorMedico(this.fechaInicioTurnosFinalizados, this.fechaFinTurnosFinalizados);
 
@@ -336,7 +410,14 @@ export class InformesComponent implements OnInit {
     });
   }
 
-  descargarComoPDF() {
+  /**
+   * Genera y descarga un informe en formato PDF que incluye diversas secciones
+   * estadísticamente relevantes de la administración de la clínica. El informe
+   * incluye un encabezado con fecha de generación y un pie de página con numeración.
+   *
+   * @return {void} No devuelve un valor, inicia la descarga del PDF generado.
+   */
+  descargarComoPDF(): void {
     const logoUrl = 'https://i.imgur.com/e7Swn1C.png';
 
     const getCurrentDateTime = (): string => {
@@ -356,11 +437,11 @@ export class InformesComponent implements OnInit {
     const pdfWidth = pdf.internal.pageSize.getWidth();
 
     const sections = [
-      {id: 'loginsSection', title: 'Log de Ingresos al Sistema'},
       {id: 'turnosEspecialidadSection', title: 'Cantidad de Turnos por Especialidad'},
       {id: 'turnosDiaSection', title: 'Cantidad de Turnos por Día'},
       {id: 'turnosMedicoSection', title: 'Cantidad de Turnos Solicitado por Médico'},
       {id: 'turnosFinalizadosMedicoSection', title: 'Cantidad de Turnos Finalizados por Médico'},
+      {id: 'loginsSection', title: 'Log de Ingresos al Sistema'},
     ];
 
     const addHeader = () => {

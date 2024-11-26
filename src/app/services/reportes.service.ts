@@ -12,6 +12,15 @@ export class ReportesService {
     private firestore: Firestore
   ) {}
 
+  /**
+   * Obtiene y cuenta los turnos por especialidad desde la base de datos.
+   *
+   * Esta función se conecta a la colección 'turnos' en Firestore, obtiene todos los documentos de
+   * dicha colección y cuenta cuántos turnos hay para cada especialidad.
+   *
+   * @return {Promise<Object>} Un objeto donde las llaves son las especialidades y los valores
+   * son la cantidad de turnos correspondientes a cada especialidad.
+   */
   async traerTurnosPorEspecialidad(): Promise<any> {
     const turnosRef = collection(this.firestore, 'turnos');
     const snapshot = await getDocs(turnosRef);
@@ -25,6 +34,15 @@ export class ReportesService {
     return counts;
   }
 
+  /**
+   * Obtiene los turnos dentro de un rango de fechas y los agrupa por fecha y estado.
+   *
+   * @param {string} startDate - La fecha de inicio del rango en formato AAAA-MM-DD.
+   * @param {string} endDate - La fecha de fin del rango en formato AAAA-MM-DD.
+   * @return {Promise<any>} Una promesa que resuelve en un objeto donde las claves son las fechas
+   * y los valores son objetos que contienen la cantidad de turnos en cada estado
+   * (pendiente, aceptado, rechazado, cancelado, realizado).
+   */
   async traerTurnosPorDiaAndEstado(startDate: string, endDate: string): Promise<any> {
     const turnosRef = collection(this.firestore, 'turnos');
     const q = query(
@@ -51,22 +69,47 @@ export class ReportesService {
     return counts;
   }
 
+  /**
+   * Verifica si una fecha dada es un domingo.
+   *
+   * @param {string} dateStr - La fecha en formato de cadena (YYYY-MM-DD).
+   * @return {boolean} - `true` si la fecha es un domingo, de lo contrario `false`.
+   */
   esDomingo(dateStr: string): boolean {
     const date = new Date(dateStr + 'T00:00:00');
     return date.getDay() === 0; // 0 = Sunday
   }
 
+  /**
+   * Formatea una cadena de fecha en el formato 'dd/MM/yyyy'.
+   *
+   * @param {string} dateStr - Cadena que representa una fecha en formato ISO (yyyy-MM-dd).
+   * @return {string} La fecha formateada en el formato 'dd/MM/yyyy'.
+   */
   formatearFecha(dateStr: string): string {
     const date = new Date(dateStr + 'T00:00:00');
     return formatDate(date, 'dd/MM/yyyy', 'es-AR');
   }
 
+  /**
+   * Recupera una lista de registros de inicio de sesión desde Firestore.
+   *
+   * @return {Promise<any[]>} Una promesa que resuelve a una matriz de objetos
+   * que representan los datos de los registros de inicio de sesión.
+   */
   async getLogins(): Promise<any[]> {
     const loginsRef = collection(this.firestore, 'logins');
     const snapshot = await getDocs(loginsRef);
     return snapshot.docs.map(doc => doc.data());
   }
 
+  /**
+   * Trae una lista de logins dentro de un rango de fechas proporcionado.
+   *
+   * @param {string} startDate - La fecha de inicio del rango en formato 'YYYY-MM-DD'.
+   * @param {string} endDate - La fecha de fin del rango en formato 'YYYY-MM-DD'.
+   * @return {Promise<any[]>} - Una promesa que resuelve a una lista de objetos de login que caen dentro del rango de fechas especificado.
+   */
   async traerLoginsPorRangoDeFecha(startDate: string, endDate: string): Promise<any[]> {
     const loginsRef = collection(this.firestore, 'logins');
     const q = query(
@@ -79,6 +122,13 @@ export class ReportesService {
     return snapshot.docs.map(doc => doc.data());
   }
 
+  /**
+   * Trae y cuenta los turnos agrupados por médico en un rango de fechas especificado.
+   *
+   * @param {string} startDate - Fecha de inicio del rango deseado en formato ISO.
+   * @param {string} endDate - Fecha de fin del rango deseado en formato ISO.
+   * @return {Promise<any>} Un objeto que contiene la cantidad de turnos agrupados por nombre del medico.
+   */
   async traerTurnosPorMedico(startDate: string, endDate: string): Promise<any> {
     const turnosRef = collection(this.firestore, 'turnos');
     const q = query(
@@ -103,6 +153,13 @@ export class ReportesService {
     return counts;
   }
 
+  /**
+   * Obtiene y cuenta los turnos finalizados por cada médico en un rango de fechas.
+   *
+   * @param {string} startDate - La fecha de inicio del rango (inclusive).
+   * @param {string} endDate - La fecha de fin del rango (inclusive).
+   * @return {Promise<any>} Un objeto donde las claves son los nombres de los médicos y los valores son la cantidad de turnos finalizados.
+   */
   async traerTurnosFinalizadosPorMedico(startDate: string, endDate: string): Promise<any> {
     const turnosRef = collection(this.firestore, 'turnos');
     const q = query(
@@ -127,7 +184,4 @@ export class ReportesService {
 
     return counts;
   }
-
-
-
 }

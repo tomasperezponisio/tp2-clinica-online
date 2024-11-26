@@ -26,7 +26,14 @@ export class LoginComponent {
   }
 
 
-  login() {
+  /**
+   * Inicia sesión con las credenciales proporcionadas.
+   * Verifica que el email y la contraseña sean válidos antes de intentar el inicio de sesión.
+   * Muestra mensajes de error apropiados si las credenciales no son válidas.
+   *
+   * @return {void} No retorna un valor explícito, pero redirecciona al usuario a la página de inicio si el inicio de sesión es exitoso.
+   */
+  login(): void {
 
     if (!this.email || !this.email.trim()) {
       this.msjError = "Ingrese email";

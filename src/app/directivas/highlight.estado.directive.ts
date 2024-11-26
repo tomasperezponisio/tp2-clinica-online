@@ -1,5 +1,26 @@
 import {Directive, ElementRef, Renderer2, Input, OnInit, RendererStyleFlags2} from '@angular/core';
 
+/**
+ * Directiva Angular para resaltar el fondo de un elemento basado en el estado proporcionado.
+ *
+ * Esta directiva cambia el color de fondo del elemento donde se aplica
+ * basándose en el valor del estado. Los colores están predefinidos para
+ * ciertos estados específicos como 'pendiente', 'aceptado', 'rechazado',
+ * 'cancelado' y 'realizado'. Si el estado proporcionado no coincide con
+ * ninguno de estos, se aplica un color gris claro por defecto.
+ *
+ * @directive
+ * @selector [appHighlightEstado]
+ *
+ * @input estado - El estado utilizado para determinar el color de fondo del elemento.
+ *                  Los valores posibles son:
+ *                  - 'pendiente' -> Naranja Claro
+ *                  - 'aceptado' -> Azul Claro
+ *                  - 'rechazado' -> Rojo Claro
+ *                  - 'cancelado' -> Gris Claro
+ *                  - 'realizado' -> Verde Claro
+ *                  - Ó cualquier otro valor que resultará en un color gris claro por defecto.
+ */
 @Directive({
   selector: '[appHighlightEstado]',
   standalone: true,

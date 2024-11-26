@@ -210,34 +210,59 @@ export class TurnosService {
    * @returns A Promise with a list of patients.
    */
   async traerPacientesAtendidos(especialistaUid: string): Promise<any[]> {
+    // Reference to the 'turnos' collection in Firestore
     const turnosRef = collection(this.firestore, 'turnos');
-    const q = query(turnosRef, where('especialistaUid', '==', especialistaUid), where('estado', '==', 'realizado'));
+
+    // Query to find all turnos attended by the current especialista with status 'realizado'
+    const q = query(
+      turnosRef,
+      where('especialistaUid', '==', especialistaUid), // Filter by especialista's UID
+      where('estado', '==', 'realizado') // Only include finalized appointments
+    );
+
+    // Perform the query and get the matching documents
     const snapshot = await getDocs(q);
+
+    // Create a map to store patients (avoids duplicates)
     const pacientesMap = new Map<string, any>();
+
+    // A set to track all unique patient UIDs attended by this especialista
+    const pacienteUids = new Set<string>();
+
+    // Iterate through each turno (appointment) document from the query results
     snapshot.forEach(doc => {
-      const data = doc.data();
-      // Only proceed if the turno has a historia clinica
-      if (data['historiaClinica']) {
-        // Add the patient to the map if not already present
+      const data = doc.data(); // Get the appointment data
+
+      // Check if the appointment has a valid patient UID
+      if (data['pacienteUid']) {
+        pacienteUids.add(data['pacienteUid']); // Add the patient's UID to the set
+
+        // If the patient is not already in the map, add a new entry
         if (!pacientesMap.has(data['pacienteUid'])) {
           pacientesMap.set(data['pacienteUid'], {
-            uid: data['pacienteUid'],
-            nombre: data['pacienteNombre'],
-            historiasClinicas: [],
+            uid: data['pacienteUid'], // Patient's UID
+            nombre: data['pacienteNombre'], // Patient's name
+            historiasClinicas: [], // Initialize an empty array for their medical histories
           });
         }
-
-        // Add the historia clinica to the patient's list
-        pacientesMap.get(data['pacienteUid']).historiasClinicas.push({
-          especialistaNombre: data['especialistaNombre'],
-          especialidad: data['especialidad'],
-          fecha: data['fecha'],
-          hora: data['hora'],
-          reseña: data['reseña'],
-          ...data['historiaClinica'],
-        });
       }
     });
+
+    // Now we need to fetch all medical histories (historias clinicas) for the patients
+    for (const pacienteUid of pacienteUids) {
+      // Fetch all finalized medical histories for this patient
+      const historias = await this.traerHistoriaClinicaPaciente(pacienteUid);
+
+      // Retrieve the existing patient object from the map
+      const paciente = pacientesMap.get(pacienteUid);
+
+      // If the patient exists in the map, append their medical histories
+      if (paciente) {
+        paciente.historiasClinicas.push(...historias); // Add all medical histories to the array
+      }
+    }
+
+    // Convert the map to an array and return it
     return Array.from(pacientesMap.values());
   }
 

@@ -5,7 +5,7 @@ import {
   collection,
   collectionData,
   doc,
-  Firestore,
+  Firestore, getDoc,
   getDocs,
   query,
   updateDoc,
@@ -209,6 +209,7 @@ export class TurnosService {
    * @param especialistaUid - The specialist's UID.
    * @returns A Promise with a list of patients.
    */
+/*
   async traerPacientesAtendidos(especialistaUid: string): Promise<any[]> {
     // Reference to the 'turnos' collection in Firestore
     const turnosRef = collection(this.firestore, 'turnos');
@@ -263,6 +264,44 @@ export class TurnosService {
     }
 
     // Convert the map to an array and return it
+    return Array.from(pacientesMap.values());
+  }
+*/
+
+  async traerPacientesAtendidos(especialistaUid: string): Promise<any[]> {
+    const turnosRef = collection(this.firestore, 'turnos');
+
+    // Query for turnos where the especialista has attended the patient
+    const q = query(
+      turnosRef,
+      where('especialistaUid', '==', especialistaUid),
+      where('estado', '==', 'realizado')
+    );
+
+    const snapshot = await getDocs(q);
+    const pacientesMap = new Map<string, any>();
+
+    // Rename loop variable to avoid conflict with `doc` function
+    for (const turnoDoc of snapshot.docs) {
+      const data = turnoDoc.data();
+      const pacienteUid = data['pacienteUid'];
+
+      if (pacienteUid && !pacientesMap.has(pacienteUid)) {
+        // Fetch the patient details from the `usuarios` collection
+        const pacienteDocRef = doc(this.firestore, 'usuarios', pacienteUid); // Construct document reference correctly
+        const pacienteDoc = await getDoc(pacienteDocRef);
+
+        if (pacienteDoc.exists()) {
+          const pacienteData = pacienteDoc.data();
+          pacientesMap.set(pacienteUid, {
+            uid: pacienteUid,
+            nombre: pacienteData['nombre'] + ' ' + pacienteData['apellido'],
+            imagenUno: pacienteData['imagenUno'], // Fetch image from usuarios collection
+          });
+        }
+      }
+    }
+
     return Array.from(pacientesMap.values());
   }
 

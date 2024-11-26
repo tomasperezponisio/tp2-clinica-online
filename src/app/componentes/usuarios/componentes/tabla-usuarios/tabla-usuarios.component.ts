@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {AsyncPipe, DatePipe, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
-import {map, Observable} from "rxjs";
+import {map, Observable, take} from "rxjs";
 import {UsuariosService} from "../../../../services/usuarios.service";
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {HoverZoomDirective} from "../../../../directivas/hover.zoom.directive";
@@ -93,7 +93,10 @@ export class TablaUsuariosComponent implements OnInit {
     console.log(`Fetching turnos for user: ${usuario.uid}`);
     const nombreCompleto = usuario.nombre + ' ' + usuario.apellido;
 
-    this.turnosService.traerTurnosPorUidDePaciente(usuario.uid).subscribe({
+    this.turnosService
+      .traerTurnosPorUidDePaciente(usuario.uid)
+      .pipe(take(1))
+      .subscribe({
       next: (turnos) => {
         if (!turnos || turnos.length === 0) {
           console.log('No turnos found for user:', usuario.nombre);

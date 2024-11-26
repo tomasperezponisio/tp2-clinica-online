@@ -3,71 +3,6 @@
     <h1 class="text-center">Informes</h1>
 
     <!-------------------------------------------------------------------------------------->
-    <!-- Logins por Día -->
-    <div id="loginsSection" class="container mt-4">
-      <h3 class="text-center mb-4">Log de Ingresos al Sistema</h3>
-
-      <!-- Date Range Selection -->
-      <div class="d-flex justify-content-center mb-3">
-        <div class="me-3">
-          <label for="fechaInicioLogins" class="form-label">Desde:</label>
-          <input
-            type="date"
-            id="fechaInicioLogins"
-            class="form-control"
-            [(ngModel)]="fechaInicioLogins"
-            (change)="filtrarLogins()"
-          />
-        </div>
-        <div>
-          <label for="fechaFinLogins" class="form-label">Hasta:</label>
-          <input
-            type="date"
-            id="fechaFinLogins"
-            class="form-control"
-            [(ngModel)]="fechaFinLogins"
-            (change)="filtrarLogins()"
-          />
-        </div>
-      </div>
-
-      <!-- Loading Spinner -->
-      <div *ngIf="loading" class="text-center">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Cargando...</span>
-        </div>
-      </div>
-
-      <!-- Scrollable Table -->
-      <div *ngIf="!loading" id="table-responsive" class="table-responsive">
-        <div *ngFor="let date of Object.keys(loginsPorDia)" class="mb-4">
-          <h5 class="text-center">{{ date | formatearFecha:'es-AR' }}</h5>
-          <table class="table table-striped">
-            <thead>
-            <tr>
-              <th>Nombre y Apellido</th>
-              <th>Email</th>
-              <th>Tipo</th>
-              <th>Fecha</th>
-              <th>Hora</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let login of loginsPorDia[date]">
-              <td>{{ login.nombreYApellido }}</td>
-              <td class="email-column" hoverEmail="{{ login.email }}">{{ login.email | obscureEmail }}</td>
-              <td>{{ login.tipo | ucfirst }}</td>
-              <td>{{ login.hora | formatearFecha:'es-AR' }}</td>
-              <td>{{ login.hora | date:'shortTime' }}</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <hr>
-
-    <!-------------------------------------------------------------------------------------->
     <!-- Turnos por Especialidad -->
     <div id="turnosEspecialidadSection" class="mb-5">
       <h3 class="text-center">Cantidad de Turnos por Especialidad</h3>
@@ -165,6 +100,72 @@
     <!-- Chart -->
     <canvas id="chartTurnosFinalizadosPorMedico"></canvas>
   </div>
+
+  <!-------------------------------------------------------------------------------------->
+  <!-- Logins por Día -->
+  <div id="loginsSection" class="container mt-4">
+    <h3 class="text-center mb-4">Log de Ingresos al Sistema</h3>
+
+    <!-- Date Range Selection -->
+    <div class="d-flex justify-content-center mb-3">
+      <div class="me-3">
+        <label for="fechaInicioLogins" class="form-label">Desde:</label>
+        <input
+          type="date"
+          id="fechaInicioLogins"
+          class="form-control"
+          [(ngModel)]="fechaInicioLogins"
+          (change)="filtrarLogins()"
+        />
+      </div>
+      <div>
+        <label for="fechaFinLogins" class="form-label">Hasta:</label>
+        <input
+          type="date"
+          id="fechaFinLogins"
+          class="form-control"
+          [(ngModel)]="fechaFinLogins"
+          (change)="filtrarLogins()"
+        />
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <!-- Scrollable Table -->
+    <div *ngIf="!loading" id="table-responsive" class="table-responsive">
+      <div *ngFor="let date of Object.keys(loginsPorDia)" class="mb-4">
+        <h5 class="text-center">{{ date }}</h5>
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th>Nombre y Apellido</th>
+            <th>Email</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let login of loginsPorDia[date]">
+            <td>{{ login.nombreYApellido }}</td>
+            <td class="email-column" hoverEmail="{{ login.email }}">{{ login.email | obscureEmail }}</td>
+            <td>{{ login.tipo | ucfirst }}</td>
+            <td>{{ login.hora | formatearFecha:'es-AR' }}</td>
+            <td>{{ login.hora | date:'HH:mm' }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <hr>
+
 
   <!-- Boton exportar a PDF -->
   <div class="text-center mt-4">

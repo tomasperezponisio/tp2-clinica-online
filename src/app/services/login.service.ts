@@ -24,6 +24,13 @@ export class LoginService {
   ) {
   }
 
+  /**
+   * Inicia sesión de usuario con el email y la contraseña especificados.
+   *
+   * @param {string} email - El email del usuario.
+   * @param {string} password - La contraseña del usuario.
+   * @return {Promise<{ success: boolean, message: string }>} Un objeto que indica si el inicio de sesión fue exitoso y un mensaje correspondiente.
+   */
   async login(email: string, password: string): Promise<{ success: boolean; message: string }> {
     try {
       const userCredential: UserCredential = await signInWithEmailAndPassword(this.auth, email, password);
@@ -83,6 +90,15 @@ export class LoginService {
     }
   }
 
+  /**
+   * Registra y guarda un paciente en la base de datos, además de enviar un correo de verificación
+   * y cerrar sesión para que el usuario no quede logueado sin haber verificado su correo.
+   *
+   * @param {string} email - El correo electrónico del paciente.
+   * @param {string} password - La contraseña del paciente.
+   * @param {Paciente} paciente - El objeto que contiene los datos del paciente.
+   * @return {Promise<{success: boolean, message: string}>} - Resultado de la operación con un mensaje correspondiente.
+   */
   async altaPaciente(email: string, password: string, paciente: Paciente): Promise<{
     success: boolean;
     message: string
@@ -142,6 +158,17 @@ export class LoginService {
     }
   }
 
+  /**
+   * Registra un nuevo especialista con los datos proporcionados, guarda la información en la base de datos
+   * y envía un correo de verificación. Posteriormente, cierra la sesión para evitar que el usuario quede logueado
+   * sin haber verificado su correo electrónico.
+   *
+   * @param {string} email - El correo electrónico del especialista.
+   * @param {string} password - La contraseña del especialista.
+   * @param {Especialista} especialista - Un objeto que contiene la información del especialista.
+   * @return {Promise<{success: boolean, message: string}>} Un objeto indicativo del éxito de la operación
+   * junto con un mensaje relevante.
+   */
   async altaEspecialista(email: string, password: string, especialista: Especialista): Promise<{
     success: boolean;
     message: string
@@ -225,6 +252,16 @@ export class LoginService {
     }
   }
 
+  /**
+   * Registra un nuevo administrador en el sistema utilizando una dirección de correo electrónico y una contraseña.
+   * Crea una entrada en la base de datos Firestore asociada con el UID del administrador recién creado.
+   * Envía un correo electrónico de verificación y cierra la sesión para que el usuario no permanezca autenticado sin verificar.
+   *
+   * @param {string} email - La dirección de correo electrónico del nuevo administrador.
+   * @param {string} password - La contraseña asociada con la cuenta del nuevo administrador.
+   * @param {Admin} admin - Objeto que contiene la información adicional del administrador que se guardará en la base de datos.
+   * @return {Promise<{success: boolean, message: string}>} Un objeto indicando el éxito de la operación y un mensaje asociado.
+   */
   async altaAdmin(email: string, password: string, admin: Admin): Promise<{
     success: boolean;
     message: string
@@ -285,6 +322,13 @@ export class LoginService {
   }
 
 
+  /**
+   * Registra un nuevo usuario con el email y contraseña proporcionados.
+   *
+   * @param {string} email - La dirección de correo electrónico del usuario que se registrará.
+   * @param {string} password - La contraseña del usuario que se registrará.
+   * @return {Promise<{ success: boolean; message: string }>} Un objeto que indica si el registro fue exitoso y un mensaje asociado.
+   */
   async register(email: string, password: string): Promise<{ success: boolean; message: string }> {
     try {
       await createUserWithEmailAndPassword(this.auth, email, password);

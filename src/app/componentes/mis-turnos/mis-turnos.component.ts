@@ -2,18 +2,9 @@ import {Component, LOCALE_ID, OnInit} from '@angular/core';
 import {Turno} from "../../models/turno";
 import {TurnosService} from "../../services/turnos.service";
 import {AuthService} from "../../services/auth.service";
-import {
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators
-} from "@angular/forms";
-import {DatePipe, NgClass, NgForOf, NgIf, TitleCasePipe} from "@angular/common";
+import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {DatePipe, NgClass, NgForOf, NgIf, registerLocaleData, TitleCasePipe} from "@angular/common";
 import {AlertService} from "../../services/alert.service";
-import {registerLocaleData} from '@angular/common';
 import localeEsAr from '@angular/common/locales/es-AR';
 import {HighlightEstadoDirective} from "../../directivas/highlight.estado.directive";
 
@@ -59,6 +50,11 @@ export class MisTurnosComponent implements OnInit {
   ) {
   }
 
+  /**
+   * Método del ciclo de vida de Angular que se ejecuta una vez que el componente ha sido inicializado.
+   *
+   * @return {void} No retorna valor.
+   */
   ngOnInit(): void {
     this.authService.traerUsuarioActual().subscribe(user => {
       this.usuarioActual = user;
@@ -82,7 +78,13 @@ export class MisTurnosComponent implements OnInit {
     });
   }
 
-  cargarTurnos() {
+  /**
+   * Carga los turnos correspondientes al usuario actual basado en su tipo.
+   * Llama al servicio apropiado para obtener los turnos y luego aplica un filtro.
+   *
+   * @return {void} No retorna ningún valor.
+   */
+  cargarTurnos(): void {
     if (this.tipoDeUsuario === 'paciente') {
       this.turnosService.traerTurnosPorUidDePaciente(this.usuarioActual.uid).subscribe(turnos => {
         this.turnos = turnos;
@@ -103,7 +105,15 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
-  filtrar() {
+  /**
+   * Filtra los turnos en función del texto proporcionado.
+   * Realiza la búsqueda en diferentes campos del turno y de la historia clínica
+   * para encontrar coincidencias parciales o completas con el texto.
+   * Ordena los resultados por fecha de manera ascendente.
+   *
+   * @return {void} No retorna un valor, pero actualiza la propiedad `turnosFiltrados` con los resultados.
+   */
+  filtrar(): void {
     const textoABuscar = this.textoParaFiltrar.toLowerCase();
 
     this.turnosFiltrados = this.turnos.filter(turno => {
@@ -145,35 +155,84 @@ export class MisTurnosComponent implements OnInit {
   }
 
 
+  /**
+   * Convierte una fecha y una hora en una instancia de Date.
+   *
+   * @param {string} fecha - La fecha en formato 'yyyy-mm-dd'.
+   * @param {string} hora - La hora en formato 'hh:mm:ss'.
+   * @return {Date} Una instancia de Date que representa la fecha y hora combinadas.
+   */
   parseDateTime(fecha: string, hora: string): Date {
     const dateTimeString = `${fecha} ${hora}`;
-    const dateTime = new Date(dateTimeString);
-    return dateTime;
+    return new Date(dateTimeString);
   }
 
-  alCambiarElFiltro() {
+  /**
+   * Método invocado al cambiar el filtro.
+   * Este método registra en la consola el texto utilizado para filtrar
+   * y luego aplica el filtro correspondiente llamando al método filtrar().
+   *
+   * @return {void}
+   */
+  alCambiarElFiltro(): void {
     console.log('Filtrando por:' + this.textoParaFiltrar);
     this.filtrar();
   }
 
+  /**
+   * Verifica si el turno puede ser cancelado.
+   *
+   * @param {Turno} turno - El turno que se desea evaluar.
+   * @return {boolean} - Devuelve verdadero si el usuario es un paciente y el estado del turno
+   * no es 'realizado', 'cancelado' o 'rechazado'. De lo contrario, devuelve falso.
+   */
   puedeCancelTurno(turno: Turno): boolean {
     const estadosNoPermitidos = ['realizado', 'cancelado', 'rechazado'];
     return this.tipoDeUsuario === 'paciente' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
+  /**
+   * Determina si se puede ver la reseña de un turno específico.
+   *
+   * @param {Turno} turno - El objeto Turno en cuestión.
+   * @return {boolean} - Retorna true si el estado del turno es 'realizado'
+   *                     o si ya existe una reseña, de lo contrario retorna false.
+   */
   puedeVerResena(turno: Turno): boolean {
     return turno.estado === 'realizado' || !!turno.reseña;
   }
 
+  /**
+   * Verifica si se puede completar la encuesta para un turno dado.
+   *
+   * @param {Turno} turno - El objeto que representa un turno, que contiene información
+   *                        sobre su estado, reseña y encuesta.
+   * @return {boolean} - Retorna true si el turno tiene el estado 'realizado',
+   *                     tiene una reseña y no tiene una encuesta ya completada,
+   *                     de lo contrario retorna false.
+   */
   puedeCompletarEncuesta(turno: Turno): boolean {
     return turno.estado === 'realizado' && !!turno.reseña && !turno.encuesta;
   }
 
+  /**
+   * Verifica si un paciente puede calificar la atención recibida en un turno.
+   *
+   * @param {Turno} turno - El objeto turno que contiene la información del estado y comentarios.
+   * @return {boolean} - Devuelve true si el turno está en estado 'realizado' y no tiene comentarios del paciente, de lo contrario devuelve false.
+   */
   puedeCalificarAtencion(turno: Turno): boolean {
     return turno.estado === 'realizado' && !turno.comentarioPaciente;
   }
 
-  puedeCelarTurno(turno: Turno) {
+  /**
+   * Maneja la cancelación de un turno, solicitando el motivo al usuario y
+   * actualizando el estado del turno si es confirmado.
+   *
+   * @param {Turno} turno - El objeto turno que se desea cancelar.
+   * @return {void} No devuelve un valor, pero realiza operaciones de actualización y alertas.
+   */
+  puedeCelarTurno(turno: Turno): void {
     this.alertService.customPrompt('Cancelar Turno', 'Ingrese el motivo de la cancelación:')
       .then(result => {
         if (result.isConfirmed && result.value) {
@@ -200,23 +259,46 @@ export class MisTurnosComponent implements OnInit {
       });
   }
 
-  verResena(turno: Turno) {
+  /**
+   * Muestra una reseña asociada a un turno si existe.
+   *
+   * @param {Turno} turno - Objeto que representa el turno del cual se va a mostrar la reseña.
+   * @return {void}
+   */
+  verResena(turno: Turno): void {
     if (turno.reseña != null) {
       this.alertService.customAlert('Reseña', turno.reseña, 'info');
     }
   }
 
+  /**
+   * Activa el formulario de encuesta y establece el turno seleccionado.
+   *
+   * @param {Turno} turno - El turno que será evaluado en la encuesta.
+   * @return {void} No retorna ningún valor.
+   */
   completarEncuesta(turno: Turno): void {
     this.showEncuestaForm = true;
     this.selectedTurno = turno;
   }
 
+  /**
+   * Cancela la encuesta en curso y restablece el formulario a su estado inicial.
+   *
+   * @return {void} No retorna ningún valor.
+   */
   cancelEncuesta(): void {
     this.showEncuestaForm = false;
     this.selectedTurno = null;
     this.encuestaForm.reset();
   }
 
+  /**
+   * Envía la encuesta asociada al turno si el formulario es válido y el turno no es nulo.
+   *
+   * @param {Turno | null} turno - El turno al que se asocia la encuesta. Puede ser nulo.
+   * @return {void} - No retorna un valor.
+   */
   submitEncuesta(turno: Turno | null): void {
     if (this.encuestaForm.valid && turno != null) {
       turno.encuesta = {
@@ -236,7 +318,13 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
-  calificarAtencion(turno: Turno) {
+  /**
+   * Solicita al usuario que califique la atención recibida y actualiza el turno con el comentario ingresado.
+   *
+   * @param {Turno} turno - El turno que será actualizado con el comentario ingresado por el paciente.
+   * @return {void} No retorna un valor.
+   */
+  calificarAtencion(turno: Turno): void {
     this.alertService.customPrompt('Califique la atención', 'Ingrese un comentario:').then(result => {
       if (result.isConfirmed && result.value) {
         const comentario = result.value;
@@ -262,26 +350,56 @@ export class MisTurnosComponent implements OnInit {
   }
 
   // Methods for Especialista
+  /**
+   * Verifica si un especialista puede cancelar un turno basado en el estado del mismo.
+   *
+   * @param {Turno} turno - El turno que se desea evaluar.
+   * @return {boolean} Devuelve true si el especialista puede cancelar el turno, false en caso contrario.
+   */
   puedeCancelarTurnoEsp(turno: Turno): boolean {
     const estadosNoPermitidos = ['aceptado', 'realizado', 'rechazado', 'cancelado'];
     return this.tipoDeUsuario === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
+  /**
+   * Verifica si un especialista puede rechazar un turno dado basado en el estado del turno.
+   *
+   * @param {Turno} turno - El objeto del turno que se quiere evaluar.
+   * @return {boolean} - Retorna `true` si el especialista puede rechazar el turno, de lo contrario `false`.
+   */
   puedeRechazarTurno(turno: Turno): boolean {
     const estadosNoPermitidos = ['aceptado', 'realizado', 'rechazado', 'cancelado'];
     return this.tipoDeUsuario === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
+  /**
+   * Verifica si un turno puede ser aceptado por el usuario.
+   *
+   * @param {Turno} turno - El turno que se evalúa.
+   * @return {boolean} - Devuelve true si el usuario es especialista y el estado del turno no está en una lista de estados no permitidos. Devuelve false en caso contrario.
+   */
   puedeAceptarTurno(turno: Turno): boolean {
     const estadosNoPermitidos = ['aceptado', 'realizado', 'cancelado', 'rechazado'];
     return this.tipoDeUsuario === 'especialista' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
+  /**
+   * Verifica si un usuario puede finalizar un turno.
+   *
+   * @param {Turno} turno - El turno que se quiere finalizar.
+   * @return {boolean} - Retorna `true` si el usuario es un especialista y el estado del turno es "aceptado", de lo contrario retorna `false`.
+   */
   puedeFinalizarTurno(turno: Turno): boolean {
     return this.tipoDeUsuario === 'especialista' && turno.estado.toLowerCase() === 'aceptado';
   }
 
-  cancelarTurnoEsp(turno: Turno) {
+  /**
+   * Cancela un turno específico asignado a un especialista.
+   *
+   * @param {Turno} turno - El objeto turno que será cancelado.
+   * @return {void}
+   */
+  cancelarTurnoEsp(turno: Turno): void {
     const motivo = prompt('Ingrese el motivo de la cancelación:');
     if (motivo) {
       turno.estado = 'cancelado';
@@ -294,7 +412,14 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
-  rechazarTurno(turno: Turno) {
+  /**
+   * Rechaza un turno solicitando un motivo al usuario.
+   *
+   * @param {Turno} turno - Objeto del turno que se va a rechazar.
+   *
+   * @return {void} No retorna ningún valor.
+   */
+  rechazarTurno(turno: Turno): void {
     this.alertService.customPrompt('Rechazar Turno', 'Ingrese el motivo del rechazo:')
       .then(result => {
         if (result.isConfirmed && result.value) {
@@ -321,7 +446,13 @@ export class MisTurnosComponent implements OnInit {
       });
   }
 
-  aceptarTurno(turno: Turno) {
+  /**
+   * Acepta un turno después de una confirmación por parte del usuario.
+   *
+   * @param {Turno} turno - El turno que se desea aceptar.
+   * @return {void} No retorna ningún valor.
+   */
+  aceptarTurno(turno: Turno): void {
     this.alertService.customConfirm('Aceptar Turno', '¿Está seguro de aceptar este turno?')
       .then(result => {
         if (result.isConfirmed) {
@@ -344,7 +475,16 @@ export class MisTurnosComponent implements OnInit {
       });
   }
 
-  finalizarTurno(turno: Turno) {
+  /**
+   * Finaliza un turno actualizando su estado y añadiendo una reseña y diagnóstico.
+   * Muestra un cuadro de diálogo personalizado para que el usuario ingrese la reseña y diagnóstico.
+   * Si el usuario confirma la acción, se actualiza el turno y se notifica el éxito.
+   * Si hay un error en la actualización, se notifica el error.
+   *
+   * @param {Turno} turno - El turno que se va a finalizar.
+   * @return {void} No retorna un valor.
+   */
+  finalizarTurno(turno: Turno): void {
     this.alertService.customPrompt('Finalizar Turno', 'Ingrese la reseña y diagnóstico de la consulta:')
       .then(result => {
         if (result.isConfirmed && result.value) {
@@ -394,6 +534,11 @@ export class MisTurnosComponent implements OnInit {
     return this.historiaClinicaForm.get('dinamicos') as FormArray;
   }
 
+  /**
+   * Agrega un campo dinámico a la lista 'dinamicos' si aún no se han añadido tres.
+   *
+   * @return {void} No devuelve ningún valor.
+   */
   agregarCampoDinamico(): void {
     if (this.dinamicos.length < 3) {
       this.dinamicos.push(this.fb.group({
@@ -407,6 +552,13 @@ export class MisTurnosComponent implements OnInit {
     this.dinamicos.removeAt(index);
   }
 
+  /**
+   * Abre el modal para la historia clínica y establece el turno seleccionado.
+   * Reinicia el formulario de la historia clínica y los campos dinámicos.
+   *
+   * @param {Turno} turno - El turno seleccionado que se mostrará en el modal.
+   * @return {void} No retorna ningún valor.
+   */
   abrirModalHistoriaClinica(turno: Turno): void {
     this.selectedTurno = turno;
     this.showHistoriaClinicaForm = true;
@@ -414,11 +566,29 @@ export class MisTurnosComponent implements OnInit {
     this.dynamicFields = []; // Reset dynamic fields
   }
 
+  /**
+   * Cierra el modal de la historia clínica.
+   *
+   * Este método realiza las siguientes acciones:
+   * - Restablece la propiedad `selectedTurno` a `null`.
+   * - Desactiva el formulario de historia clínica estableciendo
+   *   la propiedad `showHistoriaClinicaForm` a `false`.
+   *
+   * @return {void} No retorna ningún valor.
+   */
   cerrarModalHistoriaClinica(): void {
     this.selectedTurno = null;
     this.showHistoriaClinicaForm = false;
   }
 
+  /**
+   * Guarda la historia clínica del turno seleccionado en la base de datos.
+   *
+   * Combina los campos fijos del formulario con los campos dinámicos
+   * y guarda la historia clínica en el turno seleccionado.
+   *
+   * @return {void} No devuelve ningún valor.
+   */
   submitHistoriaClinica(): void {
     if (!this.selectedTurno || this.historiaClinicaForm.invalid) return;
 
@@ -451,6 +621,12 @@ export class MisTurnosComponent implements OnInit {
     });
   }
 
+  /**
+   * Devuelve la clase CSS correspondiente al estado proporcionado.
+   *
+   * @param {string} estado - El estado del objeto.
+   * @return {string} La clase CSS que corresponde al estado.
+   */
   getEstadoClass(estado: string): string {
     switch (estado.toLowerCase()) {
       case 'pendiente':
@@ -468,6 +644,11 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
+  /**
+   * Devuelve el texto del marcador de posición (placeholder) para el filtro según el tipo de usuario.
+   *
+   * @return {string} El marcador de posición apropiado para el filtro basado en el tipo de usuario.
+   */
   getFilterPlaceholder(): string {
     if (this.tipoDeUsuario === 'paciente') {
       return 'Filtrar por especialidad o especialista';
@@ -480,12 +661,24 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
+  /**
+   * Verifica si un administrador puede cancelar un turno dado su estado actual.
+   *
+   * @param {Turno} turno - El turno que se desea evaluar.
+   * @return {boolean} Devuelve true si el administrador puede cancelar el turno, de lo contrario false.
+   */
   puedeCancelarTurnoAdmin(turno: Turno): boolean {
     const estadosNoPermitidos = ['aceptado', 'realizado', 'cancelado', 'rechazado'];
     return this.tipoDeUsuario === 'admin' && !estadosNoPermitidos.includes(turno.estado.toLowerCase());
   }
 
-  cancelarTurnoAdmin(turno: Turno) {
+  /**
+   * Cancela un turno administrativamente solicitando un motivo al usuario.
+   *
+   * @param {Turno} turno - El turno a cancelar.
+   * @return {void} No retorna un valor.
+   */
+  cancelarTurnoAdmin(turno: Turno): void {
     this.alertService.customPrompt('Cancelar Turno', 'Ingrese el motivo de la cancelación:')
       .then(result => {
         if (result.isConfirmed && result.value) {

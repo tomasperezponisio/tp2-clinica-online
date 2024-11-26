@@ -4,60 +4,84 @@
       <label class="form-label me-3">Selecciona el tipo de usuario:</label>
       <div class="d-flex">
         <div class="form-check d-inline-block me-3">
-          <input id="pacienteAdmin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="paciente" required>
+          <input id="pacienteAdmin" formControlName="tipoDeUsuario" type="radio" class="form-check-input"
+                 value="paciente" required>
           <label class="form-check-label" for="pacienteAdmin">Paciente</label>
         </div>
         <div class="form-check d-inline-block me-3">
-          <input id="especialistaAdmin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="especialista" required>
+          <input id="especialistaAdmin" formControlName="tipoDeUsuario" type="radio" class="form-check-input"
+                 value="especialista" required>
           <label class="form-check-label" for="especialistaAdmin">Especialista</label>
         </div>
         <div class="form-check d-inline-block">
-          <input id="adminAdmin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="admin" required>
+          <input id="adminAdmin" formControlName="tipoDeUsuario" type="radio" class="form-check-input" value="admin"
+                 required>
           <label class="form-check-label" for="adminAdmin">Admin</label>
         </div>
       </div>
     </div>
   </form>
-  <h4 class="text-capitalize">{{tipoDeUsuario}}</h4>
+  <h4 class="text-capitalize">{{ tipoDeUsuario }}</h4>
 
-  <table class="table table-striped mt-3" *ngIf="usuariosFiltrados$ | async as usuarios">
-    <thead>
-    <tr>
-      <th>Nombre</th>
-      <th>Apellido</th>
-      <th>DNI</th>
-      <th *ngIf="tipoDeUsuario === 'paciente'">Obra Social</th>
-      <th *ngIf="tipoDeUsuario === 'especialista'">Especialidad</th>
-      <th>Imagen</th>
-      <th *ngIf="tipoDeUsuario === 'especialista'">Verificado</th>
-      <th *ngIf="tipoDeUsuario === 'paciente'">Historia Clínica</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let usuario of usuarios">
-      <td>{{ usuario.nombre }}</td>
-      <td>{{ usuario.apellido }}</td>
-      <td>{{ usuario.dni }}</td>
-      <td *ngIf="tipoDeUsuario === 'paciente'">{{ usuario.obraSocial }}</td>
-      <td *ngIf="tipoDeUsuario === 'especialista'">{{ usuario.especialidad?.join(', ') }}</td>
-      <td>
-        <img alt="imagenUno" *ngIf="usuario.imagenUno" [src]="usuario.imagenUno" class="img-thumbnail" width="50" appHoverZoom>
-        <img alt="imagenDos" *ngIf="usuario.imagenDos" [src]="usuario.imagenDos" class="img-thumbnail" width="50" appHoverZoom>
-      </td>
-      <td *ngIf="tipoDeUsuario === 'especialista'">
-        <input type="checkbox" [checked]="usuario.verificado" (change)="toggleVerificado(usuario)">
-      </td>
-      <td *ngIf="tipoDeUsuario === 'paciente'">
-        <button class="btn btn-info btn-sm" (click)="mostrarHistoriaClinica(usuario)">Mostrar Historia Clínica</button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <ng-container *ngIf="usuariosFiltrados$ | async as usuarios">
+
+    <table class="table table-striped mt-3">
+      <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>DNI</th>
+        <th *ngIf="tipoDeUsuario === 'paciente'">Obra Social</th>
+        <th *ngIf="tipoDeUsuario === 'especialista'">Especialidad</th>
+        <th>Imagen</th>
+        <th *ngIf="tipoDeUsuario === 'especialista'">Verificado</th>
+        <th *ngIf="tipoDeUsuario === 'paciente'">Historia Clínica</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let usuario of usuarios">
+        <td>{{ usuario.nombre | ucfirst }}</td>
+        <td>{{ usuario.apellido }}</td>
+        <td>{{ usuario.dni }}</td>
+        <td *ngIf="tipoDeUsuario === 'paciente'">{{ usuario.obraSocial }}</td>
+        <td *ngIf="tipoDeUsuario === 'especialista'">{{ usuario.especialidad?.join(', ') }}</td>
+        <td>
+          <img alt="imagenUno" *ngIf="usuario.imagenUno" [src]="usuario.imagenUno" class="img-thumbnail" width="50"
+               appHoverZoom>
+          <img alt="imagenDos" *ngIf="usuario.imagenDos" [src]="usuario.imagenDos" class="img-thumbnail" width="50"
+               appHoverZoom>
+        </td>
+        <td *ngIf="tipoDeUsuario === 'especialista'">
+          <input type="checkbox" [checked]="usuario.verificado" (change)="toggleVerificado(usuario)">
+        </td>
+        <td *ngIf="tipoDeUsuario === 'paciente'">
+          <button class="btn btn-info btn-sm" (click)="mostrarHistoriaClinica(usuario)">Mostrar Historia Clínica
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Patient Buttons -->
+    <div *ngIf="tipoDeUsuario === 'paciente'" class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+      <button
+        *ngFor="let paciente of usuarios"
+        class="paciente-btn"
+        (click)="exportTurnosToExcel(paciente)"
+        [style.backgroundImage]="'url(' + paciente.imagenUno + ')'"
+      >
+        <span class="paciente-nombre">{{ paciente.nombre | ucfirst }}</span>
+      </button>
+    </div>
+
+  </ng-container>
+
 
   <!-- Modal de Historia Clínica -->
   <div *ngIf="mostrarModalHistoriaClinica" class="overlay">
     <div class="overlay-content">
-      <h4 class="text-center fs-3 text fw-bold text-primary-emphasis mb-4">Historia Clínica de {{ pacienteSeleccionado?.nombre }} {{ pacienteSeleccionado?.apellido }}</h4>
+      <h4 class="text-center fs-3 text fw-bold text-primary-emphasis mb-4">Historia Clínica
+        de {{ pacienteSeleccionado?.nombre }} {{ pacienteSeleccionado?.apellido }}</h4>
 
       <!-- Si hay historia clinica -->
       <div *ngIf="historiasClinicas.length > 0; else noHistorias" class="historia-clinica-list">

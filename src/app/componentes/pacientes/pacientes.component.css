@@ -34,3 +34,82 @@ h6 {
 .alert {
   font-size: 1.2rem;
 }
+
+button.btn-light {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s;
+}
+
+button.btn-light:hover {
+  transform: scale(1.1);
+}
+
+img.rounded-circle {
+  object-fit: cover;
+  width: 60px;
+  height: 60px;
+}
+
+
+/* Fullscreen overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Ensure it's above other content */
+  overflow: auto; /* Enable scrolling for large content */
+}
+
+/* Centered modal content */
+.overlay-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90%; /* Ensure content fits within the viewport */
+  overflow-y: auto; /* Allow scrolling if content exceeds max-height */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Patient button styles */
+.paciente-btn {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Button hover effect */
+.paciente-btn:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Name styling inside the button */
+.paciente-nombre {
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background for better readability */
+  padding: 5px 10px;
+  border-radius: 10px;
+  text-align: center;
+}

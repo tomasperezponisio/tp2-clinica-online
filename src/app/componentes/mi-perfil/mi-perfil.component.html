@@ -38,10 +38,27 @@
 
       <!-- Historia Clínica Section for Paciente -->
       <div #pdfContent *ngIf="user.tipo === 'paciente'" class="mt-4">
-        <div *ngIf="historiasClinicas.length > 0" class="mt-4 historias-clinicas">
+        <div *ngIf="historiasClinicasFiltradas.length > 0" class="mt-4 historias-clinicas">
           <h3 class="mb-4">Historia Clínica</h3>
+
+          <!-- Filter Section -->
+          <div *ngIf="tipoDeUsuario === 'paciente'" class="mt-4">
+            <label class="mb-1" for="especialista-select"><strong>Filtrar por Especialista:</strong></label>
+            <select
+              id="especialista-select"
+              class="form-control"
+              [(ngModel)]="selectedEspecialista"
+              (change)="filtrar()"
+            >
+              <option *ngFor="let especialista of especialistas" [value]="especialista">
+                {{ especialista }}
+              </option>
+            </select>
+          </div>
+
+          <h4 class="my-3">Especialista: {{selectedEspecialista}}</h4>
           <div class="row">
-            <div *ngFor="let historia of historiasClinicas" class="col-md-6 col-lg-4 mb-4">
+            <div *ngFor="let historia of historiasClinicasFiltradas" class="col-md-6 col-lg-4 mb-4">
               <div class="card shadow-sm">
                 <div class="card-body">
                   <!-- Title and Specialist Info -->
@@ -79,7 +96,7 @@
       </div>
 
       <!-- Boton exportar a PDF -->
-      <div class="text-center mt-4">
+      <div *ngIf="historiasClinicasFiltradas.length > 0" class="text-center mt-4">
         <button class="btn btn-primary" (click)="descargarComoPDF()">Exportar a PDF</button>
       </div>
 
